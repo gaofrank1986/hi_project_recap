@@ -278,7 +278,7 @@ C ! NNODED: total number of nodes according to the normals
 !  --------------------------------------------
 !   
         print *,"read model"
-        !call read_model_from_WAVDUT()
+        call read_model_from_WAVDUT()
 C ! Assembling matrix and computing diffraction and radiation potentials
 C !
          CALL TASSB0   

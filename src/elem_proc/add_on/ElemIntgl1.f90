@@ -382,7 +382,7 @@
         nf=8;ndim=3
         ! CHANGE OF normal vector
         !---
-        call eval_singular_elem(IELEM,cnr_glb_mtx,nf,ndim,result0,1)!!GREEN FUNC 
+        call eval_singular_elem(IELEM,nf,ndim,result0,1)!!GREEN FUNC 
 
         write (12,*) ielem,NODj,is,result0
 !         write (12,*) result0

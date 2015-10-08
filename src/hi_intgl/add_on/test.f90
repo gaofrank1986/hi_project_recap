@@ -1,10 +1,9 @@
 
-    subroutine eval_singular_elem(this_elem_id,cnr_glb_mtx,nf,ndim,hiresult,src_preset_flag)
+    subroutine eval_singular_elem(this_elem_id,nf,ndim,hiresult,src_preset_flag)
 
         implicit none
 
         integer,intent(in) :: this_elem_id,src_preset_flag,ndim,nf
-        real(8),intent(in) :: cnr_glb_mtx(3,8)
         real(8),intent(out) :: hiresult(nf)
         ! nf : num of kernel funcs
 
@@ -28,6 +27,7 @@
             
         integer :: debug_flag,debug_file_id
         hi_beta = 3.
+        !pay attention to hi_beta here
         debug_file_id = 109
         debug_flag = 0
         !==================================
@@ -40,7 +40,7 @@
 
         hiresult = 0.
         ! cnr_glb_mtx is allocated when read in
-        !cnr_glb_mtx = full_mesh_matrix(1:ndim,1:elem_nd_count,this_elem_id)
+        cnr_glb_mtx = full_mesh_matrix(1:ndim,1:elem_nd_count,this_elem_id)
         
         OPEN(510, FILE='cnr_glb_1.txt',    STATUS='unknown') 
         do id = 1,3
