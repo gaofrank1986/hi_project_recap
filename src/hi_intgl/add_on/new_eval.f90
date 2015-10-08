@@ -27,6 +27,8 @@ subroutine new_eval_singular(cnr_glb_mtx,ctr_glb,src_glb,src_lcl,hi_result)
         real(8) :: addup,diff_1,diff_2
         integer :: debug_flag,debug_file_id
 
+        hi_beta = 3.
+        value_list = 0
         debug_file_id = 109
         debug_flag = 0
         !==================================
