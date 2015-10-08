@@ -7,7 +7,7 @@
         real(8),intent(out) :: hiresult(nf)
         ! nf : num of kernel funcs
 
-        real(8) :: src_lcl(ndim-1),pt_intg(ndim-1),pt_intg_tmp(ndim - 1)  
+        real(8) :: src_lcl(ndim-1),pt_intg(ndim-1),buf_pnt(ndim - 1)  
         ! src point, integration point , temporary integration point     
 
         real(8) :: end_nodes(2,2),ri(3),RINT(nf)
@@ -22,7 +22,7 @@
         integer :: unfixed,fixed,num_edge
 
         real(8) :: vlc2,rho_q,comt
-        real(8) :: fk,wfa,sign_value,ri_tmp,full_step_size,step_size,drdnp
+        real(8) :: fk,wfa,edge_direct,ri_tmp,buf_step,intg_pnt_step,drdn_p
         real(8) :: addup,diff_1,diff_2
             
         integer :: debug_flag,debug_file_id
@@ -65,90 +65,73 @@
                     end_nodes(1:2,ID)=cnr_lcl_mtx(2*tmp-1 : 2*tmp) !get local node from corner table
                 end do
 
-                !==================================================
-                ! for first and third edge, vertical component unchanged,1st comp change
-                ! for second and forth edge, horizontal component unchanged,2rd comp change
-                !       4----7----3
-                !       |         |
-                !       8    9    6
-                !       |         |
-                !       1----5----2
-
-                !==================================================
-                
                 call get_fixed_id(i_edge,fixed,unfixed)!get fixed and unfixed id
 
-                sign_value = DSIGN(1.D0,end_nodes(unfixed,2)-end_nodes(unfixed,1))
+                edge_direct = dsign(1.d0,end_nodes(unfixed,2)-end_nodes(unfixed,1))
                 !dsign(a,b) a time sign of b,end_node(:,id)
-                ! sign_value is sign of second node minus first node,actually shows the direction
 
                 VLc2=(end_nodes(fixed,2)-src_lcl(fixed))**2
 
-                pt_intg_tmp=end_nodes(:,1) 
-                !tmp integration point
-                pt_intg(fixed)=pt_intg_tmp(fixed)
-                ! the other xiq component is not initialised
+                !move point goes along the four edges
+                !it start from  end node 1 for each edge
+                buf_pnt=end_nodes(:,1) 
+                pt_intg(fixed)=buf_pnt(fixed)
 
                 do num_converge=1,500 
                 !control the maxium step to go thru one edge
                 !also controled by step-size, example finished in less than 10 step
                 !pt_intg(unfixed) is updated each time
-                    diff_1 = src_lcl(unfixed)-pt_intg_tmp(unfixed)!between tmp src and end node
-                    diff_2 = end_nodes(unfixed,2)-pt_intg_tmp(unfixed)!between two nodes
 
-                    if (sign_value*diff_2 < 1.D-8) then
-                        !print *, "if pt_intg_tmp coordinate out of range,exit num_converge loop"
-                        !if pt_intg_tmp goes out of the edge,then stop
+                    diff_1 = edge_direct*(src_lcl(unfixed)-buf_pnt(unfixed))
+                    !src point to moving pt distance
+                    diff_2 = edge_direct*(end_nodes(unfixed,2)-buf_pnt(unfixed))
+                    !edge end to moving point distance
+
+                    if (diff_2 < 1.D-8) then
+                        !print *, "if buf_pnt located out of edge,exit num_converge loop"
+                        !if buf_pnt goes out of the edge,then stop
                         goto 100
                     end if
-                    
-                    ri_tmp = norm2(pt_intg_tmp-src_lcl) 
-                    ! this is r from temporary integration point to local src point
 
-                    if (0..GE.sign_value*diff_1) then
-                        full_step_size = FK*ri_tmp ! fk is a factor?
+                    ri_tmp = norm2(buf_pnt-src_lcl) 
+                    ! this is r from moving  point to local src point
+                        
+                    ! compute step size====================
+                    if (diff_1 < 1.d-8) then
+                        buf_step = FK*ri_tmp ! fk is a factor?
                     else 
                         addup=VLc2*(1.-FK**2)+(diff_1)**2
                         IF(addup < 0.D0) THEN
-                            full_step_size=sign_value*diff_1
+                            buf_step=diff_1
                         ELSE
-                            full_step_size=FK*(FK*sign_value*(diff_1)-DSQRT(addup))/(FK*FK-1.)
+                            buf_step=FK*(FK*diff_1-DSQRT(addup))/(FK*FK-1.)
                         ENDIF
                     endif
 
-                
-                    IF (sign_value*sign_value*full_step_size+1.D-8 > sign_value*diff_2) then
-                            full_step_size=sign_value*(diff_2)
-                        endif
-                    step_size = 0.5D0*sign_value*full_step_size
-                    !step size control,step size is half the full step size,also consider sign
-                   
-                    !print *,"step_size = ",step_size
-                    !==================================================================
-                    !--- compute integral below
+                    bool_expr = edge_direct*(edge_direct*buf_step+buf_pnt(unfixed))+1.d-8 
 
-                    do IGL = 1,iabs(NGL) ! gaussian sampling points
-                        ! this method change the double integral to line integral
-                        
-                        pt_intg(unfixed)=pt_intg_tmp(unfixed)+step_size*(1.D0+GPL(IGL))
-                        ! update integration point position
-                        
+                    if (bool_expr> edge_direct*diff_2) then
+                            buf_step=edge_direct*(diff_2)
+                    endif
+                    intg_pnt_step = 0.5D0*edge_direct*buf_step
+                   ! step size finished ======================
+=
+                    do igl = 1,iabs(ngl) ! gaussian sampling points
+
+                        pt_intg(unfixed)=buf_pnt(unfixed)+intg_pnt_step*(1.d0+gpl(igl))
                         rho_q=norm2(pt_intg-src_lcl)
-                        ! recaluate rho_q
-                        
-                        DRDNP=DABS(pt_intg(fixed)-src_lcl(fixed))/RHO_Q !sin(theta)
+                        drdn_p=dabs(pt_intg(fixed)-src_lcl(fixed))/rho_q !sin(theta)
 
                         call compute_coeff_gh(num_dim,num_dim - 1,npw,elem_type,n_pwr_g,src_glb &
-                                                & ,src_lcl,pt_intg,COEF_G,COEF_H)
+                                                & ,src_lcl,pt_intg,coef_g,coef_h)
 
-                        call integrate_rho(ndim,nf,npw,n_pwr_g,src_lcl,pt_intg,coef_g,coef_h,RINT)
+                        call integrate_rho(ndim,nf,npw,n_pwr_g,src_lcl,pt_intg,coef_g,coef_h,rint)
 
-                        hiresult = hiresult + (dabs(step_size)*gwl(igl)*drdnp/rho_q)*rint
-                        ! Equation (3-6-50)
-
+                        hiresult = hiresult + (dabs(intg_pnt_step)*gwl(igl)*drdn_p/rho_q)*rint
+                        ! equation (3-6-50)
                     end do ! igl =1,iabs(ngl)
 
-                    pt_intg_tmp(unfixed)=pt_intg_tmp(unfixed)+sign_value*full_step_size
+                    buf_pnt(unfixed)=buf_pnt(unfixed)+edge_direct*buf_step
                 end do ! num_converge = 1,500
 
 
@@ -168,6 +151,16 @@
         integer,intent(out) :: fixed_id,unfixed_id
         ! id can be either 1 or 2,indicating which coordinate  is no changed
         ! along the edge
+        !==================================================
+        ! for first and third edge, vertical component unchanged,1st comp change
+        ! for second and forth edge, horizontal component unchanged,2rd comp change
+        !       4----7----3
+        !       |         |
+        !       8    9    6
+        !       |         |
+        !       1----5----2
+
+        !==================================================
         unfixed_id=1!x direction changed, horizontal case
         if (i_edge/2*2 .eq. i_edge) then
         !check if i_edge is even
