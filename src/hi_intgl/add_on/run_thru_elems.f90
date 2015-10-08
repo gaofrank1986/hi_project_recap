@@ -30,12 +30,12 @@
 
         integer  :: ie,id
 
-        IF(num_dim == 2) n_pwr_g = (elem_nd_count/3)*2               ! 0,  2
-        IF(num_dim == 3) n_pwr_g = elem_nd_count/2+(elem_nd_count/9)*2        ! 2,  4,  6 
+        IF(num_dim == 2) n_pwr_g = (elem_type/3)*2               ! 0,  2
+        IF(num_dim == 3) n_pwr_g = elem_type/2+(elem_type/9)*2        ! 2,  4,  6 
         ! refer to  Equ. 3-6-56 for parameter m
         num_intgd = 8   
 
-        ! NDSID=2+elem_nd_count/8 !3 !removed not used=== July 25th====
+        ! NDSID=2+elem_type/8 !3 !removed not used=== July 25th====
 
         src_ctr_glb = 0. !src center global, define the center of src for calculating r
 

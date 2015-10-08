@@ -96,13 +96,13 @@ contains
   80  A(I,J)=W(J)
       END
 
-SUBROUTINE SHAPEF(num_dim,elem_nd_count,C,cnr_glb_mtx,Q_lcl,P_glb,RI,SP)
+SUBROUTINE SHAPEF(num_dim,elem_type,C,cnr_glb_mtx,Q_lcl,P_glb,RI,SP)
     ! P is start point
     ! Q is end point
     ! C is corner_local_matrix
 
     ! given Q_local, P_global,and information about the element
-    ! like elem_nd_count,dimension and corner node global and local position
+    ! like elem_type,dimension and corner node global and local position
 
     ! we output RI,SP
 
@@ -111,17 +111,17 @@ SUBROUTINE SHAPEF(num_dim,elem_nd_count,C,cnr_glb_mtx,Q_lcl,P_glb,RI,SP)
     
     implicit none
 
-    integer,intent(in) :: num_dim,elem_nd_count
+    integer,intent(in) :: num_dim,elem_type
     real(8),intent(in) :: cnr_glb_mtx(3,*),P_glb(*),C(*),Q_lcl(*)
 
-    real(8),intent(out) :: SP(elem_nd_count),RI(*)
+    real(8),intent(out) :: SP(elem_type),RI(*)
     integer :: i,l
     real(8) :: wl
 
-    IF(elem_nd_count.GT.3) GOTO 4
+    IF(elem_type.GT.3) GOTO 4
 !                  2-noded line element
     SP(1)=0.5*(1.-Q_lcl(1)); SP(2)=0.5*(1.+Q_lcl(1))
-    IF(elem_nd_count.EQ.2) GOTO 50
+    IF(elem_type.EQ.2) GOTO 50
 !                  3-noded line element
     SP(1)=-Q_lcl(1)*SP(1); SP(2)=Q_lcl(1)*SP(2); SP(3)=1.-Q_lcl(1)*Q_lcl(1)
     GOTO 50
@@ -130,12 +130,12 @@ SUBROUTINE SHAPEF(num_dim,elem_nd_count,C,cnr_glb_mtx,Q_lcl,P_glb,RI,SP)
 4   DO I=1,4
      SP(I)=0.25*(1.+C(2*I-1)*Q_lcl(1))*(1.+C(2*I)*Q_lcl(2))
     ENDDO
-    IF(elem_nd_count.EQ.8) THEN
+    IF(elem_type.EQ.8) THEN
 !                  8 noded-element (square element)
          DO 15 I=1,4; L=2*I-1; SP(I)=SP(I)*(C(L)*Q_lcl(1)+C(L+1)*Q_lcl(2)-1.D0)
          WL=C(L+8)*Q_lcl(1)+C(L+9)*Q_lcl(2)
 15       SP(I+4)=.5D0*(WL+1.D0)*(1.D0-(C(L+8)*Q_lcl(2))**2-(C(L+9)*Q_lcl(1))**2)
-    ELSEIF(elem_nd_count.EQ.9) THEN
+    ELSEIF(elem_type.EQ.9) THEN
 !                  9 noded-element (square element)
      DO 20 I=1,4; L=2*I-1; SP(I)=SP(I)*C(L)*Q_lcl(1)*C(L+1)*Q_lcl(2)
      WL=C(L+8)*Q_lcl(1)+C(L+9)*Q_lcl(2)
@@ -148,7 +148,7 @@ SUBROUTINE SHAPEF(num_dim,elem_nd_count,C,cnr_glb_mtx,Q_lcl,P_glb,RI,SP)
 !                  Calculate r and its vector components
 
 50  DO I=1,num_dim
-        RI(I)=-P_glb(I)+dot_product(SP(1:elem_nd_count),cnr_glb_mtx(I,1:elem_nd_count))
+        RI(I)=-P_glb(I)+dot_product(SP(1:elem_type),cnr_glb_mtx(I,1:elem_type))
     end do
     ! get Q_global using Q_local, then calculate Ri is vector from P_global to Q_global
 

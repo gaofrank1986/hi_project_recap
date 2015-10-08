@@ -33,7 +33,7 @@ subroutine new_eval_singular(cnr_glb_mtx,hi_result)!ctr_glb,src_glb,src_lcl,hi_r
         debug_flag = 0
         !==================================
 
-        allocate(coef_g(0:n_pwr_g),coef_h(0:npw),sf_src(elem_nd_count))
+        allocate(coef_g(0:n_pwr_g),coef_h(0:npw),sf_src(elem_type))
         allocate(gpl(iabs(ngl)),gwl(iabs(ngl)))
 
 
@@ -156,7 +156,7 @@ subroutine new_eval_singular(cnr_glb_mtx,hi_result)!ctr_glb,src_glb,src_lcl,hi_r
                         DRDNP=DABS(pt_intg(fixed_cmp)-src_lcl(fixed_cmp))/RHO_Q !sin(theta)
 
                                
-                        call compute_coeff_GH(num_dim,num_dim - 1,npw,elem_nd_count,n_pwr_g,src_glb &
+                        call compute_coeff_GH(num_dim,num_dim - 1,npw,elem_type,n_pwr_g,src_glb &
                                                 & ,src_lcl,pt_intg,COEF_G,COEF_H)
                         
 

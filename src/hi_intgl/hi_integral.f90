@@ -6,7 +6,7 @@ module hi_intg
     
     include './add_on/hi_const.f90'    
     integer,protected    ::  num_dim,num_node,num_nrml,num_elem
-    integer,protected    ::  elem_nd_count,num_intgd
+    integer,protected    ::  elem_type,num_intgd
     real(8),protected    ::  hi_beta 
 
 
@@ -57,12 +57,12 @@ contains
             print *,"------------Start Reading Model-------------"
             OPEN(5,FILE='SIEPPEM.DAT',STATUS='OLD')
 
-            read (5,*) num_dim,num_node,num_elem,elem_nd_count,hi_beta,num_intgd
+            read (5,*) num_dim,num_node,num_elem,elem_type,hi_beta,num_intgd
             ! number of node per element
             ! beta is the power of r in target equation
             ! number of target func components
             allocate(node_matrix(num_dim,num_node))
-            allocate(elem_matrix(elem_nd_count,num_elem))
+            allocate(elem_matrix(elem_type,num_elem))
             allocate(src_flag(num_elem))
             allocate(src_local_list(2,num_elem))
             allocate(value_list(num_elem,num_intgd))
@@ -76,7 +76,7 @@ contains
             end do  
 
             do ie = 1,num_elem
-                read(5,*) tmp,(elem_matrix(id,tmp),id=1,elem_nd_count),src_flag(tmp)    ! card set 3
+                read(5,*) tmp,(elem_matrix(id,tmp),id=1,elem_type),src_flag(tmp)    ! card set 3
             end do
             !====src_flag
             ! if = 0 not valid
@@ -100,9 +100,9 @@ contains
             print *,"------------Finish Reading Model-------------"
             !------------Some initialisation of data
 
-            allocate(full_mesh_matrix(num_dim,elem_nd_count,num_elem))
+            allocate(full_mesh_matrix(num_dim,elem_type,num_elem))
             
-            forall (ie = 1:num_elem,id = 1:elem_nd_count)
+            forall (ie = 1:num_elem,id = 1:elem_type)
 
                     full_mesh_matrix(1:num_dim,id,ie)=node_matrix(1:num_dim,elem_matrix(id,ie))
                     ! reorganize nodes coordinate by element node order
@@ -129,10 +129,10 @@ contains
         num_node = NNODE
         num_elem = NELEM
         num_nrml = NNODED
-        elem_nd_count = 8 !NCN(IELEM)!! to be changed
+        elem_type = 8 !NCN(IELEM)!! to be changed
         hi_beta = 3.
         !num_intgd = 8
-        allocate(cnr_glb_mtx(num_dim,elem_nd_count))
+        allocate(cnr_glb_mtx(num_dim,elem_type))
         !model_readed_flag = 1
         !value_list = 0
         print *,"------------Finished initialization-------------"

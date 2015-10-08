@@ -32,7 +32,7 @@
         debug_flag = 0
         !==================================
 
-        allocate(coef_g(0:n_pwr_g),coef_h(0:npw),sf_src(elem_nd_count))
+        allocate(coef_g(0:n_pwr_g),coef_h(0:npw),sf_src(elem_type))
         allocate(gpl(iabs(ngl)),gwl(iabs(ngl)))
 
         num_edge = 2 * (num_dim - 1 ) ! 4 -----how many edges
@@ -40,7 +40,7 @@
 
         hiresult = 0.
         ! cnr_glb_mtx is allocated when read in
-        !cnr_glb_mtx = full_mesh_matrix(1:ndim,1:elem_nd_count,this_elem_id)
+        !cnr_glb_mtx = full_mesh_matrix(1:ndim,1:elem_type,this_elem_id)
         
         OPEN(510, FILE='cnr_glb_1.txt',    STATUS='unknown') 
         do id = 1,3
@@ -158,11 +158,11 @@
                         DRDNP=DABS(pt_intg(fixed_cmp)-src_lcl(fixed_cmp))/RHO_Q !sin(theta)
 
                                
-                        call compute_coeff_GH(num_dim,num_dim - 1,npw,elem_nd_count,n_pwr_g,src_glb &
+                        call compute_coeff_GH(num_dim,num_dim - 1,npw,elem_type,n_pwr_g,src_glb &
                                                 & ,src_lcl,pt_intg,COEF_G,COEF_H)
                         
                                         
-                        !call compute_coeff_G(ndim,ndim - 1,elem_nd_count,n_pwr_g,src_glb &
+                        !call compute_coeff_G(ndim,ndim - 1,elem_type,n_pwr_g,src_glb &
                         !                    & ,src_lcl,pt_intg,COEF_G)
                         !call comp_coef_gh(n_pwr_g,npw,coef_g,coef_h)
                         !             get coef_g and coef_h
