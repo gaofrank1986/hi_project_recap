@@ -1,28 +1,4 @@
 
-     subroutine set_npwg(number)
-        implicit none
-
-        integer,intent(in) :: number
-
-        n_pwr_g = number
-        print *,"n_power_g is set to ",number
-    end subroutine
-
-    subroutine set_src_preset(ksi,eta,glb,ctr_glb)
-        
-        implicit none
-
-        real(8),intent(in) :: ksi,eta,glb(3),ctr_glb(3)
-        src_lcl_preset(1) = ksi
-        src_lcl_preset(2) = eta
-        src_glb_preset = glb
-        src_ctr_glb = ctr_glb
-        !print *,"src preseted as",src_lcl_preset
-        !print *,"src preseted as",src_glb_preset
-        !print *,"src_ctr_glb preseted as",src_ctr_glb
-
-    end subroutine
-
    
      subroutine RIM_ELEMS()
 

@@ -1,9 +1,9 @@
 
-    subroutine eval_singular_elem(this_elem_id,nf,ndim,hiresult,src_preset_flag)
-
+    subroutine eval_singular_elem(passed_mtx,hiresult)
         implicit none
-
-        integer,intent(in) :: this_elem_id,src_preset_flag,ndim,nf
+        integer,parameter :: nf = 8 
+        integer,parameter :: ndim = 3
+        real(8),intent(in) :: passed_mtx(3,8)
         real(8),intent(out) :: hiresult(nf)
         ! nf : num of kernel funcs
 
@@ -14,86 +14,52 @@
        ! end nodes recorder, shape function
         ! rho integration result
 
-        real(8),allocatable :: coef_g(:),coef_h(:),sf_src(:),gpl(:),gwl(:)
+        real(8),allocatable :: coef_g(:),coef_h(:),gpl(:),gwl(:)
 
         !====================================================================
         integer :: id,ie,tmp,i_edge,ks,src_identifier,igl,num_converge
 
-        integer :: unfixed_cmp,fixed_cmp,num_edge
+        integer :: unfixed,fixed,num_edge
 
         real(8) :: vlc2,rho_q,comt
         real(8) :: fk,wfa,sign_value,ri_tmp,full_step_size,step_size,drdnp
         real(8) :: addup,diff_1,diff_2
             
         integer :: debug_flag,debug_file_id
-        hi_beta = 3.
-        !pay attention to hi_beta here
+
+        cnr_glb_mtx = passed_mtx
         debug_file_id = 109
         debug_flag = 0
         !==================================
 
-        allocate(coef_g(0:n_pwr_g),coef_h(0:npw),sf_src(elem_type))
+        allocate(coef_g(0:n_pwr_g),coef_h(0:npw))
         allocate(gpl(iabs(ngl)),gwl(iabs(ngl)))
 
-        num_edge = 2 * (num_dim - 1 ) ! 4 -----how many edges
-        !print *,"============in eval_SINGULAR_ELEM=============="
-
+        num_edge = 2 * (ndim - 1 ) ! 4 -----how many edges
         hiresult = 0.
-        ! cnr_glb_mtx is allocated when read in
-        cnr_glb_mtx = full_mesh_matrix(1:ndim,1:elem_type,this_elem_id)
-        
-        OPEN(510, FILE='cnr_glb_1.txt',    STATUS='unknown') 
-        do id = 1,3
-                write(510,202) cnr_glb_mtx(id,1:8)
-        end do
-202     format(8f10.6)
-        ! need set up src_lcl and src_glb
-        if (src_preset_flag .eq. 0) then
-            src_identifier = src_flag(this_elem_id)
-            
-            if (src_identifier < 0) then 
-                ! use local src info if identifier less than zero
-                src_lcl = src_local_list(:,this_elem_id) !!!!!====== attention how src_lcl_list is read
-                call shapef(ndim,elem_type,cnr_lcl_mtx,cnr_glb_mtx,src_lcl, &
-                            & src_ctr_glb,ri,SF_src)
-              
-                ! shape function based src_lcl
-                ! return ri and SF_src
-            else    
-                ! src_identifier is 0 will not be called for eval_singular-----
-                src_glb(1:ndim)=cnr_glb_mtx(1:ndim,src_identifier)
-                ! attention when > 0, here use node index in a element, not global node id 
-                ri = src_glb - src_ctr_glb   
-                if (ndim == 2) then
-                    src_lcl(1)=(-1)**src_identifier+src_identifier/3
-                else ! ndim = 3
-                    src_lcl = cnr_lcl_mtx( 2*src_identifier-1 : 2*src_identifier )
-                end if
-            end if 
-        else
+
             src_lcl = src_lcl_preset
             src_glb = src_glb_preset
             ri = src_glb - src_ctr_glb 
-        end if
+
 
         if (ndim == 2) then
             print *,"2d case not implemented"
         else 
             !-----------------------------------------------------------------------
-            call gaussv(iabs(ngl),gpl,gwl)
+            call gaussv(iabs(ngl),gpl,gwl)!guassion_point_list, gaussian_weight_list
 
-            WFA=DSQRT(hi_beta*2.D0/3.D0+0.4D0)*DLOG(DABS(TOLGP)/2.D0)   
-            FK=3.D0/8.D0*(-10.D0*DBLE(iabs(NGL))/WFA-1.D0)**(4.D0/3.D0)
+            wfa=dsqrt(hi_beta*2.d0/3.d0+0.4d0)*dlog(dabs(tolgp)/2.d0)  
+            fk=3.d0/8.d0*(-10.d0*dble(iabs(ngl))/wfa-1.d0)**(4.d0/3.d0)
 
             do i_edge = 1,num_edge ! ITERATE through each edge
 
-                KS=KSB(i_edge)
-                IF(DABS(src_lcl(IABS(KS))-DBLE(KS)/DABS(DBLE(KS))).LT.TOL) then
+                ks=ksb(i_edge)
+                if(dabs(src_lcl(iabs(ks))-dble(ks)/dabs(dble(ks))).lt.tol) then
                     !print *,"Current edge iteration skipped! elem_id = ",this_elem_id," edge =",i_edge
-                    !------------------------------------------
                     goto 100
                 end if
-                
+                !find end node local position
                 do id = 1,2
                     tmp = node_grp_by_edge(3*(i_edge - 1) + ID)! determine which group of node to used
                     end_nodes(1:2,ID)=cnr_lcl_mtx(2*tmp-1 : 2*tmp) !get local node from corner table
@@ -108,37 +74,27 @@
                 !       |         |
                 !       1----5----2
 
-                !         7     6     5
-
-                !         8           4
-
-                !         1     2     3
-               
-
-                unfixed_cmp=1
-                if (i_edge/2*2 .EQ. i_edge) unfixed_cmp=2 
-                ! i_edge can is mutiple of 2
-                fixed_cmp=3-unfixed_cmp
                 !==================================================
                 
-                sign_value = DSIGN(1.D0,end_nodes(unfixed_cmp,2)-end_nodes(unfixed_cmp,1))
+                call get_fixed_id(i_edge,fixed,unfixed)!get fixed and unfixed id
+
+                sign_value = DSIGN(1.D0,end_nodes(unfixed,2)-end_nodes(unfixed,1))
                 !dsign(a,b) a time sign of b,end_node(:,id)
                 ! sign_value is sign of second node minus first node,actually shows the direction
 
-                VLc2=(end_nodes(fixed_cmp,2)-src_lcl(fixed_cmp))**2
+                VLc2=(end_nodes(fixed,2)-src_lcl(fixed))**2
 
                 pt_intg_tmp=end_nodes(:,1) 
                 !tmp integration point
-                pt_intg(fixed_cmp)=pt_intg_tmp(fixed_cmp)
+                pt_intg(fixed)=pt_intg_tmp(fixed)
                 ! the other xiq component is not initialised
 
                 do num_converge=1,500 
                 !control the maxium step to go thru one edge
                 !also controled by step-size, example finished in less than 10 step
-                !pt_intg(unfixed_cmp) is updated each time
-
-                    diff_1 = src_lcl(unfixed_cmp)-pt_intg_tmp(unfixed_cmp)!between tmp src and end node
-                    diff_2 = end_nodes(unfixed_cmp,2)-pt_intg_tmp(unfixed_cmp)!between two nodes
+                !pt_intg(unfixed) is updated each time
+                    diff_1 = src_lcl(unfixed)-pt_intg_tmp(unfixed)!between tmp src and end node
+                    diff_2 = end_nodes(unfixed,2)-pt_intg_tmp(unfixed)!between two nodes
 
                     if (sign_value*diff_2 < 1.D-8) then
                         !print *, "if pt_intg_tmp coordinate out of range,exit num_converge loop"
@@ -174,24 +130,16 @@
                     do IGL = 1,iabs(NGL) ! gaussian sampling points
                         ! this method change the double integral to line integral
                         
-                        pt_intg(unfixed_cmp)=pt_intg_tmp(unfixed_cmp)+step_size*(1.D0+GPL(IGL))
+                        pt_intg(unfixed)=pt_intg_tmp(unfixed)+step_size*(1.D0+GPL(IGL))
                         ! update integration point position
                         
-                        RHO_Q=norm2(pt_intg-src_lcl)
+                        rho_q=norm2(pt_intg-src_lcl)
                         ! recaluate rho_q
                         
-                        DRDNP=DABS(pt_intg(fixed_cmp)-src_lcl(fixed_cmp))/RHO_Q !sin(theta)
+                        DRDNP=DABS(pt_intg(fixed)-src_lcl(fixed))/RHO_Q !sin(theta)
 
-                               
-                        call compute_coeff_GH(num_dim,num_dim - 1,npw,elem_type,n_pwr_g,src_glb &
+                        call compute_coeff_gh(num_dim,num_dim - 1,npw,elem_type,n_pwr_g,src_glb &
                                                 & ,src_lcl,pt_intg,COEF_G,COEF_H)
-                        
-                        !call compute_coeff_G(ndim,ndim - 1,elem_type,n_pwr_g,src_glb &
-                        !                    & ,src_lcl,pt_intg,COEF_G)
-                        !call comp_coef_gh(n_pwr_g,npw,coef_g,coef_h)
-                        !             get coef_g and coef_h
-                        !             why not inside integrate_Rho?????
-
 
                         call integrate_rho(ndim,nf,npw,n_pwr_g,src_lcl,pt_intg,coef_g,coef_h,RINT)
 
@@ -199,21 +147,33 @@
                         ! Equation (3-6-50)
 
                     end do ! igl =1,iabs(ngl)
-                    
-                    pt_intg_tmp(unfixed_cmp)=pt_intg_tmp(unfixed_cmp)+sign_value*full_step_size
+
+                    pt_intg_tmp(unfixed)=pt_intg_tmp(unfixed)+sign_value*full_step_size
                 end do ! num_converge = 1,500
 
 
         100          end do ! i_edge = 1,num_edge
         end if
 
+        call swap_result(hiresult)
 
 
-
-        !             write (110,*) "==========final result========="
-            call swap_result(hiresult)
-        !             write (110,*) result
-        !         end if
+    end subroutine
 
 
+    subroutine get_fixed_id(i_edge,fixed_id,unfixed_id)
+        implicit none
+
+        integer,intent(in) :: i_edge
+        integer,intent(out) :: fixed_id,unfixed_id
+        ! id can be either 1 or 2,indicating which coordinate  is no changed
+        ! along the edge
+        unfixed_id=1!x direction changed, horizontal case
+        if (i_edge/2*2 .eq. i_edge) then
+        !check if i_edge is even
+            unfixed_id=2 ! y direction changed,vertical case
+        end if
+        ! i_edge can is mutiple of 2
+        ! edge 1 and 3 is horizontal, while 2 and 4 are vertical
+        fixed_id=3-unfixed_id
     end subroutine
