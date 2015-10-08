@@ -1,10 +1,9 @@
 
-    subroutine eval_singular_elem(this_elem_id,cnr_glb_mtx,nf,ndim,hiresult,src_preset_flag)
-
+    subroutine eval_singular_elem(passed_mtx,hiresult)
         implicit none
-
-        integer,intent(in) :: this_elem_id,src_preset_flag,ndim,nf
-        real(8),intent(in) :: cnr_glb_mtx(3,8)
+        integer,parameter :: nf = 8 
+        integer,paramter :: ndim = 3
+        real(8),intent(in) :: passed_mtx(3,8)
         real(8),intent(out) :: hiresult(nf)
         ! nf : num of kernel funcs
 
@@ -28,6 +27,7 @@
             
         integer :: debug_flag,debug_file_id
         hi_beta = 3.
+        cnr_glb_mtx = passed_mtx
         debug_file_id = 109
         debug_flag = 0
         !==================================
@@ -47,35 +47,10 @@
                 write(510,202) cnr_glb_mtx(id,1:8)
         end do
 202     format(8f10.6)
-        ! need set up src_lcl and src_glb
-        if (src_preset_flag .eq. 0) then
-            src_identifier = src_flag(this_elem_id)
-            
-            if (src_identifier < 0) then 
-                ! use local src info if identifier less than zero
-                src_lcl = src_local_list(:,this_elem_id) !!!!!====== attention how src_lcl_list is read
-                call shapef(ndim,elem_nd_count,cnr_lcl_mtx,cnr_glb_mtx,src_lcl, &
-                            & src_ctr_glb,ri,SF_src)
-              
-                ! shape function based src_lcl
-                ! return ri and SF_src
-            else    
-                ! src_identifier is 0 will not be called for eval_singular-----
-                src_glb(1:ndim)=cnr_glb_mtx(1:ndim,src_identifier)
-                ! attention when > 0, here use node index in a element, not global node id 
-                ri = src_glb - src_ctr_glb   
-                if (ndim == 2) then
-                    src_lcl(1)=(-1)**src_identifier+src_identifier/3
-                else ! ndim = 3
-                    src_lcl = cnr_lcl_mtx( 2*src_identifier-1 : 2*src_identifier )
-                end if
-            end if 
-        else
             src_lcl = src_lcl_preset
             src_glb = src_glb_preset
             ri = src_glb - src_ctr_glb 
-        end if
-
+            
         if (ndim == 2) then
             print *,"2d case not implemented"
         else 
@@ -86,7 +61,8 @@
             FK=3.D0/8.D0*(-10.D0*DBLE(iabs(NGL))/WFA-1.D0)**(4.D0/3.D0)
 
             do i_edge = 1,num_edge ! ITERATE through each edge
-
+                
+                
                 KS=KSB(i_edge)
                 IF(DABS(src_lcl(IABS(KS))-DBLE(KS)/DABS(DBLE(KS))).LT.TOL) then
                     !print *,"Current edge iteration skipped! elem_id = ",this_elem_id," edge =",i_edge
@@ -136,7 +112,6 @@
                 !control the maxium step to go thru one edge
                 !also controled by step-size, example finished in less than 10 step
                 !pt_intg(unfixed_cmp) is updated each time
-
                     diff_1 = src_lcl(unfixed_cmp)-pt_intg_tmp(unfixed_cmp)!between tmp src and end node
                     diff_2 = end_nodes(unfixed_cmp,2)-pt_intg_tmp(unfixed_cmp)!between two nodes
 
@@ -186,6 +161,7 @@
                         call compute_coeff_GH(num_dim,num_dim - 1,npw,elem_nd_count,n_pwr_g,src_glb &
                                                 & ,src_lcl,pt_intg,COEF_G,COEF_H)
                         
+                                        
                         !call compute_coeff_G(ndim,ndim - 1,elem_nd_count,n_pwr_g,src_glb &
                         !                    & ,src_lcl,pt_intg,COEF_G)
                         !call comp_coef_gh(n_pwr_g,npw,coef_g,coef_h)
