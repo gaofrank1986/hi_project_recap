@@ -2,7 +2,7 @@
     subroutine eval_singular_elem(passed_mtx,hiresult)
         implicit none
         integer,parameter :: nf = 8 
-        integer,paramter :: ndim = 3
+        integer,parameter :: ndim = 3
         real(8),intent(in) :: passed_mtx(3,8)
         real(8),intent(out) :: hiresult(nf)
         ! nf : num of kernel funcs

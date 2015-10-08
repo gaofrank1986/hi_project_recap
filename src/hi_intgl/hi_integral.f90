@@ -33,7 +33,7 @@ contains
     include './add_on/test6.f90'
     include './add_on/test3.f90'
     include './add_on/test2.f90'
-    include './add_on/test.f90'
+    include './add_on/test_cp.f90'
     include './add_on/new_eval.f90'
     include './add_on/hi_integrand.f90'        
     include './add_on/run_thru_elems.f90'    
@@ -134,55 +134,55 @@ contains
         hi_beta = 3.
         num_intgd = 8
 
-        allocate(node_matrix(num_dim,num_node))
-        allocate(normal_matrix(num_dim,num_nrml))
+!        allocate(node_matrix(num_dim,num_node))
+!        allocate(normal_matrix(num_dim,num_nrml))
 
-        allocate(elem_matrix(elem_nd_count,num_elem))
-        allocate(value_list(num_elem,num_intgd))
+!        allocate(elem_matrix(elem_nd_count,num_elem))
+!        allocate(value_list(num_elem,num_intgd))
         allocate(cnr_glb_mtx(num_dim,elem_nd_count))
-
-        if (num_dim == 2) ngl = 1
-
-        forall (i = 1:num_dim,j=1:num_node)
-            node_matrix(i,j) = XYZ(i,j)
-        end forall
-
-        forall (i = 1:num_dim,j=1:num_nrml)
-            normal_matrix(i,j) = DXYZ(i,j)
-        end forall
-
-        forall(i = 1:num_elem,j = 1:elem_nd_count)
-            elem_matrix(j,i) = NCON(i,j)!triangle
-            ! there is index order problem
-!              elem_mtx_nrml(i,j) = NCOND(i,j)
-        end forall
-
-        !switch order
-        print *,"Transfering elem matrix from old order to new order"
-            do i = 1,num_elem
-                if (elem_nd_count .eq. 8) then
-                    print *,"god knows why@-@"
-                endif
-                if (NCN(i) .eq. 8) then
-                tmp = elem_matrix(2,i)
-                elem_matrix(2,i) = elem_matrix(3,i)
-                elem_matrix(3,i) = elem_matrix(5,i)
-                elem_matrix(5,i) = tmp
-                tmp = elem_matrix(4,i)
-                elem_matrix(4,i) = elem_matrix(7,i)
-                elem_matrix(7,i) = elem_matrix(6,i)
-                elem_matrix(6,i) = tmp
-            endif
-            end do
-        !-------------------- Data Manipulation------------------
-
-        allocate(full_mesh_matrix(num_dim,elem_nd_count,num_elem))
-            
-        forall (ie = 1:num_elem,id = 1:elem_nd_count)
-
-                full_mesh_matrix(1:num_dim,id,ie)=node_matrix(1:num_dim,elem_matrix(id,ie))
-                ! reorganize nodes coordinate by element node order
-        end forall
+!
+!        if (num_dim == 2) ngl = 1
+!
+!        forall (i = 1:num_dim,j=1:num_node)
+!            node_matrix(i,j) = XYZ(i,j)
+!        end forall
+!
+!        forall (i = 1:num_dim,j=1:num_nrml)
+!            normal_matrix(i,j) = DXYZ(i,j)
+!        end forall
+!
+!        forall(i = 1:num_elem,j = 1:elem_nd_count)
+!            elem_matrix(j,i) = NCON(i,j)!triangle
+!            ! there is index order problem
+!!              elem_mtx_nrml(i,j) = NCOND(i,j)
+!        end forall
+!
+!        !switch order
+!        print *,"Transfering elem matrix from old order to new order"
+!            do i = 1,num_elem
+!                if (elem_nd_count .eq. 8) then
+!                    print *,"god knows why@-@"
+!                endif
+!                if (NCN(i) .eq. 8) then
+!                tmp = elem_matrix(2,i)
+!                elem_matrix(2,i) = elem_matrix(3,i)
+!                elem_matrix(3,i) = elem_matrix(5,i)
+!                elem_matrix(5,i) = tmp
+!                tmp = elem_matrix(4,i)
+!                elem_matrix(4,i) = elem_matrix(7,i)
+!                elem_matrix(7,i) = elem_matrix(6,i)
+!                elem_matrix(6,i) = tmp
+!            endif
+!            end do
+!        !-------------------- Data Manipulation------------------
+!
+!        allocate(full_mesh_matrix(num_dim,elem_nd_count,num_elem))
+!            
+!        forall (ie = 1:num_elem,id = 1:elem_nd_count)
+!
+!                full_mesh_matrix(1:num_dim,id,ie)=node_matrix(1:num_dim,elem_matrix(id,ie))
+!                ! reorganize nodes coordinate by element node order
+!        end forall
 
         !------------- Initialization-------------------------
         model_readed_flag = 1

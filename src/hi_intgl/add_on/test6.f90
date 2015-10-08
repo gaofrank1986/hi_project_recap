@@ -20,7 +20,7 @@
        
         call compute_coeff_g(ndim,nbdm,node,npowg,xp,xip,xiq,    &
         &           coefg)
-        
+       !print *,"break point 3----------------------" 
         ! DETERMINE COEFFICIENTS Cn USING Eq. (3-6-37)
 
         
@@ -60,6 +60,7 @@
         integer :: ip,jp
 
 
+       !print *,"break point 4----------------------" 
       IF(NODE.EQ.2) THEN         ! Eq.(24)
 !        COEFG(0)=0.25*((cnr_glb_mtx(1,1)-cnr_glb_mtx(1,2))**2+(cnr_glb_mtx(2,1)-cnr_glb_mtx(2,2))**2)  
 !       ELSEIF(NODE.EQ.3) THEN             ! FORM Eq.(3-6-33)
