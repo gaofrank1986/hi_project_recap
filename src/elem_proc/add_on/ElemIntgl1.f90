@@ -174,6 +174,7 @@
 !
 
         real(8) :: src_lcl(2),src_glb(3)
+        real(8) :: cnr_glb_mtx(3,8)
         real(8) ::  SF_src(8),DSF_src(2,8),DDSF_src(3,8)
         !shape function ,derivative, double derivatives based on local src point
         real(8) ::  SF_iter(8),DSF_iter(2,8),DDSF_iter(3,8),DET1,DET2,DET3,DET 
@@ -360,12 +361,18 @@
          !print *,"start of eval singular elem"
          pwr_g = NCN(IELEM)/2+(NCN(IELEM)/9)*2 
          !write(110, *)  ' pwr_g is set to',pwr_g
-
+        cnr_glb_mtx(:,1) = xyz(:,ncon(ielem,1))
+        cnr_glb_mtx(:,2) = xyz(:,ncon(ielem,3))
+        cnr_glb_mtx(:,3) = xyz(:,ncon(ielem,5))
+        cnr_glb_mtx(:,4) = xyz(:,ncon(ielem,7))
+        cnr_glb_mtx(:,5) = xyz(:,ncon(ielem,2))
+        cnr_glb_mtx(:,6) = xyz(:,ncon(ielem,4))
+        cnr_glb_mtx(:,7) = xyz(:,ncon(ielem,6))
+        cnr_glb_mtx(:,8) = xyz(:,ncon(ielem,8))
         call set_npwg(pwr_g)
-        write(501,*) xyze(1:3,1:8,ielem)
-        call new_eval_singular(xyze(1:3,1:8,ielem),ctr_glb,src_glb,src_lcl,result0)
+        !write(501,*) xyze(1:3,1:8,ielem)
+        call new_eval_singular(cnr_glb_mtx,ctr_glb,src_glb,src_lcl,result0)
         !call set_src_preset(si,eta,XYZ(1:3,NCON(IELEM,NODJ)),ctr_glb)
-        !          call debug_test()
         ! NCON(ielem,:) give node_list for an element,
         ! which is elem_matrix(1:8,elem_id) in my data structure
         ! is there a dismatch by assignning ctr_glb and src_lcl

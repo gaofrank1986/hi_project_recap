@@ -19,7 +19,6 @@ module hi_intg
 
     
     integer,private :: model_readed_flag = 0 ! 0 for not readed
-    !integer,private :: external_src_ctr_flag = 0! if or not use external src ctr input
 
     integer,private,parameter :: NPW = 4
     real(8),private,allocatable :: value_list(:,:)

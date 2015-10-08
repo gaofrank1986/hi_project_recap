@@ -40,7 +40,12 @@
         hiresult = 0.
         ! cnr_glb_mtx is allocated when read in
         cnr_glb_mtx = full_mesh_matrix(1:ndim,1:elem_nd_count,this_elem_id)
-
+        
+        OPEN(510, FILE='cnr_glb_1.txt',    STATUS='unknown') 
+        do id = 1,3
+                write(510,202) cnr_glb_mtx(id,1:8)
+        end do
+202     format(8f10.6)
         ! need set up src_lcl and src_glb
         if (src_preset_flag .eq. 0) then
             src_identifier = src_flag(this_elem_id)

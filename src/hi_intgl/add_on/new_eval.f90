@@ -1,8 +1,8 @@
 subroutine new_eval_singular(cnr_glb_mtx,ctr_glb,src_glb,src_lcl,hi_result)
-      implicit none
-      
-      integer,parameter :: ndim = 3
-      integer,parameter :: nf = 8
+        implicit none
+
+        integer,parameter :: ndim = 3
+        integer,parameter :: nf = 8
         real(8),intent(in) :: ctr_glb(ndim),src_glb(ndim),src_lcl(ndim-1)
         real(8),intent(inout) :: cnr_glb_mtx(ndim,nf)
         real(8),intent(out) :: hi_result(nf)
@@ -43,18 +43,19 @@ subroutine new_eval_singular(cnr_glb_mtx,ctr_glb,src_glb,src_lcl,hi_result)
         hi_result = 0.
 
         ri = src_glb - src_ctr_glb 
-
-        if ( nf .eq. 8) then
-                tmp_m = cnr_glb_mtx(1:3,2)
-                cnr_glb_mtx(1:3,2) = cnr_glb_mtx(1:3,3)
-                cnr_glb_mtx(1:3,3) = cnr_glb_mtx(1:3,5)
-                cnr_glb_mtx(1:3,5) = tmp_m
-                tmp_m = cnr_glb_mtx(1:3,4)
-                cnr_glb_mtx(1:3,4) = cnr_glb_mtx(1:3,7)
-                cnr_glb_mtx(1:3,7) = cnr_glb_mtx(1:3,6)
-                cnr_glb_mtx(1:3,6) = tmp_m
-        end if
-        write(500,*) cnr_glb_mtx
+        !
+        !       7        6        5
+        !       8                4
+        !       1       2       3
+        !
+        !       4        7        3
+        !       8                6
+        !       1       5       2
+        OPEN(511, FILE='cnr_glb_2.txt',    STATUS='unknown') 
+        do id = 1,3
+                write(511,202) cnr_glb_mtx(id,1:8)
+        end do
+202     format(8f10.6)
         if (ndim == 2) then
             print *,"2d case not implemented"
         else 
