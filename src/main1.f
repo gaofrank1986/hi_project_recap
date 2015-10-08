@@ -276,9 +276,10 @@ C ! NNODED: total number of nodes according to the normals
         WRITE(10,*)  'AFTER BODYFD' 
 !
 !  --------------------------------------------
-!   
-        print *,"read model"
-        call read_model_from_WAVDUT()
+
+        print *,"initialise hi data"
+        call init_hi_var() 
+
 C ! Assembling matrix and computing diffraction and radiation potentials
 C !
          CALL TASSB0   

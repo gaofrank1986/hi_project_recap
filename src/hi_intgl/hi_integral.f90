@@ -117,14 +117,13 @@ contains
 
     end subroutine read_model_from_DAT
 
-    subroutine read_model_from_WAVDUT()
+    subroutine init_hi_var()
         !use mesh
          USE MVAR_MOD
         implicit none
 
-        integer :: i,j,ie,id,tmp,tmp1
 
-        print *,"------------Start Reading Model from WAVDUT-------------"
+        print *,"------------Start initialise hi var with WAVDUT info-------------"
 
         num_dim = 3
         num_node = NNODE
@@ -132,64 +131,12 @@ contains
         num_nrml = NNODED
         elem_nd_count = 8 !NCN(IELEM)!! to be changed
         hi_beta = 3.
-        num_intgd = 8
-
-!        allocate(node_matrix(num_dim,num_node))
-!        allocate(normal_matrix(num_dim,num_nrml))
-
-!        allocate(elem_matrix(elem_nd_count,num_elem))
-!        allocate(value_list(num_elem,num_intgd))
+        !num_intgd = 8
         allocate(cnr_glb_mtx(num_dim,elem_nd_count))
-!
-!        if (num_dim == 2) ngl = 1
-!
-!        forall (i = 1:num_dim,j=1:num_node)
-!            node_matrix(i,j) = XYZ(i,j)
-!        end forall
-!
-!        forall (i = 1:num_dim,j=1:num_nrml)
-!            normal_matrix(i,j) = DXYZ(i,j)
-!        end forall
-!
-!        forall(i = 1:num_elem,j = 1:elem_nd_count)
-!            elem_matrix(j,i) = NCON(i,j)!triangle
-!            ! there is index order problem
-!!              elem_mtx_nrml(i,j) = NCOND(i,j)
-!        end forall
-!
-!        !switch order
-!        print *,"Transfering elem matrix from old order to new order"
-!            do i = 1,num_elem
-!                if (elem_nd_count .eq. 8) then
-!                    print *,"god knows why@-@"
-!                endif
-!                if (NCN(i) .eq. 8) then
-!                tmp = elem_matrix(2,i)
-!                elem_matrix(2,i) = elem_matrix(3,i)
-!                elem_matrix(3,i) = elem_matrix(5,i)
-!                elem_matrix(5,i) = tmp
-!                tmp = elem_matrix(4,i)
-!                elem_matrix(4,i) = elem_matrix(7,i)
-!                elem_matrix(7,i) = elem_matrix(6,i)
-!                elem_matrix(6,i) = tmp
-!            endif
-!            end do
-!        !-------------------- Data Manipulation------------------
-!
-!        allocate(full_mesh_matrix(num_dim,elem_nd_count,num_elem))
-!            
-!        forall (ie = 1:num_elem,id = 1:elem_nd_count)
-!
-!                full_mesh_matrix(1:num_dim,id,ie)=node_matrix(1:num_dim,elem_matrix(id,ie))
-!                ! reorganize nodes coordinate by element node order
-!        end forall
-
-        !------------- Initialization-------------------------
-        model_readed_flag = 1
-        value_list = 0
-
-        print *,"------------Stop Reading Model from WAVDUT-------------"
-    end subroutine read_model_from_WAVDUT
+        !model_readed_flag = 1
+        !value_list = 0
+        print *,"------------Finished initialization-------------"
+    end subroutine 
 
     subroutine swap_result(result)
         implicit none
