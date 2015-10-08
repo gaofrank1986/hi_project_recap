@@ -52,6 +52,7 @@ subroutine new_eval_singular(cnr_glb_mtx,ctr_glb,src_glb,src_lcl,hi_result)
                 cnr_glb_mtx(1:3,7) = cnr_glb_mtx(1:3,6)
                 cnr_glb_mtx(1:3,6) = tmp_m
         end if
+        write(500,*) cnr_glb_mtx
         if (ndim == 2) then
             print *,"2d case not implemented"
         else 

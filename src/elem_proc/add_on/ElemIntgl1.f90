@@ -362,17 +362,18 @@
          !write(110, *)  ' pwr_g is set to',pwr_g
 
         call set_npwg(pwr_g)
-        !call new_eval_singular(xyze(3:,8,ielem),ctr_glb,src_glb,src_lcl,result0)
-        call set_src_preset(si,eta,XYZ(1:3,NCON(IELEM,NODJ)),ctr_glb)
+        write(501,*) xyze(1:3,1:8,ielem)
+        call new_eval_singular(xyze(1:3,1:8,ielem),ctr_glb,src_glb,src_lcl,result0)
+        !call set_src_preset(si,eta,XYZ(1:3,NCON(IELEM,NODJ)),ctr_glb)
         !          call debug_test()
         ! NCON(ielem,:) give node_list for an element,
         ! which is elem_matrix(1:8,elem_id) in my data structure
         ! is there a dismatch by assignning ctr_glb and src_lcl
 
-        nf=8;ndim=3
+        !nf=8;ndim=3
         ! CHANGE OF normal vector
         !---
-        call eval_singular_elem(IELEM,nf,ndim,result0,1)!!GREEN FUNC 
+        !call eval_singular_elem(IELEM,nf,ndim,result0,1)!!GREEN FUNC 
 
         write (12,*) ielem,NODj,is,result0
 !         write (12,*) result0
