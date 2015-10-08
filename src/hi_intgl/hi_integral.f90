@@ -35,6 +35,7 @@ contains
     include './add_on/test3.f90'
     include './add_on/test2.f90'
     include './add_on/test.f90'
+    include './add_on/new_eval.f90'
     include './add_on/hi_integrand.f90'        
     include './add_on/run_thru_elems.f90'    
     

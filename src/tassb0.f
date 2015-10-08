@@ -119,34 +119,34 @@ C
  	  WRITE(9, *) '   INODE      XP       YP       ZP       S_ANGLE'
         WRITE(10,*) '  INODE      ANGLE         A3   ',
      1               '       C31           C32           C33'
-!
-        DO  500   INODE=1,  NNF   ! Source point is on the free surface
-!
-	   XP=XYZ(1,INODE)
-         YP=XYZ(2,INODE)
-         ZP=XYZ(3,INODE) 
-!
-  	   CELE31(:)=0.0d0
-	   CELE32(:)=0.0d0
-	   CELE33(:)=0.0d0
-	   AL1(:)=0.0d0	  
+
+        do  500   inode=1,  nnf   ! source point is on the free surface
+
+	   xp=xyz(1,inode)
+         yp=xyz(2,inode)
+         zp=xyz(3,inode) 
+
+  	   cele31(:)=0.0d0
+	   cele32(:)=0.0d0
+	   cele33(:)=0.0d0
+	   al1(:)=0.0d0	  
 	  
-!      
-     	  CALL SOLIDANGLE(INODE,NNODE,NELEM,NCN,NCON,NODQUA,
-     1                        H,XYZ,DXYZE,S_ANGLE)    
+      
+     	  call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,
+     1                        h,xyz,dxyze,s_angle)    
      
-         S_ANGLE=1.0d0-S_ANGLE
-	   WRITE(9,102)  INODE, XP, YP, ZP, S_ANGLE
-      	 WRITE(*,102)  INODE, XP, YP, ZP, S_ANGLE
-	   WRITE(101,102)  INODE, XP, YP, ZP, S_ANGLE
+         s_angle=1.0d0-s_angle
+	   write(9,102)  inode, xp, yp, zp, s_angle
+      	 write(*,102)  inode, xp, yp, zp, s_angle
+	   write(101,102)  inode, xp, yp, zp, s_angle
         
-102	  FORMAT(I6,3F12.4,F15.6) 
-!
-	   ANGLE(INODE)=S_ANGLE
-!
-        DO   IP=1,  NSYS 
-	    AMATA(INODE,INODE,IP)= ANGLE(INODE)
-        ENDDO
+102	  format(i6,3f12.4,f15.6) 
+
+	   angle(inode)=s_angle
+
+        do   ip=1,  nsys 
+	    amata(inode,inode,ip)= angle(inode)
+        enddo
 !
 !  ---------------------------
 !  Integration on the free surface

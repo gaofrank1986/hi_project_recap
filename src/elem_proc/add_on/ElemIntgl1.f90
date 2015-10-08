@@ -166,14 +166,14 @@
         INTEGER,INTENT(IN):: IS,IELEM,NODJ
         REAL*8,INTENT(IN)::  XP,YP,ZP
         REAL*8,INTENT(OUT):: BMATRIX(4,8),AMATRIX(4,8)
-
+        integer :: nf,ndim
 !       
         INTEGER N,J,IP   
         Integer Loop1,Loop2,I,NSAMB
         INTEGER LI,LJ,LK,INODE,INODD
 !
 
-
+        real(8) :: src_lcl(2),src_glb(3)
         real(8) ::  SF_src(8),DSF_src(2,8),DDSF_src(3,8)
         !shape function ,derivative, double derivatives based on local src point
         real(8) ::  SF_iter(8),DSF_iter(2,8),DDSF_iter(3,8),DET1,DET2,DET3,DET 
@@ -203,7 +203,7 @@
         real(8) :: XIT(7),ETAT(7),WIT(9)
         real(8) :: PLO,CSST,SNST,SF,DSF,N0,N1C,N1S,JK0
         real(8) :: JK1C,JK1S,F1,F2,F,TOT,TOTJ,GXF0,GXF1
-        integer :: nf,ndim
+
         INTEGER IPRN
         DATA IPRN/11/
 !              
@@ -345,7 +345,11 @@
             ! they has to match each other, the relationship cannot be reflected here
             ! since both NODJ,and XP-ZP are input information
 
-
+            src_glb(1) = x0
+            src_glb(2) = y0
+            src_glb(3) = z0
+            src_lcl(1) = si
+            src_lcl(2) = eta
 
             ctr_glb(1) = 0
             ctr_glb(2) = 0
@@ -353,11 +357,12 @@
 !       write(debug_file_id,*) '   DDSF_src=',DDSF_src
         write(110, *)  '  src_ctr_glb    ctr_glb=',ctr_glb
 
-         print *,"start of eval singular elem"
+         !print *,"start of eval singular elem"
          pwr_g = NCN(IELEM)/2+(NCN(IELEM)/9)*2 
-         write(110, *)  ' pwr_g is set to',pwr_g
+         !write(110, *)  ' pwr_g is set to',pwr_g
 
         call set_npwg(pwr_g)
+        !call new_eval_singular(xyze(3:,8,ielem),ctr_glb,src_glb,src_lcl,result0)
         call set_src_preset(si,eta,XYZ(1:3,NCON(IELEM,NODJ)),ctr_glb)
         !          call debug_test()
         ! NCON(ielem,:) give node_list for an element,
@@ -368,9 +373,7 @@
         ! CHANGE OF normal vector
         !---
         call eval_singular_elem(IELEM,nf,ndim,result0,1)!!GREEN FUNC 
-        !subroutine eval_singular_elem(this_elem_id,num_edge,result,src_preset_flag)
 
-        print *,"end of eval singular elem"
         write (12,*) ielem,NODj,is,result0
 !         write (12,*) result0
 
