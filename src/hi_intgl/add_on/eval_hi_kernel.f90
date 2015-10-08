@@ -23,7 +23,7 @@
 
         real(8) :: vlc2,rho_q,comt
         real(8) :: fk,wfa,edge_direct,ri_tmp,buf_step,intg_pnt_step,drdn_p
-        real(8) :: addup,diff_1,diff_2
+        real(8) :: addup,diff_1,diff_2,bool_expr 
             
         integer :: debug_flag,debug_file_id
 
@@ -115,7 +115,7 @@
                     endif
                     intg_pnt_step = 0.5D0*edge_direct*buf_step
                    ! step size finished ======================
-=
+
                     do igl = 1,iabs(ngl) ! gaussian sampling points
 
                         pt_intg(unfixed)=buf_pnt(unfixed)+intg_pnt_step*(1.d0+gpl(igl))
