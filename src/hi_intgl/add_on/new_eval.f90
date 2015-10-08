@@ -1,14 +1,14 @@
-subroutine new_eval_singular(cnr_glb_mtx,ctr_glb,src_glb,src_lcl,hi_result)
+subroutine new_eval_singular(cnr_glb_mtx,hi_result)!ctr_glb,src_glb,src_lcl,hi_result)
         implicit none
 
         integer,parameter :: ndim = 3
         integer,parameter :: nf = 8
-        real(8),intent(in) :: ctr_glb(ndim),src_glb(ndim),src_lcl(ndim-1)
-        real(8),intent(inout) :: cnr_glb_mtx(ndim,nf)
+        !real(8),intent(in) :: ctr_glb(ndim),src_glb(ndim),src_lcl(ndim-1)
+        real(8),intent(in) :: cnr_glb_mtx(ndim,nf)
         real(8),intent(out) :: hi_result(nf)
         ! nf : num of kernel funcs
 
-        real(8) :: pt_intg(ndim-1),pt_intg_tmp(ndim - 1)  
+        real(8) :: src_lcl(ndim-1),pt_intg(ndim-1),pt_intg_tmp(ndim - 1)  
         ! src point, integration point , temporary integration point     
 
         real(8) :: end_nodes(2,2),ri(3),RINT(nf)
@@ -40,6 +40,8 @@ subroutine new_eval_singular(cnr_glb_mtx,ctr_glb,src_glb,src_lcl,hi_result)
         num_edge = 2 * (num_dim - 1 ) ! 4 -----how many edges
         !print *,"============in eval_SINGULAR_ELEM=============="
 
+            src_lcl = src_lcl_preset
+            src_glb = src_glb_preset
         hi_result = 0.
 
         ri = src_glb - src_ctr_glb 

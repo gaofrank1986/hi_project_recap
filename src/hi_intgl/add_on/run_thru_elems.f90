@@ -44,7 +44,7 @@
                  !CALL ADAPTINT_ELEM(ie,src_ctr_glb,cnr_lcl_mtx,value_list(ie),GPR,GWR,GPL,GWL,INT_ELEM)
                  print *," need evaluate integral over element,src not on element"            
              else     
-                 CALL eval_SINGULAR_ELEM(ie,8,num_dim,value_list(ie,:),0)
+                 !CALL eval_SINGULAR_ELEM(ie,8,num_dim,value_list(ie,:),0)
              end if 
          end do
         !print *,value_list(1,:)
