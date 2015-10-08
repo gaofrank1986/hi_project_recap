@@ -110,8 +110,8 @@
 
                     bool_expr = edge_direct*(edge_direct*buf_step+buf_pnt(unfixed))+1.d-8 
 
-                    if (bool_expr> edge_direct*diff_2) then
-                            buf_step=edge_direct*(diff_2)
+                    if (bool_expr > diff_2) then
+                            buf_step = diff_2
                     endif
                     intg_pnt_step = 0.5D0*edge_direct*buf_step
                    ! step size finished ======================
