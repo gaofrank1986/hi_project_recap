@@ -17,9 +17,9 @@
                     &,rmat(npowf,npowf), &
                     &   sf_iter(node),&
                     &   fq(nf),a(ndim)      
-        integer :: i,j,ip,m,jp
+        integer :: i,j,step_n,m,jp
         integer :: nbdm
-        real(8) :: vk,fjcb,robar
+        real(8) :: rho_step,fjcb,robar
         real(8) :: rho,r2,r,gm,drdn
 
         NBDM = num_dim - 1
@@ -28,42 +28,43 @@
         rho_q = norm2(slop)
         slop = slop/rho_q ! normalized vector, cos(theta),sin(theta)
 
-        vk=rhoq/dble(npowf) ! divide rho_q to npowf parts
+        rho_step=rhoq/dble(npowf) ! divide rho_q to npowf parts
 
-        do 20 ip=0,npowf 
+        do 20 step_n=0,npowf ! this the k value in Gao,XW note 
 
-            rho=vk*dble(ip) 
+            rho=rho_step*dble(step_n) 
             xi=xip+rho*slop !!!!!!!!!!!!!!!!! xi updated here!!!!!!!!!!!!!!!!!!
             robar=coefg(0)
 
-            DO M=1,NPOWG; ROBAR=ROBAR+COEFG(M)*RHO**M; ENDDO
+            do m=1,npowg
+                 robar=robar+coefg(m)*rho**m
+            enddo
 
             ROBAR=DSQRT(ROBAR)       ! Eq.(3-6-28)
 
-            CALL SHAPEF(NDIM,NODE,cnr_lcl_mtx,cnr_glb_mtx,XI,XP,RI,SF_iter)
+            call shapef(ndim,node,cnr_lcl_mtx,cnr_glb_mtx,xi,xp,ri,sf_iter)
             !shape func based on xi
-            !ri give distance vector from xp(it is src_glb) to xi (update along rho)
+            !ri give glb vector from xp(it is src_glb) to xi (update along rho)
             R = norm2(RI)
 
             X=XP+RI
-          
-            CALL DSHAPE(NDIM,NODE,cnr_lcl_mtx,cnr_glb_mtx,XI,COSN,FJCB,GCD)
-            !SUBROUTINE DSHAPE(NDIM,NODE,C,CK,X,COSN,FJCB,GD)
+
+            call dshape(ndim,node,cnr_lcl_mtx,cnr_glb_mtx,xi,cosn,fjcb,gcd)
             ! GCD gives the normal n vector
             ! dshape based on xi
 
-            IF(RHO.GT.1.0D-10)THEN    
-                DRDX=RI/R
-            ELSE
-                A = 0.D0
-     !             DO 10 I=1,NDIM; A(I)=0.D0
-     !             DO 10 J=1,NBDM        
+            if(rho.gt.1.0d-10)then    
+                drdx=ri/r
+            else
+                a = 0.d0
+     !             do 10 i=1,ndim; a(i)=0.d0
+     !             do 10 j=1,nbdm        
                 forall (i = 1:ndim)    
-                    A(i)=A(i)+dot_product(GCD(i,1:nbdm),SLOP(1:nbdm))
+                    a(i)=a(i)+dot_product(gcd(i,1:nbdm),slop(1:nbdm))
                 end forall                  
             
-                GM=DSQRT(DOT_PRODUCT(A,A))
-                DRDX=A/GM                 ! Eq.(3-6-74)
+                gm=dsqrt(dot_product(a,a))
+                drdx=a/gm                 ! eq.(3-6-74)
             endif 
 
             ! dr/dx is defined above

@@ -147,22 +147,22 @@ SUBROUTINE SHAPEF(num_dim,elem_type,C,cnr_glb_mtx,Q_lcl,P_glb,RI,SP)
     !=====================================================================================
 !                  Calculate r and its vector components
 
-50  DO I=1,num_dim
-        RI(I)=-P_glb(I)+dot_product(SP(1:elem_type),cnr_glb_mtx(I,1:elem_type))
+50  do i=1,num_dim
+        ri(i)=-p_glb(i)+dot_product(sp(1:elem_type),cnr_glb_mtx(i,1:elem_type))
     end do
     ! get Q_global using Q_local, then calculate Ri is vector from P_global to Q_global
 
-    END SUBROUTINE SHAPEF
+    end subroutine shapef
 
 
     !=============================================================================
 
-SUBROUTINE DSHAPE(NDIM,NODE,C,CK,X,COSN,FJCB,GD) 
+subroutine dshape(ndim,node,c,ck,x,cosn,fjcb,gd) 
 
     ! C is cnr_lcl_mtx,CK is cnr_glb_mtx
     ! X is local node
     ! FJCB is ...........
-    ! GD is ..........
+    ! GD is ........cross product.tangent vector on two local direction.
     
     IMPLICIT REAL*8 (A-H,O-Z)
     DIMENSION X(*),CK(3,*),DN(2,NODE),GD(3,*),COSN(*),C(*),GR(3)
