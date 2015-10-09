@@ -35,8 +35,8 @@
         num_edge = 4!2 * (ndim - 1 ) ! 4 -----how many edges
         hiresult = 0.
         str_result = 0
-            src_lcl = src_lcl_preset
-            src_glb = src_glb_preset
+            src_lcl = src_lcl_pre
+            src_glb = src_glb_pre
             ri = src_glb - src_ctr_glb 
 
             wfa=dsqrt(hi_beta*2.d0/3.d0+0.4d0)*dlog(dabs(tolgp)/2.d0)  
