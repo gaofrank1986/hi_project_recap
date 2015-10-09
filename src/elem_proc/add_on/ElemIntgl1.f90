@@ -287,7 +287,7 @@
         call eval_singular_elem(cnr_glb_mtx,result0,result1)
         do j=1, ncn(ielem)
             amatrix(is,j) = result0(j)
-            !bmatrix(is,j) = result1(j)
+            bmatrix(is,j) = result1(j)
         end do
         write(110,*) '   sieppem result',result0
         write(110,*) 'sum of amatrix',sum(amatrix(is,1:8))
@@ -348,7 +348,7 @@
             ! partical G over partial n
 
             do j=1, ncn(ielem)
-                bmatrix(is,j)=bmatrix(is,j)+gxf(1)*darea*sf_iter(j)
+               ! bmatrix(is,j)=bmatrix(is,j)+gxf(1)*darea*sf_iter(j)
             enddo
 
             500    continue

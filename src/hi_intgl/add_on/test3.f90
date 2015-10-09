@@ -69,11 +69,16 @@
 
             ! dr/dx is defined above
             drdn = dot_product(cosn,drdx)  !!!!  notice dr/dn is defined  here
+            !write (506,*) "drdx",drdx
+            !write (506,*) "cosn",cosn
             !CALL F_BAR(NDIM,NBDM,DRDX,COSN,R,DRDN,XI,SF_iter,XP,X,NF,FQ)
             if (flag .eq. 1) then
                 call f_integrand(ndim,nf,cosn,drdx,drdn,sf_iter,fq)
             else 
                 call f_integrand2(ndim,nf,cosn,drdx,drdn,sf_iter,fq)
+                 !write (505,*) "fq"
+                 !write(505,1000) fq
+                 !1000 format(8f10.6)
             end if
             coefb(step_n,:) = fq*fjcb/robar**lamda
 
