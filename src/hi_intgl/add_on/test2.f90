@@ -1,11 +1,11 @@
 
-    subroutine integrate_rho(ndim,nf,lamda,npw,n_pwr_g,src_lcl,pt_intg,coef_g,&
+    subroutine integrate_rho(flag,ndim,nf,lamda,npw,n_pwr_g,src_lcl,pt_intg,coef_g,&
                 &coef_h,hiresult)      
             ! changed cnr_glb_mtx to private variable shared in module
             implicit none 
 
         real(8),intent(in)  :: src_lcl(ndim-1),pt_intg(ndim-1),lamda
-        integer,intent(in)  :: n_pwr_g,ndim,nf,npw
+        integer,intent(in)  :: n_pwr_g,ndim,nf,npw,flag
         real(8),intent(out) :: hiresult(nf)
 
         real(8)  :: cosn(ndim),ri(ndim),gcd(ndim,ndim-1)
