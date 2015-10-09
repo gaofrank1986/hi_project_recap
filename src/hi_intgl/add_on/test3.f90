@@ -9,7 +9,7 @@
 
         real(8),intent(out) :: coefb(0:11,nf)
 
-        real(8):: ri(ndim), cosn(ndim), gcd(3,node)
+        real(8):: ri(ndim), cosn(ndim), gcd(3,ndim-1)
 
         real(8) :: rho_q,slop(ndim - 1)
 
