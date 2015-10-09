@@ -195,7 +195,7 @@
         REAL*8  GRN0J(8),GRN1J(8)
 
         integer :: debug_flag = 1,pwr_g
-        real(8) :: result0(8),ctr_glb(3)
+        real(8) :: result0(8),result1(8),ctr_glb(3)
 
         real(8) :: XIT(7),ETAT(7),WIT(9)
         real(8) :: PLO,CSST,SNST,SF,DSF,N0,N1C,N1S,JK0
@@ -284,11 +284,10 @@
 
         nf=8;ndim=3
 
-        call eval_singular_elem(cnr_glb_mtx,result0)
-
+        call eval_singular_elem(cnr_glb_mtx,result0,result1)
         do j=1, ncn(ielem)
             amatrix(is,j) = result0(j)
-
+            !bmatrix(is,j) = result1(j)
         end do
         write(110,*) '   sieppem result',result0
         write(110,*) 'sum of amatrix',sum(amatrix(is,1:8))
@@ -354,6 +353,11 @@
 
             500    continue
 
+        write (501,*) "bmatrix"
+        write (501,1000) bmatrix(is,1:8)
+        write (501,*) "eval result" 
+        write (501,1000) result1
+        1000 format(8f10.6)
         else if(ncn(ielem).eq.6)  then
 
         endif

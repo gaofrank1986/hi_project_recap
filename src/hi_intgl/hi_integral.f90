@@ -32,7 +32,7 @@ module hi_intg
 contains
     include './add_on/test6.f90'
     include './add_on/test3.f90'
-    include './add_on/test2.f90'
+    include './add_on/intg_rho.f90'
     include './add_on/eval_hi_kernel.f90'
     include './add_on/hi_kernel.f90'        
     !include './add_on/run_thru_elems.f90'    
