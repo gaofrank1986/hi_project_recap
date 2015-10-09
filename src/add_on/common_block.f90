@@ -1,9 +1,9 @@
-    subroutine common_block(flag1,ielem,inode,amatrix,bmatrix,fterm_coef)
+    subroutine common_block(flag1,flag2,ielem,inode,amatrix,bmatrix,fterm_coef)
         use mvar_mod
         use mfunc_mod 
 
         implicit none
-        integer,intent(in) :: ielem,inode,flag1
+        integer,intent(in) :: ielem,inode,flag1,flag2
         real(8),intent(in) :: amatrix(4,8),bmatrix(4,8)
         real(8),intent(inout) :: fterm_coef(0:3,4)
 
@@ -54,7 +54,7 @@
          bmata(inode,ip)=bmata(inode,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn  !  * ******
              enddo
         end if
-!
+        if (flag2.eq.0) then!
         do i = 0,3
             call dinp0(i,xsb,ysb,zsb,phi,dpox,dpoy,dpoz)       
             dpdn=dpox*nx+dpoy*ny+dpoz*nz
@@ -63,6 +63,6 @@
                 fterm_coef(i,ip)=fterm_coef(i,ip)+rsn(is,ip)*amatrix(is,j)*phi
             enddo
         end do
-
+        end if
         end do;end do !j,ip
      end subroutine

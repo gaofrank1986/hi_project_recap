@@ -5,7 +5,7 @@
 !C * coefficients of the corresponding system of equationn *
 !C *                                                       *
 !C *********************************************************
-      include './old/common_block.f90'
+      include './add_on/common_block.f90'
     subroutine comp_link(ielem,inode,ii) 
         use MVAR_MOD
         implicit none
@@ -164,7 +164,7 @@
                     call sing_ele1(inode,ielem,nodqua(inode),xp,yp,zp,&
                         &                   amatrix,bmatrix)
                 end if 
-                call common_block(0,ielem,inode,amatrix,bmatrix,fterm_coef)
+                call common_block(0,0,ielem,inode,amatrix,bmatrix,fterm_coef)
 
 300     CONTINUE  
 
@@ -226,7 +226,7 @@
 !        end do 
 
 
-        call common_block(1,ielem,inode,amatrix,bmatrix,fterm_coef)
+        call common_block(1,0,ielem,inode,amatrix,bmatrix,fterm_coef)
 
 !320      CONTINUE
 !
