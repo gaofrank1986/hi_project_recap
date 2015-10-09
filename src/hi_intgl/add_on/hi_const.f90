@@ -7,7 +7,7 @@
     
     real(8),parameter,private   :: hi_pi  = 4.d0*datan(1.d0)
     real(8),parameter,private   :: cnu = 0.3
-    real(8),parameter,private   :: TOLGP=1.D-14
+    real(8),parameter,private   :: tolgp=1.d-14
 
 
     real(8),parameter,private :: cnr_lcl_mtx(18) =(/-1.,-1.,1.,-1.,1.,1.,-1.,1.,0.,-1.,1.,0.,0.,1.,          &
@@ -23,6 +23,6 @@
     ! edge 2 , xip(1) != 1
     ! edge 3 , xip(2) != 1
     ! edge 4 , xip(1) != -1
-    ! why?
+    ! why? src cannot be on this edge
 
 !end module hi_const

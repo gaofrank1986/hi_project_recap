@@ -10,13 +10,13 @@
 ! ======================================================
 !
         SUBROUTINE NORM_ELE1(IELEM,XP,YP,ZP,AMATRIX,BMATRIX)
-	    USE MVAR_MOD
+        USE MVAR_MOD
         IMPLICIT   NONE 
-	  
-	    INTEGER IS,IP,N,ND,J,NP,IELEM
-	  
-	    REAL*8  XP,YP,ZP 
-! 	    REAL*8  X,Y,Z,X0,Y0,Z0,XSB,YSB,ZSB       
+      
+        INTEGER IS,IP,N,ND,J,NP,IELEM
+      
+        REAL*8  XP,YP,ZP 
+!       REAL*8  X,Y,Z,X0,Y0,Z0,XSB,YSB,ZSB       
 
         REAL*8  BMATRIX(4,8),AMATRIX(4,8)
                  
@@ -38,12 +38,12 @@
 ! ======================================================
 !
        SUBROUTINE SING_ELE1(INODE,IELEM,NUMQUA,XP,YP,ZP,AMATRIX,BMATRIX)
-	   USE MVAR_MOD
-	   USE MFUNC_mod
+       USE MVAR_MOD
+       USE MFUNC_mod
 !
       IMPLICIT   NONE  
 !
-	  INTEGER I,J,IS,IELEM,INODE,NODNUM,ND,NP,NSAMB,NUMQUA
+      INTEGER I,J,IS,IELEM,INODE,NODNUM,ND,NP,NSAMB,NUMQUA
         REAL*8  XP,YP,ZP,XYZT(3,8),DXYZT(3,8)
         REAL*8 BMATRIX(4,8),AMATRIX(4,8)
 !
@@ -101,36 +101,36 @@
 ! ======================================================
 !                      
         SUBROUTINE NORM_INT1(IS,IELEM,NCNE,XP,YP,ZP,AMATRIX,BMATRIX)
-	    USE MVAR_MOD
+        USE MVAR_MOD
         IMPLICIT   NONE  
  
-	    INTEGER IS,IELEM,N,NSAMB,NCNE,J,IP
+        INTEGER IS,IELEM,N,NSAMB,NCNE,J,IP
         REAL*8  XP,YP,ZP,EX(4),EY(4)
-	    REAL*8  X,X0,Y,Y0,Z,Z0 
-	    REAL*8  NX,NY,NZ,DGN
+        REAL*8  X,X0,Y,Y0,Z,Z0 
+        REAL*8  NX,NY,NZ,DGN
         REAL*8  DUM,WKX,PHi
         REAL*8  BMATRIX(4,8),AMATRIX(4,8),GXF(4)
 !   
-  	    DATA EX/  1.0d0,  1.0d0, -1.0d0, -1.0d0/                                                  
-	    DATA EY/  1.0d0, -1.0d0, -1.0d0,  1.0d0/
+        DATA EX/  1.0d0,  1.0d0, -1.0d0, -1.0d0/                                                  
+        DATA EY/  1.0d0, -1.0d0, -1.0d0,  1.0d0/
 !
-!	 PRINT *,' IN  NSWP0'
+!    PRINT *,' IN  NSWP0'
 !
         NSAMB=16
         IF(NCNE.EQ.6)   NSAMB=4
 
-	    X0=EX(IS)*XP
-	    Y0=EY(IS)*YP
-	    Z0= ZP
+        X0=EX(IS)*XP
+        Y0=EY(IS)*YP
+        Z0= ZP
 
 
         DO 100    N=1,   NSAMB     
 
-	     X =SAMBXY(IELEM,N,1)! guassian point info
-	     Y =SAMBXY(IELEM,N,2)
-	     Z =SAMBXY(IELEM,N,3)
-	   
-	    CALL DTGRN(H,X,X0,Y,Y0,Z,Z0,GXF) 
+         X =SAMBXY(IELEM,N,1)! guassian point info
+         Y =SAMBXY(IELEM,N,2)
+         Z =SAMBXY(IELEM,N,3)
+       
+        CALL DTGRN(H,X,X0,Y,Y0,Z,Z0,GXF) 
 !                      
           NX=EX(IS)*DSAMB(IELEM,N,1)
           NY=EY(IS)*DSAMB(IELEM,N,2)
@@ -160,14 +160,14 @@
         USE TRVar_mod    
         USE MFUNC_mod
         use hi_intg
-!       
-        IMPLICIT NONE
-!       
-        INTEGER,INTENT(IN):: IS,IELEM,NODJ
-        REAL*8,INTENT(IN)::  XP,YP,ZP
-        REAL*8,INTENT(OUT):: BMATRIX(4,8),AMATRIX(4,8)
+
+        implicit none
+
+        integer,intent(in):: is,ielem,nodj
+        real*8,intent(in)::  xp,yp,zp
+        real*8,intent(out):: bmatrix(4,8),amatrix(4,8)
         integer :: nf,ndim
-!       
+
         INTEGER N,J,IP   
         Integer Loop1,Loop2,I,NSAMB
         INTEGER LI,LJ,LK,INODE,INODD
@@ -191,11 +191,8 @@
         real*8  Xiq(8),Wiq(8)!,Xit(7),EtaT(7),WIT(7)
         REAL*8  SISM,ETASM
         REAL*8  XJ(2,3),XJSM(2,3),XXJ(3,3),XJp(2,3)
-   
 
         REAL*8  GRN0J(8),GRN1J(8)
-
-
 
         integer :: debug_flag = 1,pwr_g
         integer :: debug_file_id = 108
@@ -205,134 +202,54 @@
         real(8) :: PLO,CSST,SNST,SF,DSF,N0,N1C,N1S,JK0
         real(8) :: JK1C,JK1S,F1,F2,F,TOT,TOTJ,GXF0,GXF1
 
-        INTEGER IPRN
-        DATA IPRN/11/
-!              
-	  DATA EX/  1.0d0,  1.0d0, -1.0d0, -1.0d0,    &
+      DATA EX/  1.0d0,  1.0d0, -1.0d0, -1.0d0,    &
                 1.0d0,  1.0d0, -1.0d0, -1.0d0,    &
                -1.0d0, -1.0d0,  1.0d0,  1.0d0,    &
                -1.0d0, -1.0d0,  1.0d0,  1.0d0/
 
-!                                                  
-	  DATA EY/  1.0d0, -1.0d0, -1.0d0,  1.0d0,    &
+      DATA EY/  1.0d0, -1.0d0, -1.0d0,  1.0d0,    &
                -1.0d0,  1.0d0,  1.0d0, -1.0d0,    &
                -1.0d0,  1.0d0,  1.0d0, -1.0d0,    &
                 1.0d0, -1.0d0, -1.0d0,  1.0d0/
-!
-!
-! ** XIQSI AND XIQET: NODE COORDINATES FOR QUADRILATERAL ELEMENTS
-      	DATA XIQSI/-1.0d0, 0.0d0, 1.0d0, 1.0d0, 1.0d0, 0.0d0,-1.0d0,-1.0d0/
-      	DATA XIQET/-1.0d0,-1.0d0,-1.0d0, 0.0d0, 1.0d0, 1.0d0, 1.0d0, 0.0d0/    
-!         7     6     5
 
-!         8           4
+        ! ** XIQSI AND XIQET: NODE COORDINATES FOR QUADRILATERAL ELEMENTS
+        DATA XIQSI/-1.0d0, 0.0d0, 1.0d0, 1.0d0, 1.0d0, 0.0d0,-1.0d0,-1.0d0/
+        DATA XIQET/-1.0d0,-1.0d0,-1.0d0, 0.0d0, 1.0d0, 1.0d0, 1.0d0, 0.0d0/    
 
-!         1     2     3
-!
-! ** XITSI AND XITET: NODE COORDINATES FOR TRIANGULAR ELEMENTS
-! !
-!      	DATA XITSI/0.00d0, 1.00d0, 0.00d0, 0.50d0, 0.50d0, 0.00d0/
-!       	DATA XITET/0.00d0, 0.00d0, 1.00d0, 0.00d0, 0.50d0, 0.50d0/     	
-! !
-! ! ==================================================================
-! !
-! 	DATA XIT/0.101286507323456D0,0.797426985353087D0,		&
-! 			 0.101286507323456D0,0.470142064105115D0,		&
-! 			 0.470142064105115D0,0.059715871789770D0,		&
-! 		     0.333333333333333D0/
-
-! 	DATA ETAT/0.101286507323456D0,0.101286507323456D0,		&
-! 			  0.797426985353087D0,0.059715871789770D0,		&
-! 			  0.470142064105115D0,0.470142064105115D0,		&
-! 			  0.333333333333333D0/
-
-! 	DATA WIT/0.062969590272414D0,0.062969590272414D0,		&
-!            0.062969590272414D0,0.066197076394253D0,       &
-! 			 0.062969590272414D0,0.066197076394253D0,		&
-! 			 0.066197076394253D0,0.066197076394253D0,		&
-! 			 0.112500000000000D0/
-!
-!  -----------------------------------------------
-!
-	DATA XIQ/ 0.960289856497536D+00, 0.796666477413626D+00,	&
-              0.525532409916329D+00, 0.183434642495650D+00,	&
-			 -0.183434642495650D+00,-0.525532409916329D+00,	&
-			 -0.796666477413626D+00,-0.960289856497536D+00/
+    DATA XIQ/ 0.960289856497536D+00, 0.796666477413626D+00, &
+              0.525532409916329D+00, 0.183434642495650D+00, &
+             -0.183434642495650D+00,-0.525532409916329D+00, &
+             -0.796666477413626D+00,-0.960289856497536D+00/
   
-  	DATA WIQ/ 0.101228536290376D+00, 0.222381034453374D+00,	&
-			  0.313706645877887D+00, 0.362683783378362D+00,	&
-			  0.362683783378362D+00, 0.313706645877887D+00,	&
-			  0.222381034453374D+00, 0.101228536290376D+00/   	
-!    	
+    DATA WIQ/ 0.101228536290376D+00, 0.222381034453374D+00, &
+              0.313706645877887D+00, 0.362683783378362D+00, &
+              0.362683783378362D+00, 0.313706645877887D+00, &
+              0.222381034453374D+00, 0.101228536290376D+00/     
 !    ============================================    
-!
-      INODE=NCON(IELEM,NODJ) ! corresponding node id
-	  INODD=NCOND(IELEM,NODJ)!                 normal id
+      inode=ncon(ielem,nodj) ! corresponding node id
+      inodd=ncond(ielem,nodj)!                 normal id
 
 
-!    
-    write(110,*) '   ELEMT ID =',ielem
-    write(110,*) '   NODE ID =',INODE
-    write(13,*)   ielem,nodj,inode
-! -===========================
-! write(110,*) 'output node info in elemIntgl1.f90 line 289 ,order in teng program'
-!     do i = 1,8
+        write(110,*) '   ELEMT ID =',ielem
+        write(110,*) '   NODE ID =',INODE
 
-!       write(110,*) 'node ',i,'is',XYZ(1,NCON(IELEM,i)),XYZ(2,NCON(IELEM,i)),XYZ(3,NCON(IELEM,i))
-!     end do
-!     if (debug_flag .eq. 1) then
-!       write(101,*) 
-!       write(101,*) ' INODE=',INODE,'   INODD=',INODD     
-!       write(101,*) ' Inside  SGWP1,     IELEM=',Ielem     
+        if(ncn(ielem).eq.8)  then 
 
-!       write(debug_file_id,*) 
-!       write(debug_file_id,*) ' Inside  SGWP1,     IELEM=',Ielem   
-!       write(debug_file_id,*)  'node list',ncon(ielem,:) 
-!       write(debug_file_id,*)  'normal list',ncond(ielem,:)
+            si =xiqsi(nodj) !get local coordinate for the src
+            eta=xiqet(nodj)
 
-!       write(debug_file_id,*) '       X            Y             Z'
+            call spfunc8_1(si,eta,sf_src,dsf_src,ddsf_src) 
+            ! sf_src,dsf_src,ddsf_src is based on si,eta which is one node of the element
 
-
-! !       DO J=1, NCN(IELEM)
-! !         WRITE(debug_file_id,101)  XYZ(1,NCON(IELEM,J)),XYZ(2,NCON(IELEM,J)),XYZ(3,NCON(IELEM,J))      
-! !       ENDDO
-! ! !
-! !       write(debug_file_id,*) '       NX           NY            NZ'
-! !       DO J=1, NCN(IELEM)
-! !         WRITE(debug_file_id,101)  DXYZ(1,NCOND(IELEM,J)),DXYZ(2,NCOND(IELEM,J)),DXYZ(3,NCOND(IELEM,J))      
-! !       ENDDO
-
-
-
-! 101   FORMAT(3F21.13)
-
-        write(debug_file_id,*) ' Inside SGWP0_1'
-        write(debug_file_id,*) ' IS,INODE,IELEM,NODJ:',IS,INODE,IELEM,NODJ
-        write(debug_file_id,*) ' XP,YP,ZP:',XP,YP,ZP
-!         print *,"running"
-!     end if
-!       //-------------- get src local info
-        IF(NCN(IELEM).EQ.8)  THEN 
-!               
-            SI =XIQSI(NODJ) !get local coordinate for the src
-            ETA=XIQET(NODJ)
-
-            CALL SPFUNC8_1(SI,ETA,SF_src,DSF_src,DDSF_src) 
-            ! SF_src,DSF_src,DDSF_src is based on si,eta which is one node of the element
-            ! is this necessary, the src is one of the node point anyway..
-
-
-        ELSE IF(NCN(IELEM).EQ.6)  THEN
-!
-!           SI =XITSI(NODJ)
-! 	        ETA=XITET(NODJ)
-!           CALL SPFUNC6_1(SI,ETA,SF_src,DSF_src,DDSF_src) 
-! !
-        ENDIF
+        else if(ncn(ielem).eq.6)  then
+!           si =xitsi(nodj)
+!           eta=xitet(nodj)
+!           call spfunc6_1(si,eta,sf_src,dsf_src,ddsf_src) 
+        endif
 
          
         write(debug_file_id,*) '   SI=',SI,'   ETA=',ETA
-        !//------- get src global    
+
             X0=EX(IS,1)*XP
             Y0=EY(IS,1)*YP      
             Z0=ZP
@@ -355,14 +272,11 @@
             ctr_glb(1) = 0
             ctr_glb(2) = 0
             ctr_glb(3) = 0
-!       write(debug_file_id,*) '   DDSF_src=',DDSF_src
         write(110, *)  '  src_ctr_glb    ctr_glb=',ctr_glb
 
-         !print *,"start of eval singular elem"
-         pwr_g = NCN(IELEM)/2+(NCN(IELEM)/9)*2 
-         !write(110, *)  ' pwr_g is set to',pwr_g
-        
-         cnr_glb_mtx(:,1) = xyz(:,ncon(ielem,1))
+        pwr_g = ncn(ielem)/2+(ncn(ielem)/9)*2 
+        !========switch cnr_glb_mtx order for hi module
+        cnr_glb_mtx(:,1) = xyz(:,ncon(ielem,1))
         cnr_glb_mtx(:,2) = xyz(:,ncon(ielem,3))
         cnr_glb_mtx(:,3) = xyz(:,ncon(ielem,5))
         cnr_glb_mtx(:,4) = xyz(:,ncon(ielem,7))
@@ -372,16 +286,13 @@
         cnr_glb_mtx(:,8) = xyz(:,ncon(ielem,8))
 
         call set_npwg(pwr_g)
-
-        call set_src_preset(si,eta,XYZ(1:3,NCON(IELEM,NODJ)),ctr_glb)
+        call set_src_preset(si,eta,xyz(1:3,ncon(ielem,nodj)),ctr_glb)
 
         nf=8;ndim=3
 
-        !call eval_singular_elem(IELEM,nf,ndim,result0,1)!!GREEN FUNC 
-        call eval_singular_elem(cnr_glb_mtx,result0)!!GREEN FUNC 
+        call eval_singular_elem(cnr_glb_mtx,result0)
 
         write (12,*) ielem,NODj,is,result0
-!         write (12,*) result0
 
 
         NSAMB=0
@@ -434,10 +345,10 @@
                 end do ! Lj
             end do !Li
 
-           	DET1=XJP(1,2)*XJP(2,3)-XJP(1,3)*XJP(2,2)    !  J1
-          	DET2=XJP(1,3)*XJP(2,1)-XJP(1,1)*XJP(2,3)    !  J2
-          	DET3=XJP(1,1)*XJP(2,2)-XJP(1,2)*XJP(2,1)    !  J3
-          	DET=DSQRT(DET1*DET1+DET2*DET2+DET3*DET3)
+            DET1=XJP(1,2)*XJP(2,3)-XJP(1,3)*XJP(2,2)    !  J1
+            DET2=XJP(1,3)*XJP(2,1)-XJP(1,1)*XJP(2,3)    !  J2
+            DET3=XJP(1,1)*XJP(2,2)-XJP(1,2)*XJP(2,1)    !  J3
+            DET=DSQRT(DET1*DET1+DET2*DET2+DET3*DET3)
         !
             DAREA=DET*WIQ(LOOP1)*WIQ(LOOP2) !only for J
 
@@ -450,18 +361,18 @@
         ! x0-z0, src_ctr_glb for green fucntion
 
 
-!   	    CALL DTGRN0(H,X,X0,Y,Y0,Z,Z0,GXF0)
+!           CALL DTGRN0(H,X,X0,Y,Y0,Z,Z0,GXF0)
 !         DGN0=GXF0(2)*NX+GXF0(3)*NY+GXF0(4)*NZ
 !          write(debug_file_id,*)  ' GXF0=',GXF0(2),GXF0(3),GXF0(4)                    
 !          write(debug_file_id,*)  ' DGN0=',DGN0                    
               
-! ! 	   
-!   	    CALL DTGRN1(H,X,X0,Y,Y0,Z,Z0,GXF1) 
+! !        
+!           CALL DTGRN1(H,X,X0,Y,Y0,Z,Z0,GXF1) 
 !         DGN1=GXF1(2)*NX+GXF1(3)*NY+GXF1(4)*NZ
 ! !         write(debug_file_id,*)  ' GXF1=',GXF1                    
 ! !         write(debug_file_id,*)  ' DGN1=',DGN1                    
 
-  	    CALL DTGRN (H,X,X0,Y,Y0,Z,Z0,GXF) 
+        CALL DTGRN (H,X,X0,Y,Y0,Z,Z0,GXF) 
         DGN=GXF(2)*NX+GXF(3)*NY+GXF(4)*NZ
         ! DGN is derivative of Green fucntion over normal vector,
         ! partical G over partial n
@@ -484,7 +395,7 @@
 !
 ! **** FOR TRIANGULAR ELEMENTS **********************
 ! 
-      	ELSE IF(NCN(IELEM).EQ.6)  THEN
+        ELSE IF(NCN(IELEM).EQ.6)  THEN
 !
 !       DO 800 NSAMB=1, 7
       
@@ -511,19 +422,19 @@
 !         NZ=NZ+SF(LK)*DXYZ(3,NCOND(IELEM,LK))
 !       END DO
          
-!        	DO  630  LI=1,2
-!       	DO  630  LJ=1,3
-!       	DUMX=0.0D0
-!       	DO    LK=1,NCN(IELEM)
+!           DO  630  LI=1,2
+!           DO  630  LJ=1,3
+!           DUMX=0.0D0
+!           DO    LK=1,NCN(IELEM)
 !          DUMX=DUMX+DSF(LI,LK)*XYZ(LJ,NCON(IELEM,LK))
 !         enddo
-!   	     XJP(LI,LJ)=DUMX
-! 630	   CONTINUE
+!            XJP(LI,LJ)=DUMX
+! 630      CONTINUE
 ! !
-!        	DET1=XJP(1,2)*XJP(2,3)-XJP(1,3)*XJP(2,2)    !  J1
-!       	DET2=XJP(1,3)*XJP(2,1)-XJP(1,1)*XJP(2,3)    !  J2
-!       	DET3=XJP(1,1)*XJP(2,2)-XJP(1,2)*XJP(2,1)    !  J3
-!       	DET=DSQRT(DET1*DET1+DET2*DET2+DET3*DET3)
+!           DET1=XJP(1,2)*XJP(2,3)-XJP(1,3)*XJP(2,2)    !  J1
+!           DET2=XJP(1,3)*XJP(2,1)-XJP(1,1)*XJP(2,3)    !  J2
+!           DET3=XJP(1,1)*XJP(2,2)-XJP(1,2)*XJP(2,1)    !  J3
+!           DET=DSQRT(DET1*DET1+DET2*DET2+DET3*DET3)
 
 !         DAREA=DET*WIT(NSAMB)
 !  !  ---------------------------------------------
@@ -548,13 +459,13 @@
 !         X0=EX(IS,1)*XP
 !         Y0=EY(IS,1)*YP        
 !         Z0=ZP        
-!   	    CALL DTGRN0(H,X,X0,Y,Y0,Z,Z0,GXF0)       
+!           CALL DTGRN0(H,X,X0,Y,Y0,Z,Z0,GXF0)       
 !         DGN0=GXF0(2)*NX+GXF0(3)*NY+GXF0(4)*NZ
      
-!   	    CALL DTGRN1(H,X,X0,Y,Y0,Z,Z0,GXF1) 
+!           CALL DTGRN1(H,X,X0,Y,Y0,Z,Z0,GXF1) 
 !         DGN1=GXF1(2)*NX+GXF1(3)*NY+GXF1(4)*NZ        
 
-!   	    CALL DTGRN (H,X,X0,Y,Y0,Z,Z0,GXF) 
+!           CALL DTGRN (H,X,X0,Y,Y0,Z,Z0,GXF) 
 !          DGN=GXF(2)*NX+GXF(3)*NY+GXF(4)*NZ
         
 !         DO J=1, NCN(IELEM)
@@ -568,7 +479,7 @@
 
 800    CONTINUE 
 
-      	ENDIF
+        ENDIF
 !
 ! ======================================================================
 !
@@ -581,5 +492,5 @@
         END DO
         write(110,*) '   sieppem result',result0
         write(110,*) 'sum of AMATRIX',SUM(AMATRIX(IS,1:8))
-      	END
+        END
                

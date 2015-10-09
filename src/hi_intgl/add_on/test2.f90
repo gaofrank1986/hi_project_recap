@@ -8,12 +8,12 @@
         integer,intent(in)  :: n_pwr_g,ndim,nf,npw
         real(8),intent(out) :: hiresult(nf)
 
-        real(8)  :: COSN(ndim),RI(ndim),GCD(ndim,ndim-1)
-        real(8)  :: COEF_G(0:n_pwr_g),COEF_H(0:NPW),COEF_B(0:11,nf)
+        real(8)  :: cosn(ndim),ri(ndim),gcd(ndim,ndim-1)
+        real(8)  :: coef_g(0:n_pwr_g),coef_h(0:npw),coef_b(0:11,nf)
 
-        integer :: k ,beta1,nbdm
+        integer :: k
 
-        real(8) :: SLOP(ndim-1),rho_q,E_k,pw,nbeta
+        real(8) :: slop(ndim-1),rho_q,e_k,pw,nbeta
 
         integer :: n_pwr_k
 

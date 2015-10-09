@@ -6,42 +6,36 @@
 
         integer,intent(in) ::  ndim,nbdm,node,npw,npowg
         real(8),intent(in) :: xp(ndim),xip(nbdm),xiq(nbdm)
-        real(8),intent(out) :: COEFG(0:NPOWG),COEFH(0:NPW)
+        real(8),intent(out) :: coefg(0:npowg),coefh(0:npw)
         real(8) :: drdn
 
-        real(8) ::COSN(NDIM),GCD(NDIM,NBDM),XI(NDIM),RI(NDIM),SHAP(NODE),     &
-        &         COEFC(0:NPW)
+        real(8) ::cosn(ndim),gcd(ndim,nbdm),xi(ndim),ri(ndim),shap(node),     &
+        &         coefc(0:npw)
 
         integer :: i,n,ip,jp
-       
-        ! DETERMINE COEFFICIENTS Gn
-       
-        !COEFG=0.D0
-       
+
         call compute_coeff_g(ndim,nbdm,node,npowg,xp,xip,xiq,    &
         &           coefg)
-       !print *,"break point 3----------------------" 
-        ! DETERMINE COEFFICIENTS Cn USING Eq. (3-6-37)
+        ! determine coefficients cn using eq. (3-6-37)
 
-        
-        COEFC(0)=DSQRT(COEFG(0))
-        DO N=1,NPW
-            COEFC(N)=0.D0
-            DO I=1,N-1
-                COEFC(N)=COEFC(N)-COEFC(I)*COEFC(N-I)     
-            ENDDO
-            IF(N.LE.NPOWG)COEFC(N)=COEFG(N)+COEFC(N)   ! Eq. (3-6-37)
-            COEFC(N)=COEFC(N)/(2.D0*COEFC(0))
-        ENDDO
-        ! DETERMINE COEFFICIENTS Hi USING Eq.(3-6-47a)
-        COEFC(1:NPW)=COEFC(1:NPW)/COEFC(0)    ! Eq.(3-6-47b)
-        COEFH(0)=1.D0/COEFC(0)
-        COEFH(1)=COEFC(1)
-        COEFH(2)=2.*COEFC(2)-COEFC(1)*COEFC(1)
-        COEFH(3)=3.*COEFC(3)-3.*COEFC(1)*COEFC(2)+COEFC(1)**3
-        COEFH(4)=4.*COEFC(4)+4.*COEFC(1)*COEFC(1)*COEFC(2)                &
-        &        -4.*COEFC(1)*COEFC(3)-2.*COEFC(2)*COEFC(2)                &
-        &        -COEFC(1)**4
+        coefc(0)=dsqrt(coefg(0))
+        do n=1,npw
+            coefc(n)=0.d0
+            do i=1,n-1
+                coefc(n)=coefc(n)-coefc(i)*coefc(n-i)     
+            enddo
+            if(n.le.npowg)coefc(n)=coefg(n)+coefc(n)   ! eq. (3-6-37)
+            coefc(n)=coefc(n)/(2.d0*coefc(0))
+        enddo
+        ! determine coefficients hi using eq.(3-6-47a)
+        coefc(1:npw)=coefc(1:npw)/coefc(0)    ! eq.(3-6-47b)
+        coefh(0)=1.d0/coefc(0)
+        coefh(1)=coefc(1)
+        coefh(2)=2.*coefc(2)-coefc(1)*coefc(1)
+        coefh(3)=3.*coefc(3)-3.*coefc(1)*coefc(2)+coefc(1)**3
+        coefh(4)=4.*coefc(4)+4.*coefc(1)*coefc(1)*coefc(2)                &
+        &        -4.*coefc(1)*coefc(3)-2.*coefc(2)*coefc(2)                &
+        &        -coefc(1)**4
    
     end subroutine
     subroutine compute_coeff_g(ndim,nbdm,node,npowg,xp,xip,xiq,         &
@@ -60,7 +54,6 @@
         integer :: ip,jp
 
 
-       !print *,"break point 4----------------------" 
       IF(NODE.EQ.2) THEN         ! Eq.(24)
 !        COEFG(0)=0.25*((cnr_glb_mtx(1,1)-cnr_glb_mtx(1,2))**2+(cnr_glb_mtx(2,1)-cnr_glb_mtx(2,2))**2)  
 !       ELSEIF(NODE.EQ.3) THEN             ! FORM Eq.(3-6-33)

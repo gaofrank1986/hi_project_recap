@@ -3,11 +3,11 @@
         implicit none
         integer,parameter :: nf = 8 
         integer,parameter :: ndim = 3
-        real(8),intent(in) :: passed_mtx(3,8)
+        real(8),intent(in) :: passed_mtx(ndim,nf)
         real(8),intent(out) :: hiresult(nf)
         ! nf : num of kernel funcs
 
-        real(8) :: src_lcl(ndim-1),pt_intg(ndim-1),buf_pnt(ndim - 1)  
+        real(8) :: src_lcl(ndim-1),pt_intg(ndim-1),seg_start(ndim - 1)  
         ! src point, integration point , temporary integration point     
 
         real(8) :: end_nodes(2,2),ri(3),RINT(nf)
@@ -21,27 +21,26 @@
 
         integer :: unfixed,fixed,num_edge
 
-        real(8) :: vlc2,rho_q,comt
-        real(8) :: fk,wfa,edge_direct,ri_tmp,buf_step,intg_pnt_step,drdn_p
-        real(8) :: addup,diff_1,diff_2,bool_expr 
+        real(8) :: dist_fixed2,rho_q,comt
+        real(8) :: fk,wfa,edge_direct,seg_step,half_step,drdn_p
+        real(8) :: sub,dist_unfixed,dist_to_end,bool_expr 
             
         integer :: debug_flag,debug_file_id
 
         cnr_glb_mtx = passed_mtx
-        debug_file_id = 109
-        debug_flag = 0
-        !==================================
 
         allocate(coef_g(0:n_pwr_g),coef_h(0:npw))
         allocate(gpl(iabs(ngl)),gwl(iabs(ngl)))
 
-        num_edge = 2 * (ndim - 1 ) ! 4 -----how many edges
+        num_edge = 4!2 * (ndim - 1 ) ! 4 -----how many edges
         hiresult = 0.
 
             src_lcl = src_lcl_preset
             src_glb = src_glb_preset
             ri = src_glb - src_ctr_glb 
 
+            wfa=dsqrt(hi_beta*2.d0/3.d0+0.4d0)*dlog(dabs(tolgp)/2.d0)  
+            fk=3.d0/8.d0*(-10.d0*dble(iabs(ngl))/wfa-1.d0)**(4.d0/3.d0)
 
         if (ndim == 2) then
             print *,"2d case not implemented"
@@ -49,76 +48,66 @@
             !-----------------------------------------------------------------------
             call gaussv(iabs(ngl),gpl,gwl)!guassion_point_list, gaussian_weight_list
 
-            wfa=dsqrt(hi_beta*2.d0/3.d0+0.4d0)*dlog(dabs(tolgp)/2.d0)  
-            fk=3.d0/8.d0*(-10.d0*dble(iabs(ngl))/wfa-1.d0)**(4.d0/3.d0)
-
             do i_edge = 1,num_edge ! ITERATE through each edge
 
                 ks=ksb(i_edge)
                 if(dabs(src_lcl(iabs(ks))-dble(ks)/dabs(dble(ks))).lt.tol) then
-                    !print *,"Current edge iteration skipped! elem_id = ",this_elem_id," edge =",i_edge
+                    !print *,"src on current edge,Current edge skipped!"
                     goto 100
                 end if
-                !find end node local position
+                !get the two end nodes coordinates for current edge
                 do id = 1,2
                     tmp = node_grp_by_edge(3*(i_edge - 1) + ID)! determine which group of node to used
                     end_nodes(1:2,ID)=cnr_lcl_mtx(2*tmp-1 : 2*tmp) !get local node from corner table
                 end do
-
+                !see on which direction ( 1 for x,2 for y) along the edge remain unchanged 
                 call get_fixed_id(i_edge,fixed,unfixed)!get fixed and unfixed id
 
                 edge_direct = dsign(1.d0,end_nodes(unfixed,2)-end_nodes(unfixed,1))
                 !dsign(a,b) a time sign of b,end_node(:,id)
 
-                VLc2=(end_nodes(fixed,2)-src_lcl(fixed))**2
+                !segment start from  end node 1 for each edge
+                seg_start=end_nodes(:,1) 
 
-                !move point goes along the four edges
-                !it start from  end node 1 for each edge
-                buf_pnt=end_nodes(:,1) 
-                pt_intg(fixed)=buf_pnt(fixed)
+                pt_intg(fixed)=seg_start(fixed)
+                dist_fixed2=(seg_start(fixed)-src_lcl(fixed))**2
 
                 do num_converge=1,500 
-                !control the maxium step to go thru one edge
-                !also controled by step-size, example finished in less than 10 step
-                !pt_intg(unfixed) is updated each time
 
-                    diff_1 = edge_direct*(src_lcl(unfixed)-buf_pnt(unfixed))
-                    !src point to moving pt distance
-                    diff_2 = edge_direct*(end_nodes(unfixed,2)-buf_pnt(unfixed))
+                    dist_to_end = edge_direct*(end_nodes(unfixed,2)-seg_start(unfixed))
                     !edge end to moving point distance
-
-                    if (diff_2 < 1.D-8) then
-                        !print *, "if buf_pnt located out of edge,exit num_converge loop"
-                        !if buf_pnt goes out of the edge,then stop
+                    if (dist_to_end < 1.D-8) then
+                        !print *, "if seg_start located out of edge,exit num_converge loop"
                         goto 100
                     end if
 
-                    ri_tmp = norm2(buf_pnt-src_lcl) 
-                    ! this is r from moving  point to local src point
-                        
+                    dist_unfixed = edge_direct*(src_lcl(unfixed)-seg_start(unfixed))
                     ! compute step size====================
-                    if (diff_1 < 1.d-8) then
-                        buf_step = FK*ri_tmp ! fk is a factor?
+                    if (dist_unfixed < 1.d-8) then!if passed src unfixed 
+                        seg_step = FK*norm2(seg_start-src_lcl)  ! fk is a factor?
                     else 
-                        addup=VLc2*(1.-FK**2)+(diff_1)**2
-                        IF(addup < 0.D0) THEN
-                            buf_step=diff_1
-                        ELSE
-                            buf_step=FK*(FK*diff_1-DSQRT(addup))/(FK*FK-1.)
-                        ENDIF
+                        sub=(dist_fixed2+(dist_unfixed)**2)-dist_fixed2*FK**2
+                        if(sub < 0.d0) then
+                            seg_step=dist_unfixed
+                        else
+                            seg_step=fk*(fk*dist_unfixed-dsqrt(sub))/(fk**2-1.)
+                        endif
                     endif
 
-                    bool_expr = edge_direct*(edge_direct*buf_step+buf_pnt(unfixed))+1.d-8 
+                    bool_expr = edge_direct*(edge_direct*seg_step+seg_start(unfixed))+1.d-8 
 
-                    if (bool_expr > diff_2) then
-                            buf_step = diff_2
+                    if (bool_expr > dist_to_end) then
+                    ! if next step goes beyond the edge, use the end node
+                            seg_step = dist_to_end
                     endif
-                    intg_pnt_step = 0.5D0*edge_direct*buf_step
-                   ! step size finished ======================
+                    half_step = 0.5D0*edge_direct*seg_step
+                   ! =====================
 
-                    do igl = 1,iabs(ngl) ! gaussian sampling points
+                    do igl = 1,iabs(ngl) !cutting each intg segment to ngl parts 
 
-                        pt_intg(unfixed)=buf_pnt(unfixed)+intg_pnt_step*(1.d0+gpl(igl))
+                        pt_intg(unfixed)=seg_start(unfixed)+half_step*(1.d0+gpl(igl))
+                        ! 1+gpl , is shifted gpl to start at least from 0
+                        ! gpl span from -1 to 1, so intg-seg-size if half buffer point step
                         rho_q=norm2(pt_intg-src_lcl)
                         drdn_p=dabs(pt_intg(fixed)-src_lcl(fixed))/rho_q !sin(theta)
 
@@ -127,11 +116,11 @@
 
                         call integrate_rho(ndim,nf,npw,n_pwr_g,src_lcl,pt_intg,coef_g,coef_h,rint)
 
-                        hiresult = hiresult + (dabs(intg_pnt_step)*gwl(igl)*drdn_p/rho_q)*rint
+                        hiresult = hiresult + (dabs(half_step)*gwl(igl)*drdn_p/rho_q)*rint
                         ! equation (3-6-50)
                     end do ! igl =1,iabs(ngl)
 
-                    buf_pnt(unfixed)=buf_pnt(unfixed)+edge_direct*buf_step
+                    seg_start(unfixed)=seg_start(unfixed)+edge_direct*seg_step
                 end do ! num_converge = 1,500
 
 
