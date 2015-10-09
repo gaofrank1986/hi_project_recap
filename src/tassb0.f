@@ -1,34 +1,32 @@
-C  TASSB0
-C *********************************************************
-C *                                                       *
-C * Calculate the element contribution and assembly the   *
-C * coefficients of the corresponding system of equationn *
-C *                                                       *
-C *********************************************************
-C
+!C  TASSB0
+!C *********************************************************
+!C *                                                       *
+!C * Calculate the element contribution and assembly the   *
+!C * coefficients of the corresponding system of equationn *
+!C *                                                       *
+!C *********************************************************
         SUBROUTINE TASSB0
-C  
-	  USE MVAR_MOD
-	  USE PVAR_MOD
-	  USE MFUNC_mod
+          USE MVAR_MOD
+          USE PVAR_MOD
+          USE MFUNC_mod
         USE SEBSM_MOD
         !use elem_intgl
         
         IMPLICIT   NONE  
-	  INTEGER  INODE,IELEM,J,JNODE,IND,INDD,IP,
-	1	       I,II,IS,JNCON,KNCON,L
-	  REAL*8  XP,YP,ZP,XSB,YSB,ZSB,R
-	  REAL*8  DX,DY,DZ,NX,NY,NZ
-	  REAL*8 RSN(4,4),EX(4),EY(4)
-	  
+          INTEGER  INODE,IELEM,J,JNODE,IND,INDD,IP
+          integer ::              I,II,IS,JNCON,KNCON,L
+          REAL*8  XP,YP,ZP,XSB,YSB,ZSB,R
+          REAL*8  DX,DY,DZ,NX,NY,NZ
+          REAL*8 RSN(4,4),EX(4),EY(4)
+          
         REAL*8  BMATRIX(4,8),AMATRIX(4,8),BMAT(4)
 
-	  REAL*8  S_ANGLE
-!	  REAL*8  POXY 
-	  REAL*8  DSIGN
+          REAL*8  S_ANGLE
+!         REAL*8  POXY 
+          REAL*8  DSIGN
 !
         REAL*8  CELE31(4),CELE32(4),CELE33(4),AL1(4)
-	  REAL*8  DPOX,DPOY,DPOZ,DPDN,PHI
+          REAL*8  DPOX,DPOY,DPOZ,DPDN,PHI
 
 
         DATA RSN /1.,  1.,  1.,  1., 
@@ -36,16 +34,16 @@ C
      2            1.,  1., -1., -1., 
      3            1., -1., -1.,  1./ 
 !
-	  DATA EX /  1.0d0,  1.0d0, -1.0d0, -1.0d0/                       
+          DATA EX /  1.0d0,  1.0d0, -1.0d0, -1.0d0/                       
         DATA EY /  1.0d0, -1.0d0, -1.0d0,  1.0d0/
 !
 !  ----------------------------------------------------
 !
-	  WRITE(10, *)   ' IN TASSB0 '
-	  DSDT(:)=0.0
-!	  
+          WRITE(10, *)   ' IN TASSB0 '
+          DSDT(:)=0.0
+!         
 !  ----------------------------------------------------
-!	  	  
+!                 
         DO 50 INODE=1, NNODE 
         L=0
         DO 40 IELEM=1,  NELEM
@@ -76,77 +74,76 @@ C
         END IF
 !
 50      CONTINUE
-!                
 ! ***************************************
 
-        DO  INODE=1, NNODE 
-          write (14,51) inode,nodele(inode,1:5)
-        end do
-51    FORMAT(6I5)
-!
-        line_sum=0.0d0
-        AMATA(:,:,:)=(0.0D0,0.0D0)
-        BMATA(:,:)=(0.0D0,0.0D0)
-
-        open (402,file = 'xyz_matrix.txt',status = 'unknown')
-        open (403,file = 'dxyz_matrix.txt',status = 'unknown')
-        open (404,file = 'dxyze_matrix.txt',status = 'unknown')
-        open (405,file = 'ncn.txt',status = 'unknown')
-        open (406,file = 'ncon.txt',status = 'unknown')
-        
-        do i = 1,nnode
-            write(402,54) xyz(:,i)
-        end do
-        do i = 1,nnoded
-            write(403,54) dxyz(:,i)
-        end do
-        do i = 1,nelem
-            write(404,52) dxyze(1,:,nelem)
-            write(404,52) dxyze(2,:,nelem)
-            write(404,52) dxyze(3,:,nelem)
-        end do
-        do i = 1,nelem
-            write(405,53) i,ncn(i)
-            write(406,55) i,ncon(:,i)
-        end do
+        !DO  INODE=1, NNODE 
+        !write (14,51) inode,nodele(inode,1:5)
+        !end do
 !51    FORMAT(6I5)
-52      format(8f10.6)
-53      format(2i4)
-54      format(3f10.6)
-55      format(9i6)
+
+        line_sum=0.0d0
+        amata(:,:,:)=(0.0d0,0.0d0)
+        bmata(:,:)=(0.0d0,0.0d0)
+
+!        open (402,file = 'xyz_matrix.txt',status = 'unknown')
+!        open (403,file = 'dxyz_matrix.txt',status = 'unknown')
+!        open (404,file = 'dxyze_matrix.txt',status = 'unknown')
+!        open (405,file = 'ncn.txt',status = 'unknown')
+!        open (406,file = 'ncon.txt',status = 'unknown')
+!        
+!        do i = 1,nnode
+!            write(402,54) xyz(:,i)
+!        end do
+!        do i = 1,nnoded
+!            write(403,54) dxyz(:,i)
+!        end do
+!        do i = 1,nelem
+!            write(404,52) dxyze(1,:,nelem)
+!            write(404,52) dxyze(2,:,nelem)
+!            write(404,52) dxyze(3,:,nelem)
+!        end do
+!        do i = 1,nelem
+!            write(405,53) i,ncn(i)
+!            write(406,55) i,ncon(:,i)
+!        end do
+!51    FORMAT(6I5)
+!52      format(8f10.6)
+!53      format(2i4)
+!54      format(3f10.6)
+!55      format(9i6)
 ! =======================================================================
 ! 
- 	  WRITE(9, *) '   INODE      XP       YP       ZP       S_ANGLE'
+          WRITE(9, *) '   INODE      XP       YP       ZP       S_ANGLE'
         WRITE(10,*) '  INODE      ANGLE         A3   ',
      1               '       C31           C32           C33'
 
         do  500   inode=1,  nnf   ! source point is on the free surface
 
-	   xp=xyz(1,inode)
+           xp=xyz(1,inode)
          yp=xyz(2,inode)
          zp=xyz(3,inode) 
 
-  	   cele31(:)=0.0d0
-	   cele32(:)=0.0d0
-	   cele33(:)=0.0d0
-	   al1(:)=0.0d0	  
-	  
+           cele31(:)=0.0d0
+           cele32(:)=0.0d0
+           cele33(:)=0.0d0
+           al1(:)=0.0d0   
+          
       
-     	  call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,
+          call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,
      1                        h,xyz,dxyze,s_angle)    
      
-         s_angle=1.0d0-s_angle
-	   write(9,102)  inode, xp, yp, zp, s_angle
-      	 write(*,102)  inode, xp, yp, zp, s_angle
-	   write(101,102)  inode, xp, yp, zp, s_angle
-        
-102	  format(i6,3f12.4,f15.6) 
+          s_angle=1.0d0-s_angle
+          write(9,102)  inode, xp, yp, zp, s_angle
+          write(*,102)  inode, xp, yp, zp, s_angle
+          write(101,102)  inode, xp, yp, zp, s_angle
 
-	   angle(inode)=s_angle
+102       format(i6,3f12.4,f15.6) 
 
-        do   ip=1,  nsys 
-	    amata(inode,inode,ip)= angle(inode)
-        enddo
+          angle(inode)=s_angle
+
+          do   ip=1,  nsys 
+                  amata(inode,inode,ip)= angle(inode)
+          enddo
 !
 !  ---------------------------
 !  Integration on the free surface
@@ -184,34 +181,33 @@ C
 ! ----------------------------
 !
 !
-        DO  110   J=1,  NCN(IELEM) 
-         JNCON=NCON(IELEM,J)
-         KNCON=NCOND(IELEM,J)  
-        DO  110   IP=1, NSYS          
-          XSB=EX(IP)*XYZ(1,JNCON)
-	    YSB=EY(IP)*XYZ(2,JNCON)
-	    ZSB=       XYZ(3,JNCON)
-          NX=EX(IP)*DXYZ(1,KNCON)
-	    NY=EY(IP)*DXYZ(2,KNCON)
-	    NZ=       DXYZ(3,KNCON)
-	    
-          CALL DINP(XSB,YSB,ZSB,DPOX,DPOY,DPOZ)       
-           DPDN=DPOX*NX+DPOY*NY+DPOZ*NZ
-            	 
-         DO   IS=1, NSYS    
-           AMATA(INODE,JNCON,IP)=AMATA(INODE,JNCON,IP)+
-     1                           RSN(IS,IP)*BMATRIX(IS,J)		
-        
-           BMATA(INODE,IP)=BMATA(INODE,IP)+RSN(IS,IP)*AMATRIX(IS,J)
-     1                        *POXY(XSB,YSB,ZSB)
-         ENDDO        
+        do  110   j=1,  ncn(ielem) 
+            jncon=ncon(ielem,j)
+            kncon=ncond(ielem,j)  
+        do  110   ip=1, nsys          
+            xsb=ex(ip)*xyz(1,jncon)
+            ysb=ey(ip)*xyz(2,jncon)
+            zsb=       xyz(3,jncon)
+            nx=ex(ip)*dxyz(1,kncon)
+            ny=ey(ip)*dxyz(2,kncon)
+            nz=       dxyz(3,kncon)
+            call dinp(xsb,ysb,zsb,dpox,dpoy,dpoz)       
+            dpdn=dpox*nx+dpoy*ny+dpoz*nz
+
+            do   is=1, nsys    
+            amata(inode,jncon,ip)=amata(inode,jncon,ip)+
+         1                           rsn(is,ip)*bmatrix(is,j)               
+
+            bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)*amatrix(is,j)
+         1                        *poxy(xsb,ysb,zsb)
+        enddo        
 !
 ! -------------------------
 !
           CALL DINP0(0,XSB,YSB,ZSB,PHI,DPOX,DPOY,DPOZ)       
            DPDN=DPOX*NX+DPOY*NY+DPOZ*NZ
          DO    IS=1, NSYS             
-           AL1(IP)=AL1(IP)-RSN(IS,IP)*BMATRIX(IS,J)*DPDN	
+           AL1(IP)=AL1(IP)-RSN(IS,IP)*BMATRIX(IS,J)*DPDN        
            AL1(IP)=AL1(IP)+RSN(IS,IP)*AMATRIX(IS,J)*PHI
          ENDDO
 
@@ -219,21 +215,21 @@ C
           CALL DINP0(1,XSB,YSB,ZSB,PHI,DPOX,DPOY,DPOZ)       
            DPDN=DPOX*NX+DPOY*NY+DPOZ*NZ
          DO    IS=1, NSYS             
-           CELE31(IP)=CELE31(IP)-RSN(IS,IP)*BMATRIX(IS,J)*DPDN	
+           CELE31(IP)=CELE31(IP)-RSN(IS,IP)*BMATRIX(IS,J)*DPDN  
            CELE31(IP)=CELE31(IP)+RSN(IS,IP)*AMATRIX(IS,J)*PHI
          ENDDO
 !
           CALL DINP0(2,XSB,YSB,ZSB,PHI,DPOX,DPOY,DPOZ)       
            DPDN=DPOX*NX+DPOY*NY+DPOZ*NZ
          DO    IS=1, NSYS             
-           CELE32(IP)=CELE32(IP)-RSN(IS,IP)*BMATRIX(IS,J)*DPDN	
+           CELE32(IP)=CELE32(IP)-RSN(IS,IP)*BMATRIX(IS,J)*DPDN  
            CELE32(IP)=CELE32(IP)+RSN(IS,IP)*AMATRIX(IS,J)*PHI
          ENDDO
 !
           CALL DINP0(3,XSB,YSB,ZSB,PHI,DPOX,DPOY,DPOZ)       
            DPDN=DPOX*NX+DPOY*NY+DPOZ*NZ
          DO    IS=1, NSYS             
-           CELE33(IP)=CELE33(IP)-RSN(IS,IP)*BMATRIX(IS,J)*DPDN	
+           CELE33(IP)=CELE33(IP)-RSN(IS,IP)*BMATRIX(IS,J)*DPDN  
            CELE33(IP)=CELE33(IP)+RSN(IS,IP)*AMATRIX(IS,J)*PHI
          ENDDO
 
@@ -247,7 +243,7 @@ C
 
 
 300     CONTINUE  
-!	  
+!         
 !  --------------------------
 !  Integration on the body surface
 
@@ -280,26 +276,26 @@ C
           KNCON=NCOND(IELEM,J)
          DO  320   IP=1, NSYS 
           XSB=EX(IP)*XYZ(1,JNCON)
-	    YSB=EY(IP)*XYZ(2,JNCON)
-	    ZSB=       XYZ(3,JNCON)
+            YSB=EY(IP)*XYZ(2,JNCON)
+            ZSB=       XYZ(3,JNCON)
    
           NX=EX(IP)*DXYZ(1,KNCON)
-	    NY=EY(IP)*DXYZ(2,KNCON)
-	    NZ=       DXYZ(3,KNCON)
+            NY=EY(IP)*DXYZ(2,KNCON)
+            NZ=       DXYZ(3,KNCON)
 
           CALL DINP(XSB,YSB,ZSB,DPOX,DPOY,DPOZ)       
           DPDN=DPOX*NX+DPOY*NY+DPOZ*NZ 
  
          DO  IS=1, NSYS    
-	   IF(JNCON .GT. NNF)  THEN
+           IF(JNCON .GT. NNF)  THEN
           AMATA(INODE,JNCON,IP)=AMATA(INODE,JNCON,IP)-
      1                          RSN(IS,IP)*AMATRIX(IS,J)
          ELSE
           PHI=POXY(XSB,YSB,ZSB)
- 	    BMATA(INODE,IP)=BMATA(INODE,IP)+RSN(IS,IP)*AMATRIX(IS,J)*PHI   !  * ******
+          BMATA(INODE,IP)=BMATA(INODE,IP)+RSN(IS,IP)*AMATRIX(IS,J)*PHI   !  * ******
          ENDIF
 
- 	    BMATA(INODE,IP)=BMATA(INODE,IP)-RSN(IS,IP)*BMATRIX(IS,J)*DPDN  !  * ******
+          BMATA(INODE,IP)=BMATA(INODE,IP)-RSN(IS,IP)*BMATRIX(IS,J)*DPDN  !  * ******
         ENDDO
 !
 ! -------------------------
@@ -307,28 +303,28 @@ C
           CALL DINP0(0,XSB,YSB,ZSB,PHI,DPOX,DPOY,DPOZ)       
            DPDN=DPOX*NX+DPOY*NY+DPOZ*NZ
          DO    IS=1, NSYS             
-           AL1(IP)=AL1(IP)-RSN(IS,IP)*BMATRIX(IS,J)*DPDN	
+           AL1(IP)=AL1(IP)-RSN(IS,IP)*BMATRIX(IS,J)*DPDN        
            AL1(IP)=AL1(IP)+RSN(IS,IP)*AMATRIX(IS,J)*PHI
          ENDDO
 !
           CALL DINP0(1,XSB,YSB,ZSB,PHI,DPOX,DPOY,DPOZ)       
            DPDN=DPOX*NX+DPOY*NY+DPOZ*NZ
          DO    IS=1, NSYS             
-           CELE31(IP)=CELE31(IP)-RSN(IS,IP)*BMATRIX(IS,J)*DPDN	
+           CELE31(IP)=CELE31(IP)-RSN(IS,IP)*BMATRIX(IS,J)*DPDN  
            CELE31(IP)=CELE31(IP)+RSN(IS,IP)*AMATRIX(IS,J)*PHI
          ENDDO
 !
           CALL DINP0(2,XSB,YSB,ZSB,PHI,DPOX,DPOY,DPOZ)       
            DPDN=DPOX*NX+DPOY*NY+DPOZ*NZ
          DO    IS=1, NSYS             
-           CELE32(IP)=CELE32(IP)-RSN(IS,IP)*BMATRIX(IS,J)*DPDN	
+           CELE32(IP)=CELE32(IP)-RSN(IS,IP)*BMATRIX(IS,J)*DPDN  
            CELE32(IP)=CELE32(IP)+RSN(IS,IP)*AMATRIX(IS,J)*PHI
          ENDDO
 !
           CALL DINP0(3,XSB,YSB,ZSB,PHI,DPOX,DPOY,DPOZ)       
            DPDN=DPOX*NX+DPOY*NY+DPOZ*NZ
          DO    IS=1, NSYS             
-           CELE33(IP)=CELE33(IP)-RSN(IS,IP)*BMATRIX(IS,J)*DPDN	
+           CELE33(IP)=CELE33(IP)-RSN(IS,IP)*BMATRIX(IS,J)*DPDN  
            CELE33(IP)=CELE33(IP)+RSN(IS,IP)*AMATRIX(IS,J)*PHI
          ENDDO
 !
@@ -363,22 +359,22 @@ C
         DO  1000   INODE=NNF+1, NNODE   
 !
 
-	   XP=XYZ(1,INODE)
+           XP=XYZ(1,INODE)
          YP=XYZ(2,INODE)
          ZP=XYZ(3,INODE) 
-!	        
-     	   CALL SOLIDANGLE(INODE,NNODE,NELEM,NCN,NCON,NODQUA,
+!               
+           CALL SOLIDANGLE(INODE,NNODE,NELEM,NCN,NCON,NODQUA,
      1                    H,XYZ,DXYZE,S_ANGLE) 
      
          S_ANGLE=1.0d0-S_ANGLE
     
-	   WRITE(9,102)  INODE, XP, YP, ZP, S_ANGLE
-      	 WRITE(*,102)  INODE, XP, YP, ZP, S_ANGLE
+           WRITE(9,102)  INODE, XP, YP, ZP, S_ANGLE
+         WRITE(*,102)  INODE, XP, YP, ZP, S_ANGLE
 !
-	   ANGLE(INODE)=S_ANGLE
+           ANGLE(INODE)=S_ANGLE
 !
         DO    IP=1,  NSYS 
-	    AMATA(INODE,INODE,IP)= ANGLE(INODE)
+            AMATA(INODE,INODE,IP)= ANGLE(INODE)
         ENDDO        
 ! ------------------------------
 ! Intergration on the free surface
@@ -397,25 +393,25 @@ C
          KNCON=NCOND(IELEM,J)
         DO  710   IP=1, NSYS  
           XSB=EX(IP)*XYZ(1,JNCON)
-	    YSB=EY(IP)*XYZ(2,JNCON)
-	    ZSB=       XYZ(3,JNCON)
+            YSB=EY(IP)*XYZ(2,JNCON)
+            ZSB=       XYZ(3,JNCON)
    
           NX=EX(IP)*DXYZ(1,KNCON)
-	    NY=EY(IP)*DXYZ(2,KNCON)
-	    NZ=       DXYZ(3,KNCON)
+            NY=EY(IP)*DXYZ(2,KNCON)
+            NZ=       DXYZ(3,KNCON)
           CALL DINP(XSB,YSB,ZSB,DPOX,DPOY,DPOZ)       
           DPDN=DPOX*NX+DPOY*NY+DPOZ*NZ 
-      	 
+         
          DO  710   IS=1, NSYS    
            AMATA(INODE,JNCON,IP)=AMATA(INODE,JNCON,IP)+
      1                           RSN(IS,IP)*BMATRIX(IS,J)
-	     BMATA(INODE,IP)=BMATA(INODE,IP)+RSN(IS,IP)*AMATRIX(IS,J)*
-     1               POXY(XSB,YSB,ZSB)	 	 
+             BMATA(INODE,IP)=BMATA(INODE,IP)+RSN(IS,IP)*AMATRIX(IS,J)*
+     1               POXY(XSB,YSB,ZSB)           
 710     CONTINUE  
 !
 
 800     CONTINUE
-	  
+          
 !  --------------------------
 ! Intergration on the body surface    
 ! 
@@ -444,24 +440,24 @@ C
           KNCON=NCOND(IELEM,J)
          DO 820 IP=1, NSYS                   
            XSB=EX(IP)*XYZ(1,JNCON)
-	     YSB=EY(IP)*XYZ(2,JNCON)
-	     ZSB=       XYZ(3,JNCON)
+             YSB=EY(IP)*XYZ(2,JNCON)
+             ZSB=       XYZ(3,JNCON)
            NX=EX(IP)*DXYZ(1,KNCON)
-	     NY=EY(IP)*DXYZ(2,KNCON)
-	     NZ=       DXYZ(3,KNCON)
+             NY=EY(IP)*DXYZ(2,KNCON)
+             NZ=       DXYZ(3,KNCON)
           CALL DINP(XSB,YSB,ZSB,DPOX,DPOY,DPOZ)       
           DPDN=DPOX*NX+DPOY*NY+DPOZ*NZ 
           
            DO  IS=1, NSYS    
-	     IF(JNCON .GT. NNF)  THEN
+             IF(JNCON .GT. NNF)  THEN
            AMATA(INODE,JNCON,IP)=AMATA(INODE,JNCON,IP)-
      1                          RSN(IS,IP)*AMATRIX(IS,J)
-	     ELSE	
-	      PHI=POXY(XSB,YSB,ZSB)     	    
-	      BMATA(INODE,IP)=BMATA(INODE,IP)+RSN(IS,IP)*AMATRIX(IS,J)*PHI  ! *******
-	     ENDIF
+             ELSE       
+              PHI=POXY(XSB,YSB,ZSB)                 
+           BMATA(INODE,IP)=BMATA(INODE,IP)+RSN(IS,IP)*AMATRIX(IS,J)*PHI  ! *******
+             ENDIF
             BMATA(INODE,IP)=BMATA(INODE,IP)-
-     1                      RSN(IS,IP)*BMATRIX(IS,J)*DPDN	
+     1                      RSN(IS,IP)*BMATRIX(IS,J)*DPDN       
            ENDDO
 820     CONTINUE
 !
@@ -471,44 +467,43 @@ C
 !
 ! =============================================
 
-        IF( NSYS .EQ. 2) THEN
+           IF( NSYS .EQ. 2) THEN
 !
-	   DO INODE=1, NNF
-	    IF(NODQUA(INODE) .EQ. 2) THEN
-	     AMATA(INODE,INODE,2)=1.0E20	 
-		ENDIF
-	   ENDDO
+                   DO INODE=1, NNF
+                   IF(NODQUA(INODE) .EQ. 2) THEN
+                           AMATA(INODE,INODE,2)=1.0E20         
+                   ENDIF
+                   ENDDO
 !
-	  ELSE IF( NSYS .EQ. 4) THEN
+           ELSE IF( NSYS .EQ. 4) THEN
 !
-	   DO INODE=1, NNF
-	    IF(NODQUA(INODE) .EQ. 2) THEN
-	     AMATA(INODE,INODE,2)=1.0E20
-	     AMATA(INODE,INODE,4)=1.0E20	    
-	    ELSE IF(NODQUA(INODE) .EQ. 4) THEN
-	     AMATA(INODE,INODE,3)=1.0E20
-	     AMATA(INODE,INODE,2)=1.0E20
-		  ELSE IF(NODQUA(INODE) .EQ. 5) THEN
-	     AMATA(INODE,INODE,2)=1.0E20
-	     AMATA(INODE,INODE,3)=1.0E20	    
-	     AMATA(INODE,INODE,4)=1.0E20	    
-		ENDIF
-	   ENDDO
-!
-	  ENDIF
-!
+                   DO INODE=1, NNF
+                   IF(NODQUA(INODE) .EQ. 2) THEN
+                           AMATA(INODE,INODE,2)=1.0E20
+                           AMATA(INODE,INODE,4)=1.0E20            
+                   ELSE IF(NODQUA(INODE) .EQ. 4) THEN
+                           AMATA(INODE,INODE,3)=1.0E20
+                           AMATA(INODE,INODE,2)=1.0E20
+                   ELSE IF(NODQUA(INODE) .EQ. 5) THEN
+                           AMATA(INODE,INODE,2)=1.0E20
+                           AMATA(INODE,INODE,3)=1.0E20            
+                           AMATA(INODE,INODE,4)=1.0E20            
+                   ENDIF
+                   ENDDO
+           ENDIF
+           !-------output amata,bmata to txt file
             do i = 1,nnode
                  do j = 1,nnode
                    write(400,*) amata(i,j,1:nsys)
             end do;end do
             do i = 1,nnode
-            write(401,*) bmata(i,1:nsys)
+                    write(401,*) bmata(i,1:nsys)
             end do
 ! =============================================
 !
-	 DO IP=1, NSYS
+            DO IP=1, NSYS
         WRITE(101, *) '  IP=',IP
-	  WRITE(101, *) '    INODE=',nNODE,'      AMATA' 
+          WRITE(101, *) '    INODE=',nNODE,'      AMATA' 
         DO INODE=1,  NNODE
          WRITE(101, *) '  INODE=',INODE
          DO IND= 1,  NNODE 
@@ -520,9 +515,9 @@ C
 !
 !
         WRITE(102, *) '  =========== Before RLUDCMP =============='
-	 DO IP=1, NSYS
+         DO IP=1, NSYS
         WRITE(102, *) '  IP=',IP
-	  WRITE(102, *) '    INODE          BMATA' 
+          WRITE(102, *) '    INODE          BMATA' 
          DO IND= 1,  NNODE 
          WRITE(102, 620) IND,XYZ(1,IND),XYZ(2,IND),XYZ(3,IND),
      1                    BMATA(IND,IP) 
@@ -534,19 +529,19 @@ C
         WRITE(102, *) 
         WRITE(102, *)
         WRITE(102, *) '  =========== After RLUDCMP =============='
-	   DO IP=1, NSYS
+           DO IP=1, NSYS
            WRITE(6, *) '  IP=',IP,'    Before RLUDCMP'
-	     CALL RLUDCMP(IP,AMATA,NNODE,NNODE,NSYS,INDX,DSIGN)  
-	   ENDDO
+             CALL RLUDCMP(IP,AMATA,NNODE,NNODE,NSYS,INDX,DSIGN)  
+           ENDDO
 !
          DO IS=1, NSYS   
            CALL RLUBKSB(IS,AMATA,NNODE,NNODE,1,NSYS,1,INDX,BMATA)
          ENDDO
 !         
 !
-	 DO IP=1, NSYS
+         DO IP=1, NSYS
         WRITE(102, *) '  IP=',IP
-	  WRITE(102, *) '    INODE          BMATA' 
+          WRITE(102, *) '    INODE          BMATA' 
          DO IND= 1,  NNODE 
          WRITE(102, 620) IND,XYZ(1,IND),XYZ(2,IND),XYZ(3,IND),
      1                    BMATA(IND,IP) 
@@ -573,7 +568,7 @@ C
 !       IF(TIMERK .GT. 1.0) THEN
 !  
          WRITE(9, *)
-	   WRITE(9, *)  '  Direvative of potential on the upper surface'
+           WRITE(9, *)  '  Direvative of potential on the upper surface'
          WRITE(9, *)  '    INODE     XP      YP     ZP     Unkn    DPDZ'
            
         DO  INODE=1, NNF 
@@ -586,7 +581,7 @@ C
         ENDDO
         
          WRITE(9, *)
-	   WRITE(9, *)  '  Potential on the body surface'
+           WRITE(9, *)  '  Potential on the body surface'
          WRITE(9, *)  '    INODE     XP      YP     ZP     Unkn    POXY'
 
         DO  INODE=1+NNF, NNODE
@@ -596,17 +591,17 @@ C
         WRITE(9, 620)  INODE,XP,YP,ZP,unkn(INODE,1),POXY(XP,YP,ZP)
         ENDDO
 
-        do i = 1,NELEMF
-          write (200,999) i,ncon(i,1:8)
-C           x = 0.5*(XYZ(1,NCON(2))+XYZ(1,NCON(6)))
-C           Y = 0.5*(XYZ(2,NCON(2))+XYZ(2,NCON(6)))
-        end DO
-
-         do i = NELEMF+1,NELEM
-          write (201,999) i,ncon(i,1:8)
-C           x = 0.5*(XYZ(1,NCON(2))+XYZ(1,NCON(6)))
-C           Y = 0.5*(XYZ(2,NCON(2))+XYZ(2,NCON(6)))
-        end DO
+        !do i = 1,NELEMF
+          !write (200,999) i,ncon(i,1:8)
+!C           x = 0.5*(XYZ(1,NCON(2))+XYZ(1,NCON(6)))
+!C           Y = 0.5*(XYZ(2,NCON(2))+XYZ(2,NCON(6)))
+        !end DO
+!
+         !do i = NELEMF+1,NELEM
+          !write (201,999) i,ncon(i,1:8)
+!C           x = 0.5*(XYZ(1,NCON(2))+XYZ(1,NCON(6)))
+!C           Y = 0.5*(XYZ(2,NCON(2))+XYZ(2,NCON(6)))
+        !end DO
 
 
 c 610     FORMAT(10x,'NNODE=',I6,/,2X,'IND',10X,'AMATA(IND,IND,1)')
@@ -616,7 +611,7 @@ c 610     FORMAT(10x,'NNODE=',I6,/,2X,'IND',10X,'AMATA(IND,IND,1)')
  620   FORMAT(1X,I4,6(1X,F13.6))      
  630   FORMAT(10x,'NNODE     UNKN(IND,1)     T=',F14.6)     
  640   FORMAT(1X,I4,2(2X,F13.6,2X,F13.6))                     
-	            
+                    
                       
       RETURN
       END
