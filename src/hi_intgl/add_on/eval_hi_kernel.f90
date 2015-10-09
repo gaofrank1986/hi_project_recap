@@ -1,16 +1,16 @@
 
-    subroutine eval_singular_elem(passed_mtx,hiresult)
+    subroutine eval_singular_elem(passed_mtx,hiresult,str_result)
         implicit none
         integer,parameter :: nf = 8 
         integer,parameter :: ndim = 3
         real(8),intent(in) :: passed_mtx(ndim,nf)
-        real(8),intent(out) :: hiresult(nf)
+        real(8),intent(out) :: hiresult(nf),str_result(nf)
         ! nf : num of kernel funcs
 
         real(8) :: src_lcl(ndim-1),pt_intg(ndim-1),seg_start(ndim - 1)  
         ! src point, integration point , temporary integration point     
 
-        real(8) :: end_nodes(2,2),ri(3),RINT(nf)
+        real(8) :: end_nodes(2,2),ri(3),RINT(nf),rint2(nf)
        ! end nodes recorder, shape function
         ! rho integration result
 
@@ -115,8 +115,10 @@
                                                 & ,src_lcl,pt_intg,coef_g,coef_h)
 
                         call integrate_rho(1,ndim,nf,hi_beta,npw,n_pwr_g,src_lcl,pt_intg,coef_g,coef_h,rint)
+                        call integrate_rho(2,ndim,nf,2.d0,npw,n_pwr_g,src_lcl,pt_intg,coef_g,coef_h,rint2)
 
                         hiresult = hiresult + (dabs(half_step)*gwl(igl)*drdn_p/rho_q)*rint
+                        str_result = str_result + (dabs(half_step)*gwl(igl)*drdn_p/rho_q)*rint2
                         ! equation (3-6-50)
                     end do ! igl =1,iabs(ngl)
 
@@ -128,6 +130,7 @@
         end if
 
         call swap_result(hiresult)
+        call swap_result(str_result)
 
 
     end subroutine

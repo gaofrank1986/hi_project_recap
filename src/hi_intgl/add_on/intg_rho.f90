@@ -5,7 +5,7 @@
             implicit none 
 
         real(8),intent(in)  :: src_lcl(ndim-1),pt_intg(ndim-1),lamda
-        integer,intent(in)  :: n_pwr_g,ndim,nf,npw,flag
+        integer,intent(in)  :: n_pwr_g,ndim,nf,npw,flag!flag control which kernel to use
         real(8),intent(out) :: hiresult(nf)
 
         real(8)  :: cosn(ndim),ri(ndim),gcd(ndim,ndim-1)
@@ -33,10 +33,20 @@
 
         !!! - ----------End computing pwr_k
 
-        call compute_coeff_B(1,ndim,nf,lamda,elem_type,n_pwr_g,n_pwr_k, &
-                & src_glb,src_lcl,pt_intg,COEF_G,COEF_B)     
-
+        call compute_coeff_B(flag,ndim,nf,lamda,elem_type,n_pwr_g,n_pwr_k, &
+                & src_glb,src_lcl,pt_intg,coef_g,coef_b)     
+        if (flag .eq. 2) then
+            do k=1,8
+                write(502,230) coef_b(0:11,k)
+                end do
+        end if
+        230 format(12f10.6)
         ! Case 1 for Ek, 0 <= k <= lamda - 3        
+        if (flag .eq. 1) then
+            do k=1,8
+                write(503,230) coef_b(0:11,k)
+                end do
+        end if
 
         do k =0 ,int(lamda)-ndim
 

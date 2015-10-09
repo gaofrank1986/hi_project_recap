@@ -73,6 +73,7 @@
             if (flag .eq. 1) then
                 call f_integrand(ndim,nf,cosn,drdx,drdn,sf_iter,fq)
             else 
+                call f_integrand2(ndim,nf,cosn,drdx,drdn,sf_iter,fq)
             end if
             coefb(step_n,:) = fq*fjcb/robar**lamda
 
