@@ -177,14 +177,12 @@
          
         call comp_link(ielem,inode,ii)
 !
-        IF (II .EQ. 0)   THEN 
-         CALL NORM_ELE1(IELEM,XP,YP,ZP,AMATRIX,BMATRIX)
-!         write(101,*) ' After NORM_ELE1'
-        ELSE IF (II .NE. 0)   THEN 
-          CALL SING_ELE1(INODE,IELEM,NODQUA(INODE),XP,YP,ZP,&
-     &                   AMATRIX,BMATRIX)
-!         write(101,*) ' After SING_ELE1'
-        END IF                
+        if (ii .eq. 0)   then 
+            call norm_ele1(ielem,xp,yp,zp,amatrix,bmatrix)
+        else if (ii .ne. 0)   then 
+            call sing_ele1(inode,ielem,nodqua(inode),xp,yp,zp,&
+             &                   amatrix,bmatrix)
+        end if                
 !       write(101,*) ' BMATRIX=',BMATRIX(1,:)
 !       write(101,*) ' AMATRIX=',AMATRIX(1,:)
 !!
@@ -227,9 +225,6 @@
 
 
         call common_block(1,0,ielem,inode,amatrix,bmatrix,fterm_coef)
-
-!320      CONTINUE
-!
 
 400     CONTINUE
 
@@ -280,29 +275,29 @@
 !C Using TNORWP0 to integrate 
 !C
          CALL NORM_ELE0(IELEM,XP,YP,ZP,AMATRIX,BMATRIX)
-
+        call common_block(0,1,ielem,inode,amatrix,bmatrix,fterm_coef)
 !  ------
 !
-        DO  710   J=1,  NCN(IELEM) 
-         JNCON=NCON(IELEM,J)
-         KNCON=NCOND(IELEM,J)
-        DO  710   IP=1, NSYS  
-          XSB=EX(IP)*XYZ(1,JNCON)
-            YSB=EY(IP)*XYZ(2,JNCON)
-            ZSB=       XYZ(3,JNCON)
-   
-          NX=EX(IP)*DXYZ(1,KNCON)
-            NY=EY(IP)*DXYZ(2,KNCON)
-            NZ=       DXYZ(3,KNCON)
-          CALL DINP(XSB,YSB,ZSB,DPOX,DPOY,DPOZ)       
-          DPDN=DPOX*NX+DPOY*NY+DPOZ*NZ 
-         
-         DO  710   IS=1, NSYS    
-           AMATA(INODE,JNCON,IP)=AMATA(INODE,JNCON,IP)+&
-     &                           RSN(IS,IP)*BMATRIX(IS,J)
-             BMATA(INODE,IP)=BMATA(INODE,IP)+RSN(IS,IP)*AMATRIX(IS,J)*&
-     &               POXY(XSB,YSB,ZSB)           
-710     CONTINUE  
+!        DO  710   J=1,  NCN(IELEM) 
+!         JNCON=NCON(IELEM,J)
+!         KNCON=NCOND(IELEM,J)
+!        DO  710   IP=1, NSYS  
+!          XSB=EX(IP)*XYZ(1,JNCON)
+!            YSB=EY(IP)*XYZ(2,JNCON)
+!            ZSB=       XYZ(3,JNCON)
+!   
+!          NX=EX(IP)*DXYZ(1,KNCON)
+!            NY=EY(IP)*DXYZ(2,KNCON)
+!            NZ=       DXYZ(3,KNCON)
+!          CALL DINP(XSB,YSB,ZSB,DPOX,DPOY,DPOZ)       
+!          DPDN=DPOX*NX+DPOY*NY+DPOZ*NZ 
+!         
+!         DO  710   IS=1, NSYS    
+!           AMATA(INODE,JNCON,IP)=AMATA(INODE,JNCON,IP)+&
+!     &                           RSN(IS,IP)*BMATRIX(IS,J)
+!             BMATA(INODE,IP)=BMATA(INODE,IP)+RSN(IS,IP)*AMATRIX(IS,J)*&
+!     &               POXY(XSB,YSB,ZSB)           
+!710     CONTINUE  
 !
 
 800     CONTINUE
