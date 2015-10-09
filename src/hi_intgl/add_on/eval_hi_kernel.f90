@@ -114,7 +114,7 @@
                         call compute_coeff_gh(num_dim,num_dim - 1,npw,elem_type,n_pwr_g,src_glb &
                                                 & ,src_lcl,pt_intg,coef_g,coef_h)
 
-                        call integrate_rho(ndim,nf,npw,n_pwr_g,src_lcl,pt_intg,coef_g,coef_h,rint)
+                        call integrate_rho(ndim,nf,hi_beta,npw,n_pwr_g,src_lcl,pt_intg,coef_g,coef_h,rint)
 
                         hiresult = hiresult + (dabs(half_step)*gwl(igl)*drdn_p/rho_q)*rint
                         ! equation (3-6-50)
