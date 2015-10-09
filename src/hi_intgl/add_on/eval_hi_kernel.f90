@@ -34,7 +34,7 @@
 
         num_edge = 4!2 * (ndim - 1 ) ! 4 -----how many edges
         hiresult = 0.
-
+        str_result = 0
             src_lcl = src_lcl_preset
             src_glb = src_glb_preset
             ri = src_glb - src_ctr_glb 
