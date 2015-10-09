@@ -11,7 +11,7 @@
 
         real(8):: ri(ndim), cosn(ndim), gcd(3,node)
 
-        real(8) :: rhoq,slop(ndim - 1)
+        real(8) :: rho_q,slop(ndim - 1)
 
         real(8) :: drdx(ndim),xi(ndim - 1),x(ndim)&
                     &,rmat(npowf,npowf), &
@@ -28,7 +28,7 @@
         rho_q = norm2(slop)
         slop = slop/rho_q ! normalized vector, cos(theta),sin(theta)
 
-        rho_step=rhoq/dble(npowf) ! divide rho_q to npowf parts
+        rho_step=rho_q/dble(npowf) ! divide rho_q to npowf parts
 
         do 20 step_n=0,npowf ! this the k value in Gao,XW note 
 
@@ -73,14 +73,14 @@
             
             !CALL F_BAR(NDIM,NBDM,DRDX,COSN,R,DRDN,XI,SF_iter,XP,X,NF,FQ)
             call f_integrand(ndim,nf,cosn,drdx,drdn,sf_iter,fq)
-            COEFB(IP,:) = FQ*FJCB/ROBAR**hi_beta
+            COEFB(step_n,:) = FQ*FJCB/ROBAR**hi_beta
 
      
-            IF(IP.EQ.0) GOTO 20
-            COEFB(IP,:)=(COEFB(IP,:)-COEFB(0,:))/RHO
+            IF(step_n.EQ.0) GOTO 20
+            COEFB(step_n,:)=(COEFB(step_n,:)-COEFB(0,:))/RHO
 
-            RMAT(IP,1)=1.D0
-            DO JP=2,NPOWF; RMAT(IP,JP)=RMAT(IP,JP-1)*RHO; ENDDO
+            RMAT(step_n,1)=1.D0
+            DO JP=2,NPOWF; RMAT(step_n,JP)=RMAT(step_n,JP-1)*RHO; ENDDO
 
 20      CONTINUE
         
