@@ -155,12 +155,7 @@
         WRITE(101,*) ' IELEM=',IELEM
         WRITE(101,*)  ' XP,YP,ZP=',XP,YP,ZP
 
-         II=0   
-         DO I=1, NODNOE(INODE)
-          IF(IELEM .EQ. NODELE(INODE,I)) THEN
-          II=II+1
-          ENDIF
-         ENDDO
+        call comp_link(ielem,inode,ii)
 
         IF (II .EQ. 0)   THEN 
          CALL NORM_ELE1(IELEM,XP,YP,ZP,AMATRIX,BMATRIX)
@@ -221,12 +216,7 @@
         WRITE(101,*)  ' IELEM=',IELEM
         WRITE(101,*)  ' XP,YP,ZP=',XP,YP,ZP
          
-         II=0
-         DO  I=1, NODNOE(INODE)
-         IF(IELEM .EQ. NODELE(INODE,I)) THEN
-         II=II+1
-         ENDIF
-         ENDDO
+        call comp_link(ielem,inode,ii)
 !
         IF (II .EQ. 0)   THEN 
          CALL NORM_ELE1(IELEM,XP,YP,ZP,AMATRIX,BMATRIX)
@@ -366,12 +356,7 @@
 !C Using TSING if the source point is in the element or its mirror
 !C     elements about any symmetrical axis, otherwise using TINBOD
 !C
-         DO  I=1, NODNOE(INODE)
-         IF(IELEM .EQ. NODELE(INODE,I)) THEN
-         II=II+1
-         ENDIF
-         ENDDO
-!
+        call comp_link(ielem,inode,ii)!
         IF (II .EQ. 0)   THEN 
          CALL NORM_ELE0(IELEM,XP,YP,ZP,AMATRIX,BMATRIX)
         ELSE IF (II .NE. 0)   THEN 
