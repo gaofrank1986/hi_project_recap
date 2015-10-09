@@ -1,39 +1,40 @@
         subroutine compute_coeff_b(ndim,nf,node,npowg,npowf,xp,xip,&
-                                & xiq,slop,rhoq &
-                                &,coefg,coefb)
+                                & xiq,coefg,coefb)
       
         implicit none
 
         integer,intent(in) ::  node,npowg,npowf,ndim,nf
-       
-      
-        real(8),intent(in) :: XP(NDIM),XIP(NDIM - 1)&
-                    & ,XIQ(NDIM - 1),SLOP(NDIM - 1), &
-                                        & COEFG(0:NPOWG)
-        real(8):: ri(NDIM), COSN(NDIM), GCD(3,node)
+        real(8),intent(in) :: xp(ndim),xip(ndim - 1)&
+                    & ,xiq(ndim - 1), coefg(0:npowg)
 
-        real(8),intent(in) :: rhoq
-        real(8),intent(out) :: COEFB(0:11,NF)
+        real(8),intent(out) :: coefb(0:11,nf)
 
-        real(8) :: DRDX(NDIM),XI(NDIM - 1),X(NDIM)&
-                    &,RMAT(NPOWF,NPOWF), &
-                    &   SF_iter(NODE),&
-                    &   FQ(NF),A(NDIM)      
+        real(8):: ri(ndim), cosn(ndim), gcd(3,node)
+
+        real(8) :: rhoq,slop(ndim - 1)
+
+        real(8) :: drdx(ndim),xi(ndim - 1),x(ndim)&
+                    &,rmat(npowf,npowf), &
+                    &   sf_iter(node),&
+                    &   fq(nf),a(ndim)      
         integer :: i,j,ip,m,jp
-        integer :: NBDM
+        integer :: nbdm
         real(8) :: vk,fjcb,robar
         real(8) :: rho,r2,r,gm,drdn
 
         NBDM = num_dim - 1
 
+        slop = xiq - xip
+        rho_q = norm2(slop)
+        slop = slop/rho_q ! normalized vector, cos(theta),sin(theta)
 
-        VK=RHOQ/DBLE(NPOWF) ! divide rho_q to npowf parts
+        vk=rhoq/dble(npowf) ! divide rho_q to npowf parts
 
-        DO 20 IP=0,NPOWF 
+        do 20 ip=0,npowf 
 
-            RHO=VK*DBLE(IP) 
-            XI=XIP+RHO*SLOP !!!!!!!!!!!!!!!!! xi updated here!!!!!!!!!!!!!!!!!!
-            ROBAR=COEFG(0)
+            rho=vk*dble(ip) 
+            xi=xip+rho*slop !!!!!!!!!!!!!!!!! xi updated here!!!!!!!!!!!!!!!!!!
+            robar=coefg(0)
 
             DO M=1,NPOWG; ROBAR=ROBAR+COEFG(M)*RHO**M; ENDDO
 
