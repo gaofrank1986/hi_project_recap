@@ -28,4 +28,19 @@
         end do
     end subroutine
 
+     subroutine f_integrand2(ndim,nf,cosn,drdx,drdn,shap,fb)
+        implicit none
+        integer,intent(in) :: ndim,nf
+        real(8),intent(in) :: drdx(ndim),drdn,cosn(ndim),shap(*)
+        real(8),intent(out) :: fb(nf)       
+
+        real(8) :: x(ndim),tmp
+        integer :: id
+      
+        tmp =DRDN/(4.*hi_PI)    ! GUIG 4.2
+        !attention neg sign removed in tmp to match teng's result
+        do id =1,8
+            FB(id) = tmp*shap(id)
+        end do
+    end subroutine   
 !end module 

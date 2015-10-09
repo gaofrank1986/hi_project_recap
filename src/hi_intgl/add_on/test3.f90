@@ -1,10 +1,10 @@
-        subroutine compute_coeff_B(NDIM,NF,NODE,NPOWG,NPOWF,XP,XIP,&
-                                & XIQ,SLOP,RHOQ &
-                                &,COEFG,COEFB)
+        subroutine compute_coeff_b(ndim,nf,node,npowg,npowf,xp,xip,&
+                                & xiq,slop,rhoq &
+                                &,coefg,coefb)
       
         implicit none
 
-        integer,intent(in) ::  NODE,NPOWG,NPOWF,NDIM,NF
+        integer,intent(in) ::  node,npowg,npowf,ndim,nf
        
       
         real(8),intent(in) :: XP(NDIM),XIP(NDIM - 1)&
