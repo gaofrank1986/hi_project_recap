@@ -132,6 +132,8 @@ contains
         hi_beta = 3.
         !num_intgd = 8
         allocate(cnr_glb_mtx(num_dim,elem_type))
+        if (elem_type.eq.8) n_pwr_g = 4
+        !pwr_g = elem_type/2+(elem_type/9)*2 
         !model_readed_flag = 1
         !value_list = 0
         print *,"------------Finished initialization-------------"
@@ -165,15 +167,6 @@ contains
     end subroutine
 
 
-
-     subroutine set_npwg(number)
-        implicit none
-
-        integer,intent(in) :: number
-
-        n_pwr_g = number
-        print *,"n_power_g is set to ",number
-    end subroutine
 
     subroutine set_src_preset(ksi,eta,glb,ctr_glb)
         
