@@ -1,9 +1,9 @@
-        subroutine compute_coeff_b(ndim,nf,lamda,node,npowg,npowf,xp,xip,&
+        subroutine compute_coeff_b(flag,ndim,nf,lamda,node,npowg,npowf,xp,xip,&
                                 & xiq,coefg,coefb)
       
         implicit none
 
-        integer,intent(in) ::  node,npowg,npowf,ndim,nf
+        integer,intent(in) ::  node,npowg,npowf,ndim,nf,flag
         real(8),intent(in) :: lamda,xp(ndim),xip(ndim - 1)&
                     & ,xiq(ndim - 1), coefg(0:npowg)
 
@@ -70,27 +70,28 @@
             ! dr/dx is defined above
             drdn = dot_product(cosn,drdx)  !!!!  notice dr/dn is defined  here
             !CALL F_BAR(NDIM,NBDM,DRDX,COSN,R,DRDN,XI,SF_iter,XP,X,NF,FQ)
-            call f_integrand(ndim,nf,cosn,drdx,drdn,sf_iter,fq)
-            COEFB(step_n,:) = FQ*FJCB/ROBAR**lamda
+            if (flag .eq. 1) then
+                call f_integrand(ndim,nf,cosn,drdx,drdn,sf_iter,fq)
+            else 
+            end if
+            coefb(step_n,:) = fq*fjcb/robar**lamda
 
      
             IF(step_n.EQ.0) GOTO 20
-            COEFB(step_n,:)=(COEFB(step_n,:)-COEFB(0,:))/RHO
+            coefb(step_n,:)=(coefb(step_n,:)-coefb(0,:))/rho
 
-            RMAT(step_n,1)=1.D0
-            DO JP=2,NPOWF; RMAT(step_n,JP)=RMAT(step_n,JP-1)*RHO; ENDDO
+            rmat(step_n,1)=1.d0
+            do jp=2,npowf; rmat(step_n,jp)=rmat(step_n,jp-1)*rho; enddo
 
-20      CONTINUE
+20      continue
         
 
 
-        CALL INVSOLVR(NPOWF,NPOWF,RMAT,NPOWF,-1)
+        call invsolvr(npowf,npowf,rmat,npowf,-1)
    
 
         forall (i = 1:npowf,j=1:NF)
-
-        coefb(i,j) = DOT_PRODUCT(rmat(i,:),coefb(1:npowf,j))
-
+            coefb(i,j) = dot_product(rmat(i,:),coefb(1:npowf,j))
         end forall
         !COEFB(1:NPOWF,:)=MATMUL(RMAT,COEFB(1:NPOWF,:))    ! Bk IN Eq.(3-6-62)
         ! coefb has size 12xnum_intgd,but only from index 1 to 7 has useful info

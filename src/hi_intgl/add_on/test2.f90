@@ -33,7 +33,7 @@
 
         !!! - ----------End computing pwr_k
 
-        call compute_coeff_B(ndim,nf,elem_type,n_pwr_g,n_pwr_k, &
+        call compute_coeff_B(1,ndim,nf,lamda,elem_type,n_pwr_g,n_pwr_k, &
                 & src_glb,src_lcl,pt_intg,COEF_G,COEF_B)     
 
         ! Case 1 for Ek, 0 <= k <= lamda - 3        
