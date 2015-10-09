@@ -35,19 +35,8 @@
 
         call compute_coeff_B(flag,ndim,nf,lamda,elem_type,n_pwr_g,n_pwr_k, &
                 & src_glb,src_lcl,pt_intg,coef_g,coef_b)     
-        if (flag .eq. 2) then
-            do k=1,8
-                write(502,230) coef_b(0:11,k)
-                end do
-        end if
-        230 format(12f10.6)
-        ! Case 1 for Ek, 0 <= k <= lamda - 3        
-        if (flag .eq. 1) then
-            do k=1,8
-                write(503,230) coef_b(0:11,k)
-                end do
-        end if
 
+        ! Case 1
         do k =0 ,int(lamda)-ndim
 
             pw= lamda - k - (ndim - 1) ! the power coefficient of rho_q

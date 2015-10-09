@@ -229,7 +229,7 @@
         cnr_glb_mtx(:,8) = xyz(:,ncon(ielem,8))
 
 
-        call set_src_preset(si,eta,xyz(1:3,ncon(ielem,nodj)),origin_offset)
+        call preset_src(si,eta,xyz(1:3,ncon(ielem,nodj)),origin_offset)
         call eval_singular_elem(cnr_glb_mtx,result0,result1)
 
         do j=1, ncn(ielem)

@@ -7,9 +7,8 @@ module hi_intg
     include './add_on/hi_const.f90'    
     integer,protected    ::  num_dim,num_node,num_nrml,num_elem
     integer,protected    ::  elem_type,num_intgd
-    real(8),protected    ::  hi_beta 
 
-
+    real(8),private    ::  hi_beta 
     real(8),allocatable,private ::  node_matrix(:,:),normal_matrix(:,:),src_local_list(:,:)
     !node_matrix(1:3,node_id),normal_matrix(1:3,nrml_id)
     integer,allocatable,private ::  elem_matrix(:,:),src_flag(:)
@@ -22,16 +21,17 @@ module hi_intg
 
     integer,private,parameter :: NPW = 4
     real(8),private,allocatable :: value_list(:,:)
+
     integer,private :: n_pwr_g = -1
     real(8),allocatable,private :: cnr_glb_mtx(:,:) !corner_global_matrix
-    real(8),private :: src_lcl_preset(2),src_glb_preset(3)
+    real(8),private :: src_lcl_pre(2),src_glb_pre(3)
    
     real(8),private ::  src_glb(3),src_ctr_glb(3)
-    !src coordinate in global,src center point in global
-    !private :: read_model_from_WAVDUT
+    !src_ctr_glb is actually the offset of orgin in src coordinate and glb coordinate,
+    ! normally there is none
 contains
-    include './add_on/test6.f90'
-    include './add_on/test3.f90'
+    include './add_on/coef_gh.f90'
+    include './add_on/coef_b.f90'
     include './add_on/intg_rho.f90'
     include './add_on/eval_hi_kernel.f90'
     include './add_on/hi_kernel.f90'        
@@ -168,14 +168,14 @@ contains
 
 
 
-    subroutine set_src_preset(ksi,eta,glb,ctr_glb)
+    subroutine preset_src(ksi,eta,glb,ctr_glb)
         
         implicit none
 
         real(8),intent(in) :: ksi,eta,glb(3),ctr_glb(3)
-        src_lcl_preset(1) = ksi
-        src_lcl_preset(2) = eta
-        src_glb_preset = glb
+        src_lcl_pre(1) = ksi
+        src_lcl_pre(2) = eta
+        src_glb_pre = glb
         src_ctr_glb = ctr_glb
         !print *,"src preseted as",src_lcl_preset
         !print *,"src preseted as",src_glb_preset
