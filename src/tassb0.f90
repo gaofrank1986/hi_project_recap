@@ -5,22 +5,23 @@
 !C * coefficients of the corresponding system of equationn *
 !C *                                                       *
 !C *********************************************************
-     subroutine comp_link(ielem,inode,ii) 
-       use MVAR_MOD
-       implicit none
-       integer :: inode,ielem
-       integer,intent(out) :: ii
-       integer :: i
-       ii = 0 
-         DO I=1, NODNOE(INODE)
-          IF(IELEM .EQ. NODELE(INODE,I)) THEN
-          II=II+1
-          ENDIF
-         ENDDO
+      include './old/common_block.f90'
+    subroutine comp_link(ielem,inode,ii) 
+        use MVAR_MOD
+        implicit none
+        integer :: inode,ielem
+        integer,intent(out) :: ii
+        integer :: i
 
-     end subroutine 
+        ii = 0 
+        do i=1, nodnoe(inode)
+        if(ielem .eq. nodele(inode,i)) then
+          ii=ii+1
+        endif
+        enddo
+    end subroutine 
 
-        SUBROUTINE TASSB0
+    SUBROUTINE TASSB0
           USE MVAR_MOD
           USE PVAR_MOD
           USE MFUNC_mod
@@ -135,7 +136,7 @@
             call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,&
              &                        h,xyz,dxyze,s_angle)    
 
-             s_angle=1.0d0-s_angle
+            s_angle=1.0d0-s_angle
              write(9,102)  inode, xp, yp, zp, s_angle
              write(*,102)  inode, xp, yp, zp, s_angle
              write(101,102)  inode, xp, yp, zp, s_angle
@@ -144,71 +145,59 @@
 
              angle(inode)=s_angle
 
-              amata(inode,inode,1:nsys)= angle(inode)
+            amata(inode,inode,1:nsys)= angle(inode)
 !
 !  ---------------------------
 !  Integration on the free surface
+
+            do  300   ielem=1,  nelemf
+
+                write(101,*)
+                write(101,*) ' ielem=',ielem
+                write(101,*)  ' xp,yp,zp=',xp,yp,zp
+
+                call comp_link(ielem,inode,ii)
+
+                if (ii .eq. 0)   then 
+                    call norm_ele1(ielem,xp,yp,zp,amatrix,bmatrix)
+                else if (ii .ne. 0)   then 
+                    call sing_ele1(inode,ielem,nodqua(inode),xp,yp,zp,&
+                        &                   amatrix,bmatrix)
+                end if 
+                call common_block(ielem,inode,amatrix,bmatrix,fterm_coef)
+!                do     j=1,  ncn(ielem) 
+!                    jncon=ncon(ielem,j)
+!                    kncon=ncond(ielem,j)  
+!                do     ip=1, nsys          
+!                    xsb=ex(ip)*xyz(1,jncon)
+!                    ysb=ey(ip)*xyz(2,jncon)
+!                    zsb=       xyz(3,jncon)
+!                    nx=ex(ip)*dxyz(1,kncon)
+!                    ny=ey(ip)*dxyz(2,kncon)
+!                    nz=       dxyz(3,kncon)
+!                    call dinp(xsb,ysb,zsb,dpox,dpoy,dpoz)       
+!                    dpdn=dpox*nx+dpoy*ny+dpoz*nz
 !
-        DO  300   IELEM=1,  NELEMF
-
-        WRITE(101,*)
-        WRITE(101,*) ' IELEM=',IELEM
-        WRITE(101,*)  ' XP,YP,ZP=',XP,YP,ZP
-
-        call comp_link(ielem,inode,ii)
-
-        IF (II .EQ. 0)   THEN 
-         CALL NORM_ELE1(IELEM,XP,YP,ZP,AMATRIX,BMATRIX)
-!         write(101,*) ' After NORM_ELE1'
-        ELSE IF (II .NE. 0)   THEN 
-          CALL SING_ELE1(INODE,IELEM,NODQUA(INODE),XP,YP,ZP,&
-     &                   AMATRIX,BMATRIX)
-!         write(101,*) ' After SING_ELE1'
-        END IF 
-
-!       write(101,*) ' BMATRIX=',BMATRIX(1,:)
-!       write(101,*) ' AMATRIX=',AMATRIX(1,:)
-
+!                do   is=1, nsys    
+!                    amata(inode,jncon,ip)=amata(inode,jncon,ip)+&
+!                        &              rsn(is,ip)*bmatrix(is,j)               
 !
-! ----------------------------
+!                    bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)&
+!                                &*amatrix(is,j)*poxy(xsb,ysb,zsb)
+!                enddo
+!!
+!                do i = 0,3
+!                call dinp0(i,xsb,ysb,zsb,phi,dpox,dpoy,dpoz)       
+!                dpdn=dpox*nx+dpoy*ny+dpoz*nz
+!                do    is=1, nsys             
+!                fterm_coef(i,ip)=fterm_coef(i,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn        
+!                fterm_coef(i,ip)=fterm_coef(i,ip)+rsn(is,ip)*amatrix(is,j)*phi
+!                enddo
 !
-!
-        do     j=1,  ncn(ielem) 
-            jncon=ncon(ielem,j)
-            kncon=ncond(ielem,j)  
-        do     ip=1, nsys          
-            xsb=ex(ip)*xyz(1,jncon)
-            ysb=ey(ip)*xyz(2,jncon)
-            zsb=       xyz(3,jncon)
-            nx=ex(ip)*dxyz(1,kncon)
-            ny=ey(ip)*dxyz(2,kncon)
-            nz=       dxyz(3,kncon)
-            call dinp(xsb,ysb,zsb,dpox,dpoy,dpoz)       
-            dpdn=dpox*nx+dpoy*ny+dpoz*nz
-
-            do   is=1, nsys    
-            amata(inode,jncon,ip)=amata(inode,jncon,ip)+&
-         &                           rsn(is,ip)*bmatrix(is,j)               
-
-            bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)*amatrix(is,j)&
-         &                        *poxy(xsb,ysb,zsb)
-        enddo        
-!
-! -------------------------
-!
-        do i = 0,3
-        call dinp0(i,xsb,ysb,zsb,phi,dpox,dpoy,dpoz)       
-        dpdn=dpox*nx+dpoy*ny+dpoz*nz
-        do    is=1, nsys             
-        fterm_coef(i,ip)=fterm_coef(i,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn        
-        fterm_coef(i,ip)=fterm_coef(i,ip)+rsn(is,ip)*amatrix(is,j)*phi
-        enddo
-        
-        end do
-        end do;end do
+!                end do
+!                end do;end do !j,ip
 300     CONTINUE  
-!         
-!  --------------------------
+
 !  Integration on the body surface
 
         DO  400   IELEM=NELEMF+1,  NELEM
@@ -230,32 +219,32 @@
 !       write(101,*) ' BMATRIX=',BMATRIX(1,:)
 !       write(101,*) ' AMATRIX=',AMATRIX(1,:)
 !
-        DO  320   J=1,  NCN(IELEM) 
-          JNCON=NCON(IELEM,J)
-          KNCON=NCOND(IELEM,J)
-         DO  320   IP=1, NSYS 
-             XSB=EX(IP)*XYZ(1,JNCON)
-             YSB=EY(IP)*XYZ(2,JNCON)
-             ZSB=       XYZ(3,JNCON)
+        do  320   j=1,  ncn(ielem) 
+          jncon=ncon(ielem,j)
+          kncon=ncond(ielem,j)
+         do  320   ip=1, nsys 
+             xsb=ex(ip)*xyz(1,jncon)
+             ysb=ey(ip)*xyz(2,jncon)
+             zsb=       xyz(3,jncon)
 
-             NX=EX(IP)*DXYZ(1,KNCON)
-             NY=EY(IP)*DXYZ(2,KNCON)
-             NZ=       DXYZ(3,KNCON)
+             nx=ex(ip)*dxyz(1,kncon)
+             ny=ey(ip)*dxyz(2,kncon)
+             nz=       dxyz(3,kncon)
 
-             CALL DINP(XSB,YSB,ZSB,DPOX,DPOY,DPOZ)       
-             DPDN=DPOX*NX+DPOY*NY+DPOZ*NZ 
+             call dinp(xsb,ysb,zsb,dpox,dpoy,dpoz)       
+             dpdn=dpox*nx+dpoy*ny+dpoz*nz 
 
-             DO  IS=1, NSYS    
-             IF(JNCON .GT. NNF)  THEN
-                 AMATA(INODE,JNCON,IP)=AMATA(INODE,JNCON,IP)-&
-         &                          RSN(IS,IP)*AMATRIX(IS,J)
-             ELSE
-                 PHI=POXY(XSB,YSB,ZSB)
-         BMATA(INODE,IP)=BMATA(INODE,IP)+RSN(IS,IP)*AMATRIX(IS,J)*PHI   !  * ******
-             ENDIF
+             do  is=1, nsys    
+             if(jncon .gt. nnf)  then
+                 amata(inode,jncon,ip)=amata(inode,jncon,ip)-&
+         &                          rsn(is,ip)*amatrix(is,j)
+             else
+                 phi=poxy(xsb,ysb,zsb)
+         bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)*amatrix(is,j)*phi   !  * ******
+             endif
 
-         BMATA(INODE,IP)=BMATA(INODE,IP)-RSN(IS,IP)*BMATRIX(IS,J)*DPDN  !  * ******
-             ENDDO
+         bmata(inode,ip)=bmata(inode,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn  !  * ******
+             enddo
 !
 !
         do i = 0,3
