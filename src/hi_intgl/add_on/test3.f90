@@ -1,10 +1,10 @@
-        subroutine compute_coeff_b(ndim,nf,node,npowg,npowf,xp,xip,&
+        subroutine compute_coeff_b(ndim,nf,lamda,node,npowg,npowf,xp,xip,&
                                 & xiq,coefg,coefb)
       
         implicit none
 
         integer,intent(in) ::  node,npowg,npowf,ndim,nf
-        real(8),intent(in) :: xp(ndim),xip(ndim - 1)&
+        real(8),intent(in) :: lamda,xp(ndim),xip(ndim - 1)&
                     & ,xiq(ndim - 1), coefg(0:npowg)
 
         real(8),intent(out) :: coefb(0:11,nf)
@@ -50,7 +50,8 @@
             X=XP+RI
 
             call dshape(ndim,node,cnr_lcl_mtx,cnr_glb_mtx,xi,cosn,fjcb,gcd)
-            ! GCD gives the normal n vector
+            ! GCD gives the two tangent vector
+            ! cosn gives a normalized normal vector
             ! dshape based on xi
 
             if(rho.gt.1.0d-10)then    
@@ -62,18 +63,15 @@
                 forall (i = 1:ndim)    
                     a(i)=a(i)+dot_product(gcd(i,1:nbdm),slop(1:nbdm))
                 end forall                  
-            
                 gm=dsqrt(dot_product(a,a))
                 drdx=a/gm                 ! eq.(3-6-74)
             endif 
 
             ! dr/dx is defined above
-            
-            DRDN = DOT_PRODUCT(COSN,DRDX)  !!!!  notice dr/dn is defined  here
-            
+            drdn = dot_product(cosn,drdx)  !!!!  notice dr/dn is defined  here
             !CALL F_BAR(NDIM,NBDM,DRDX,COSN,R,DRDN,XI,SF_iter,XP,X,NF,FQ)
             call f_integrand(ndim,nf,cosn,drdx,drdn,sf_iter,fq)
-            COEFB(step_n,:) = FQ*FJCB/ROBAR**hi_beta
+            COEFB(step_n,:) = FQ*FJCB/ROBAR**lamda
 
      
             IF(step_n.EQ.0) GOTO 20
