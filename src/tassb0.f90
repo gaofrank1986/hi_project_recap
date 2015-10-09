@@ -164,38 +164,8 @@
                     call sing_ele1(inode,ielem,nodqua(inode),xp,yp,zp,&
                         &                   amatrix,bmatrix)
                 end if 
-                call common_block(ielem,inode,amatrix,bmatrix,fterm_coef)
-!                do     j=1,  ncn(ielem) 
-!                    jncon=ncon(ielem,j)
-!                    kncon=ncond(ielem,j)  
-!                do     ip=1, nsys          
-!                    xsb=ex(ip)*xyz(1,jncon)
-!                    ysb=ey(ip)*xyz(2,jncon)
-!                    zsb=       xyz(3,jncon)
-!                    nx=ex(ip)*dxyz(1,kncon)
-!                    ny=ey(ip)*dxyz(2,kncon)
-!                    nz=       dxyz(3,kncon)
-!                    call dinp(xsb,ysb,zsb,dpox,dpoy,dpoz)       
-!                    dpdn=dpox*nx+dpoy*ny+dpoz*nz
-!
-!                do   is=1, nsys    
-!                    amata(inode,jncon,ip)=amata(inode,jncon,ip)+&
-!                        &              rsn(is,ip)*bmatrix(is,j)               
-!
-!                    bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)&
-!                                &*amatrix(is,j)*poxy(xsb,ysb,zsb)
-!                enddo
-!!
-!                do i = 0,3
-!                call dinp0(i,xsb,ysb,zsb,phi,dpox,dpoy,dpoz)       
-!                dpdn=dpox*nx+dpoy*ny+dpoz*nz
-!                do    is=1, nsys             
-!                fterm_coef(i,ip)=fterm_coef(i,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn        
-!                fterm_coef(i,ip)=fterm_coef(i,ip)+rsn(is,ip)*amatrix(is,j)*phi
-!                enddo
-!
-!                end do
-!                end do;end do !j,ip
+                call common_block(0,ielem,inode,amatrix,bmatrix,fterm_coef)
+
 300     CONTINUE  
 
 !  Integration on the body surface
@@ -215,49 +185,50 @@
      &                   AMATRIX,BMATRIX)
 !         write(101,*) ' After SING_ELE1'
         END IF                
-! 
 !       write(101,*) ' BMATRIX=',BMATRIX(1,:)
 !       write(101,*) ' AMATRIX=',AMATRIX(1,:)
+!!
+!        do  320   j=1,  ncn(ielem) 
+!          jncon=ncon(ielem,j)
+!          kncon=ncond(ielem,j)
+!         do  320   ip=1, nsys 
+!             xsb=ex(ip)*xyz(1,jncon)
+!             ysb=ey(ip)*xyz(2,jncon)
+!             zsb=       xyz(3,jncon)
 !
-        do  320   j=1,  ncn(ielem) 
-          jncon=ncon(ielem,j)
-          kncon=ncond(ielem,j)
-         do  320   ip=1, nsys 
-             xsb=ex(ip)*xyz(1,jncon)
-             ysb=ey(ip)*xyz(2,jncon)
-             zsb=       xyz(3,jncon)
-
-             nx=ex(ip)*dxyz(1,kncon)
-             ny=ey(ip)*dxyz(2,kncon)
-             nz=       dxyz(3,kncon)
-
-             call dinp(xsb,ysb,zsb,dpox,dpoy,dpoz)       
-             dpdn=dpox*nx+dpoy*ny+dpoz*nz 
-
-             do  is=1, nsys    
-             if(jncon .gt. nnf)  then
-                 amata(inode,jncon,ip)=amata(inode,jncon,ip)-&
-         &                          rsn(is,ip)*amatrix(is,j)
-             else
-                 phi=poxy(xsb,ysb,zsb)
-         bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)*amatrix(is,j)*phi   !  * ******
-             endif
-
-         bmata(inode,ip)=bmata(inode,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn  !  * ******
-             enddo
+!             nx=ex(ip)*dxyz(1,kncon)
+!             ny=ey(ip)*dxyz(2,kncon)
+!             nz=       dxyz(3,kncon)
+!
+!             call dinp(xsb,ysb,zsb,dpox,dpoy,dpoz)       
+!             dpdn=dpox*nx+dpoy*ny+dpoz*nz 
+!
+!             do  is=1, nsys    
+!             if(jncon .gt. nnf)  then
+!                 amata(inode,jncon,ip)=amata(inode,jncon,ip)-&
+!         &                          rsn(is,ip)*amatrix(is,j)
+!             else
+!                 phi=poxy(xsb,ysb,zsb)
+!         bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)*amatrix(is,j)*phi   !  * ******
+!             endif
+!
+!         bmata(inode,ip)=bmata(inode,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn  !  * ******
+!             enddo
 !
 !
-        do i = 0,3
-        call dinp0(i,xsb,ysb,zsb,phi,dpox,dpoy,dpoz)       
-        dpdn=dpox*nx+dpoy*ny+dpoz*nz
-        do    is=1, nsys             
-        fterm_coef(i,ip)=fterm_coef(i,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn        
-        fterm_coef(i,ip)=fterm_coef(i,ip)+rsn(is,ip)*amatrix(is,j)*phi
-        enddo
-        end do 
+!        do i = 0,3
+!        call dinp0(i,xsb,ysb,zsb,phi,dpox,dpoy,dpoz)       
+!        dpdn=dpox*nx+dpoy*ny+dpoz*nz
+!        do    is=1, nsys             
+!        fterm_coef(i,ip)=fterm_coef(i,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn        
+!        fterm_coef(i,ip)=fterm_coef(i,ip)+rsn(is,ip)*amatrix(is,j)*phi
+!        enddo
+!        end do 
 
 
-320      CONTINUE
+        call common_block(1,ielem,inode,amatrix,bmatrix,fterm_coef)
+
+!320      CONTINUE
 !
 
 400     CONTINUE
