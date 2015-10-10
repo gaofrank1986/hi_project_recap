@@ -7,62 +7,63 @@
         real(8),intent(in) :: amatrix(4,8),bmatrix(4,8)
         real(8),intent(inout) :: fterm_coef(0:3,4)
 
-        integer :: jncon,kncon,j,ip,is,i
+        integer :: cur_node,cur_nrml,j,ip,is,i
         real(8) :: xsb,ysb,zsb,nx,ny,nz,dpdn,phi
         real(8) :: dpox,dpoy,dpoz
-          REAL*8 RSN(4,4),EX(4),EY(4)
+        real*8 rsn(4,4),ex(4),ey(4)
 
-        DATA RSN /1.,  1.,  1.,  1., &
+        data rsn /1.,  1.,  1.,  1., &
      &            1., -1.,  1., -1.,&
      &            1.,  1., -1., -1., &
      &            1., -1., -1.,  1./ 
 !
-          DATA EX /  1.0d0,  1.0d0, -1.0d0, -1.0d0/                       
-        DATA EY /  1.0d0, -1.0d0, -1.0d0,  1.0d0/
+        data ex /  1.0d0,  1.0d0, -1.0d0, -1.0d0/
+        data ey /  1.0d0, -1.0d0, -1.0d0,  1.0d0/
 
         do     j=1,  ncn(ielem) 
-            jncon=ncon(ielem,j)
-            kncon=ncond(ielem,j)  
-        do     ip=1, nsys          
-            xsb=ex(ip)*xyz(1,jncon)
-            ysb=ey(ip)*xyz(2,jncon)
-            zsb=       xyz(3,jncon)
-            nx=ex(ip)*dxyz(1,kncon)
-            ny=ey(ip)*dxyz(2,kncon)
-            nz=       dxyz(3,kncon)
-            call dinp(xsb,ysb,zsb,dpox,dpoy,dpoz)       
-            dpdn=dpox*nx+dpoy*ny+dpoz*nz
-        if (flag1.eq.0) then
+            cur_node=ncon(ielem,j)
+            cur_nrml=ncond(ielem,j)  
+            do     ip=1, nsys          
+                xsb=ex(ip)*xyz(1,cur_node)
+                ysb=ey(ip)*xyz(2,cur_node)
+                zsb=       xyz(3,cur_node)
+                nx=ex(ip)*dxyz(1,cur_nrml)
+                ny=ey(ip)*dxyz(2,cur_nrml)
+                nz=       dxyz(3,cur_nrml)
 
-            do   is=1, nsys    
-                amata(inode,jncon,ip)=amata(inode,jncon,ip)+&
-                    &              rsn(is,ip)*bmatrix(is,j)               
+                call dinp(xsb,ysb,zsb,dpox,dpoy,dpoz)       
+                dpdn=dpox*nx+dpoy*ny+dpoz*nz
 
-                bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)&
-                            &*amatrix(is,j)*poxy(xsb,ysb,zsb)
-            enddo
-        else 
-              do  is=1, nsys    
-             if(jncon .gt. nnf)  then
-                 amata(inode,jncon,ip)=amata(inode,jncon,ip)-&
-         &                          rsn(is,ip)*amatrix(is,j)
-             else
-                 phi=poxy(xsb,ysb,zsb)
-         bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)*amatrix(is,j)*phi   !  * ******
-             endif
+                if (flag1.eq.0) then
+                    do   is=1, nsys    
+                    amata(inode,cur_node,ip)=amata(inode,cur_node,ip)+&
+                        &              rsn(is,ip)*bmatrix(is,j)               
 
-         bmata(inode,ip)=bmata(inode,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn  !  * ******
-             enddo
-        end if
-        if (flag2.eq.0) then!
-        do i = 0,3
-            call dinp0(i,xsb,ysb,zsb,phi,dpox,dpoy,dpoz)       
-            dpdn=dpox*nx+dpoy*ny+dpoz*nz
-            do    is=1, nsys             
-                fterm_coef(i,ip)=fterm_coef(i,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn        
-                fterm_coef(i,ip)=fterm_coef(i,ip)+rsn(is,ip)*amatrix(is,j)*phi
-            enddo
-        end do
-        end if
-        end do;end do !j,ip
+                    bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)&
+                        &           *amatrix(is,j)*poxy(xsb,ysb,zsb)
+                    enddo
+                else 
+                    do  is=1, nsys    
+                    if(cur_node .gt. nnf)  then
+                        amata(inode,cur_node,ip)=amata(inode,cur_node,ip)-&
+                            &                   rsn(is,ip)*amatrix(is,j)
+                    else
+                        phi=poxy(xsb,ysb,zsb)
+                        bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)*amatrix(is,j)*phi   !  * ******
+                    endif
+
+                    bmata(inode,ip)=bmata(inode,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn  !  * ******
+                    enddo
+                end if
+                if (flag2.eq.0) then!
+                    do i = 0,3
+                    call dinp0(i,xsb,ysb,zsb,phi,dpox,dpoy,dpoz)       
+                    dpdn=dpox*nx+dpoy*ny+dpoz*nz
+                    do    is=1, nsys             
+                    fterm_coef(i,ip)=fterm_coef(i,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn        
+                    fterm_coef(i,ip)=fterm_coef(i,ip)+rsn(is,ip)*amatrix(is,j)*phi
+                    enddo
+                    end do
+                end if
+                end do;end do !j,ip
      end subroutine

@@ -9,7 +9,8 @@
     subroutine comp_link(ielem,inode,ii) 
         use MVAR_MOD
         implicit none
-        integer,intent(out) :: ii,node,ielem
+        integer,intent(in) :: inode,ielem
+        integer,intent(out) :: ii
 
         integer :: i
 
@@ -30,7 +31,7 @@
         implicit   none  
         integer  inode,ielem,j,jnode,ind,indd,ip
         integer ::    i,ii,is,l
-        real*8  xp,yp,zp
+        real*8  xp,yp,zp,dpox,dpoy,dpoz,phi
         real*8  rsn(4,4)
         real*8  bmatrix(4,8),amatrix(4,8),bmat(4)
 
@@ -126,6 +127,7 @@
              &                        h,xyz,dxyze,s_angle)    
 
             s_angle=1.0d0-s_angle
+
             write(9,102)  inode, xp, yp, zp, s_angle
             write(*,102)  inode, xp, yp, zp, s_angle
             write(101,102)  inode, xp, yp, zp, s_angle
@@ -183,7 +185,7 @@
              call dinp(xp,yp,zp,dpox,dpoy,dpoz)       
              bmata(inode,1)=bmata(inode,1)-fra3(inode)*phi-&
                  &     frc31(inode)*dpox-frc32(inode)*dpoy
-        500     CONTINUE
+        500     continue
 !
 ! =======================================================================
 !    Source point is on the body surface
@@ -209,17 +211,17 @@
 ! ------------------------------
 ! Intergration on the free surface
 ! 
-        do  800   ielem=1,  nelemf
+        do   ielem=1,  nelemf
 
             ii=0   
             call norm_ele0(ielem,xp,yp,zp,amatrix,bmatrix)
             call common_block(0,1,ielem,inode,amatrix,bmatrix,fterm_coef)
 
-800     continue
+        end do
 
 ! Intergration on the body surface    
 
-        do  900   ielem=1+nelemf, nelem
+        do  ielem=1+nelemf, nelem
 
             call comp_link(ielem,inode,ii)!
             if (ii .eq. 0)   then 
@@ -229,8 +231,8 @@
                  &                   amatrix,bmatrix)
             end if
 
-     call common_block(1,1,ielem,inode,amatrix,bmatrix,fterm_coef)
-900     continue
+            call common_block(1,1,ielem,inode,amatrix,bmatrix,fterm_coef)
+        end do
 1000     continue
 !
 ! =============================================
