@@ -197,44 +197,44 @@
             xp=xyz(1,inode)
             yp=xyz(2,inode)
             zp=xyz(3,inode) 
+            
+            fterm_coef = 0
+            !call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,&
+             !&                    h,xyz,dxyze,s_angle) 
 
-            call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,&
-             &                    h,xyz,dxyze,s_angle) 
+            !s_angle=1.0d0-s_angle
 
-            s_angle=1.0d0-s_angle
+            !write(9,102)  inode, xp, yp, zp, s_angle
+            !write(*,102)  inode, xp, yp, zp, s_angle
 
-            write(9,102)  inode, xp, yp, zp, s_angle
-            write(*,102)  inode, xp, yp, zp, s_angle
+            !angle(inode)=s_angle
 
-            angle(inode)=s_angle
+            !amata(inode,inode,1:nsys)= angle(inode)
 
-            amata(inode,inode,1:nsys)= angle(inode)
+            do   ielem=1,  nelemf
 
-! ------------------------------
-! Intergration on the free surface
-! 
-        do   ielem=1,  nelemf
-
-            ii=0   
-            call norm_ele0(ielem,xp,yp,zp,amatrix,bmatrix)
-            call common_block(0,1,ielem,inode,amatrix,bmatrix,fterm_coef)
-
-        end do
-
-! Intergration on the body surface    
-
-        do  ielem=1+nelemf, nelem
-
-            call comp_link(ielem,inode,ii)!
-            if (ii .eq. 0)   then 
+                ii=0   
                 call norm_ele0(ielem,xp,yp,zp,amatrix,bmatrix)
-            else if (ii .ne. 0)   then 
-                call sing_ele0(inode,ielem,nodqua(inode),xp,yp,zp,&
-                 &                   amatrix,bmatrix)
-            end if
+                call common_block(0,1,ielem,inode,amatrix,bmatrix,fterm_coef)
 
-            call common_block(1,1,ielem,inode,amatrix,bmatrix,fterm_coef)
-        end do
+            end do
+
+            do  ielem=1+nelemf, nelem
+
+                call comp_link(ielem,inode,ii)!
+                if (ii .eq. 0)   then 
+                    call norm_ele0(ielem,xp,yp,zp,amatrix,bmatrix)
+                else if (ii .ne. 0)   then 
+                    call sing_ele0(inode,ielem,nodqua(inode),xp,yp,zp,&
+                     &                   amatrix,bmatrix)
+                end if
+
+                call common_block(1,1,ielem,inode,amatrix,bmatrix,fterm_coef)
+            end do
+
+            fra3(inode)=fterm_coef(0,1)!
+            write (402,499) fterm_coef(0:3,1)
+            amata(inode,inode,1:nsys)= amata(inode,inode,1:nsys)+fra3(inode)
 1000     continue
 !
 ! =============================================
