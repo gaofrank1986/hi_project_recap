@@ -173,16 +173,17 @@
 
             end do
 
-            fra3(inode)=fterm_coef(0,1)!al1(1)
-            frc31(inode)=fterm_coef(1,1)!cele31(1)
-            frc32(inode)=fterm_coef(2,1)!cele32(1)
-            frc33(inode)=fterm_coef(3,1)!cele33(1)
+            fra3(inode)=fterm_coef(0,1)!
+            frc31(inode)=fterm_coef(1,1)-fterm_coef(0,1)*xp!
+            frc32(inode)=fterm_coef(2,1)-fterm_coef(0,1)*yp!
+            frc33(inode)=fterm_coef(3,1)-fterm_coef(0,1)*zp!
 
             !         write(10,620) inode,angle(inode),fra3(inode),&
             !     &                 frc31(inode),frc32(inode),frc33(inode)
-
-             phi=poxy(xp,yp,zp)
-             call dinp(xp,yp,zp,dpox,dpoy,dpoz)       
+            write (402,499) fterm_coef(0:3,1)
+            499 format(4f10.6)
+             phi=poxy(xp,yp,zp) ! this in known since src on free surface
+             call dinp(xp,yp,zp,dpox,dpoy,dpoz)! this is unkown, so is this a mistake
              bmata(inode,1)=bmata(inode,1)-fra3(inode)*phi-&
                  &     frc31(inode)*dpox-frc32(inode)*dpoy
         500     continue
