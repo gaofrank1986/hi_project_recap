@@ -123,19 +123,19 @@
             zp=xyz(3,inode)
 
             fterm_coef = 0
-            call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,&
-             &                        h,xyz,dxyze,s_angle)    
+            !call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,&
+             !&                        h,xyz,dxyze,s_angle)    
 
-            s_angle=1.0d0-s_angle
+            !s_angle=1.0d0-s_angle
 
-            write(9,102)  inode, xp, yp, zp, s_angle
-            write(*,102)  inode, xp, yp, zp, s_angle
-            write(101,102)  inode, xp, yp, zp, s_angle
+            !write(9,102)  inode, xp, yp, zp, s_angle
+            !write(*,102)  inode, xp, yp, zp, s_angle
+            !write(101,102)  inode, xp, yp, zp, s_angle
 
             102  format(i6,3f12.4,f15.6) 
 
-            angle(inode)=s_angle
-            amata(inode,inode,1:nsys)= angle(inode)
+            !angle(inode)=s_angle
+            !amata(inode,inode,1:nsys)= angle(inode)
             !  ---------------------------
             !  Integration on the free surface
 
@@ -186,6 +186,7 @@
              call dinp(xp,yp,zp,dpox,dpoy,dpoz)! this is unkown, so is this a mistake
              bmata(inode,1)=bmata(inode,1)-fra3(inode)*phi-&
                  &     frc31(inode)*dpox-frc32(inode)*dpoy
+             amata(inode,inode,1:nsys)= amata(inode,inode,1:nsys)+frc33(inode)
         500     continue
 !
 ! =======================================================================
