@@ -78,8 +78,6 @@ C
         WRITE(10, *) ' Test on huper-singular integration'
         call read_wav_data()
         call output_wav_data()
-C !  ------------------------------------
-C !bodmass在mass.f中
 
         XC=0
         YC=0
@@ -87,82 +85,18 @@ C !bodmass在mass.f中
 
        call read_mesh()
 !
-	  WRITE(11,*) ' ISYS=',ISYS,' NSYS=',NSYS
-	  WRITE(11,*) ' NELEMB=',NELEMB,' NELEMF=',NELEMF
+	  write(11,*) ' isys=',isys,' nsys=',nsys
+	  write(11,*) ' nelemb=',nelemb,' nelemf=',nelemf
+	  write(11,*) ' nelem=',nelem,'  iopl=',ipol
 
-
-	  WRITE(11,*) ' NELEM=',NELEM,'  IOPL=',IPOL
-
-       ALLOCATE(SAMB(NELEM,16,0:8),SAMBXY(NELEM,16,3))
+       allocate(samb(nelem,16,0:8),sambxy(nelem,16,3))
        allocate(DSAMB(NELEM,16,6))
 
-C ! IETYPE: type of the element; =1, on body surface; =2, on free surface
-C ! SAMBXY: Coordinates of Gaussin points
-C ! DSAMB:  Normal direvatives at Gaussian points
-C ! XYZE  : Initial Coordinates of nodes of body mesh
-C ! TXYZE : Coordinates of nodes of body mesh at the simulation time 
 
-
-      !  call MESHFS4   		        ! Read in data on free surface mesh
-        
-        WRITE(11,*),'  After MESHFS4' 
-
-       ! CALL MESHBD(IPOL) 		    ! Read in data on body mesh
-        WRITE(11,*),'  After MESHBD' 
-
-        
-C         OPEN(50, FILE='OUTPUT/DATBDMS.txt',    STATUS='UNKNOWN')
-
-        WRITE(11,*),'  Before CONVSB' 
-        WRITE(11,*) ' NNODE=',NNODE
-	  
-	   !   CALL CONVSB
-        WRITE(11,*),'  After CONVSB' 
-        
-C ! mvr中 NNODE:  total number of nodes according to the coordinate
-C ! NNODED: total number of nodes according to the normals
-	  WRITE(11,*) ' NNODE=',NNODE
-
-	  NDMAX=MAX(NNODE,NNODED)
-       ALLOCATE(NODELE(NNODE,64),NODNOE(NNODE),NODELJ(NNODE,64),
-     1         NODQUA(NNODE),NNORMC(NNODED),
-     2		 XYZ(3,NDMAX),DXYZ(6,NDMAX),DAMPF(NNF))
+        call pre_mesh_2()!
+!  --------------------------------------------
         ALLOCATE(ANGLE(NNODE),FrA3(NNODE),
      1	        FrC31(NNODE),FrC32(NNODE),FrC33(NNODE))
-!
-! ---------------------------------------------------
-!
-	 WRITE(10,*) '  IND       X          Y          Z        DAMPing'
-	 DO IND=1, NNF
-	  DAMPF(IND)=DAMPTP(IND)
-	  XYZ(1,IND)=XYZTP(1,IND)
-	  XYZ(2,IND)=XYZTP(2,IND)
-	  XYZ(3,IND)=XYZTP(3,IND)
-	  !WRITE(10,111) IND, XYZ(1,IND),XYZ(2,IND),XYZ(3,IND),DAMPF(IND)
-	 END DO
-!	  	 
-	 DO IND=NNF+1, NNODE
-	  XYZ(1,IND)=XYZTP(1,IND)
-	  XYZ(2,IND)=XYZTP(2,IND)
-	  XYZ(3,IND)=XYZTP(3,IND)
-	  !WRITE(10,111) IND, XYZ(1,IND),XYZ(2,IND),XYZ(3,IND)
-	 END DO
-!
-	 DO IND=1, NNODED
-	  DXYZ(1,IND)=DXYZTP(1,IND)
-	  DXYZ(2,IND)=DXYZTP(2,IND)
-	  DXYZ(3,IND)=DXYZTP(3,IND)
-	  NNORMC(IND)=NNORMN(IND)
-	 ! WRITE(10,111) IND, DXYZ(1,IND),DXYZ(2,IND),DXYZ(3,IND)
-	 END DO
-!
-111	 FORMAT(I4,5(2x,F12.5))
-!
-	 DEALLOCATE(XYZTP,DXYZTP,NNORMN)
-!
-	 DAMPF(:)=W1*DAMPF(:)
-!
-!  --------------------------------------------
 
        ALLOCATE(AMATA(NNODE,NNODE,NSYS),
 	1		  BMATA(NNODE,NSYS), INDX(NNODE,NSYS))
@@ -172,20 +106,11 @@ C ! NNODED: total number of nodes according to the normals
 	1	      DPDT(NNODE,NSYS))
 	 ALLOCATE(DH(4,NNF,NSYS),DP(4,NNF,NSYS),Dposi(4,6))
 !
-!      
-! Identify the Gaussian sampling points and evaluate the    
-! Corresponding values for the shape functions and Jacobian matrices       
-!
         CALL BODYFD                  
-        WRITE(10,*)  'AFTER BODYFD' 
-!
-!  --------------------------------------------
 
         print *,"initialise hi data"
         call init_hi_var() 
 
-C ! Assembling matrix and computing diffraction and radiation potentials
-C !
          CALL TASSB0   
 C 	  WRITE(10,*) '    AFTER TASSB0' 
 ! 
@@ -196,20 +121,6 @@ C           write (200,999) i,ncon(i,1:8)
 C           x = 0.5*(XYZ(1,NCON(2))+XYZ(1,NCON(6)))
 C           Y = 0.5*(XYZ(2,NCON(2))+XYZ(2,NCON(6)))
 C         end DO
-
-
-
-!                              
-1010    FORMAT(F7.3,1x,F7.3,1x,6E14.5) 
-! 
-!1111    FORMAT(//,'  WATER DEPTH=',F9.3,'    WAVE AMPLITUDE=', F6.2,/,
-!     1    '  WAVE NUMBER=',F9.5,'  K0=',F9.5,'  WAVE LENGTH=',F9.4,/, 
-!     3    '  ANGULAR FREQU.=',F9.5,'   WAVE PERIOD=',F7.3,/,      
-!     2    '  WAVE DIRECTION:',F7.3,'  Degree',/)
-! 
-1115	  FORMAT(' I_time=',I5,'    at the time:',F10.5,' s')
-1200	FORMAT(2x,I3,3F12.5,1x,2F13.5)
         print *,"=================== main program ends ==============="
-        STOP 
-       END      
+        end  program      
 

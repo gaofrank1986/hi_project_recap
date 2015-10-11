@@ -37,7 +37,7 @@ module mesh
     real(8),allocatable :: dampe(:,:),dampf(:),damptp(:)
     integer,allocatable :: nodele(:,:),nodnoe(:),nodelj(:,:),nodqua(:) 
 contains
-
+        include './include/prepare_mesh_2.f90'
     subroutine read_mesh()
         implicit none
 
