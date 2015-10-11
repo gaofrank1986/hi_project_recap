@@ -4,9 +4,9 @@ module wave
     real(8),protected :: wk,h,beta,amp
     real(8),protected :: w1,tper,v,wl 
     real(8),protected :: timerk,rampf
-    real(8),parameter,protected :: g = 9.807
-    real(8),parameter,protected :: rho = 1.023e3
-    real(8),parameter,protected :: pi = 3.14159265359 
+    real(8),parameter :: g = 9.807
+    real(8),parameter :: rho = 1.023e3
+    real(8),parameter :: pi = 3.14159265359 
     !w1 => angular freq
     !v => wav num deep water
     !wk =>wave num
