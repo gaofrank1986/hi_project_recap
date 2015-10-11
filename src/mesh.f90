@@ -1,5 +1,5 @@
 module mesh
-    
+    use wave 
     implicit none
     
     real(8),public,allocatable :: XYZB(:,:),DXYZB(:,:)
@@ -44,7 +44,7 @@ contains
         INTEGER IFWKO,IPOL
       !INTEGER NTnum,IFLAG_T,IND,
       
-        REAL*8  WL
+!        REAL*8  WL
       !REAL*8  FAMPR(6),FAMPI(6),FORCER(6),FORCEI(6)
       !REAL*8  PL_AMP(6),FORAMP
       !REAL*8  FCD_AMR,  FCD_AMI
@@ -79,13 +79,13 @@ contains
         !allocate(DAMPE(8,NELEM))
         ALLOCATE( TXYZE(3,8,NELEM))
         ALLOCATE( XYZTP(3,8*NELEM),DXYZTP(3,8*NELEM))!,DAMPTP(8*NELEM))
-
+        allocate(dampe(8,nelem),damptp(8*nelem))
         !ALLOCATE(SAMB(NELEM,16,0:8),SAMBXY(NELEM,16,3),
         !&         DSAMB(NELEM,16,6))
 
 
-!        call MESHFS4()! Read in data on free surface mesh
-!        call MESHBD(IPOL) ! Read in data on body mesh
+        call MESHFS4_2()! Read in data on free surface mesh
+        call MESHBD_2(IPOL) ! Read in data on body mesh
 !
 !        close(2)
 !        close(1)
@@ -164,7 +164,7 @@ contains
 !C *                                                                 *
 !C *******************************************************************
 !C 
-    subroutine meshfs42()
+    subroutine meshfs4_2()
 
         implicit none
 
@@ -178,7 +178,7 @@ contains
             READ(3, *) (XYZE(1,J,IE), J=1, NCN(IE))
             READ(3, *) (XYZE(2,J,IE), J=1, NCN(IE))
 
-      !dampe(:,:)=0.0d0
+      dampe(:,:)=0.0d0
 
 100    CONTINUE
         ! in dat file ,positive nrml is set as pointing into fulid field
@@ -209,7 +209,7 @@ contains
         INTEGER I,IE,M,INODE,NCNN,K,KK
         REAL*8  A1,A2,R1,R2,Z1
         REAL*8  XOFSET(50),YOFSET(50),ZOFSET(50)
-        real(8),parameter :: pi = 3.141592653589793
+!        real(8),parameter :: pi = 3.141592653589793
         !
         ! --------------------------------------------
         DO 5 I=1, NCOR
