@@ -42,10 +42,6 @@ C
 C ----------------------------------------
 C Input data files
 
-        OPEN(1, FILE='INPUT/DATIN.txt',      STATUS='OLD') 
-        OPEN(2, FILE='INPUT/DATBDMS.txt',    STATUS='OLD') 
-        OPEN(3, FILE='INPUT/DATWPMS.txt',    STATUS='OLD') 
-
 C         OPEN(8, FILE='INPUT/SOLIDANGLE.txt',    STATUS='OLD') 
 C         open(67, FILE='INPUT/M.txt',    STATUS='OLD')
 C         read(67,*) wl
@@ -89,57 +85,23 @@ C !bodmass在mass.f中
         YC=0
         ZC=0
 
-C !    mvar中ISYS: number of symmetric planes
-C !    NELEMB: number of elements on body surface
-C !    NNB: number of nodes on the body surface according to coordinate
-C !    NNBD: number of nodes on the body surface according to directives 
-!        READ(2,*) ISYS 
-!        READ(2,*)   NELEMB, NNB, NNBD, IPOL
-!
-!   	 ALLOCATE (NCONB(NELEMB,8),NCONDB(NELEMB,8))
-!
-!
-!
-!
-!       ALLOCATE (XYZB(3,NNB),DXYZB(3,NNBD))
-!
-!!	
-!
-!        IF(ISYS.EQ.0) NSYS=1
-!        IF(ISYS.EQ.1) NSYS=2
-!        IF(ISYS.EQ.2) NSYS=4
-!C
-!C !    mvar中NELEMF:number of elements on the free surface
-!      
-!
-!        READ(3,*)   NELEMF
        call read_mesh()
 !
 	  WRITE(11,*) ' ISYS=',ISYS,' NSYS=',NSYS
 	  WRITE(11,*) ' NELEMB=',NELEMB,' NELEMF=',NELEMF
-C !    mvar中NELEM: number of total elements
 
-!	  NELEM=NELEMB+NELEMF
 
 	  WRITE(11,*) ' NELEM=',NELEM,'  IOPL=',IPOL
 
        ALLOCATE(SAMB(NELEM,16,0:8),SAMBXY(NELEM,16,3))
        allocate(DSAMB(NELEM,16,6))
-!       allocate(NCN(NELEM),NCON(NELEM,8),
-!     1		   NCOND(NELEM,8),IETYPE(NELEM),NNORMN(8*NELEM) )
 
-!        ALLOCATE( XYZE(3,8,NELEM),DXYZE(3,8,NELEM),DAMPE(8,NELEM))
-!        ALLOCATE( TXYZE(3,8,NELEM))
-!	  ALLOCATE( XYZTP(3,8*NELEM),DXYZTP(3,8*NELEM),DAMPTP(8*NELEM))
-
-C ! mvar中的定义 NCN: number of nodes in the element
 C ! IETYPE: type of the element; =1, on body surface; =2, on free surface
 C ! SAMBXY: Coordinates of Gaussin points
 C ! DSAMB:  Normal direvatives at Gaussian points
 C ! XYZE  : Initial Coordinates of nodes of body mesh
 C ! TXYZE : Coordinates of nodes of body mesh at the simulation time 
-C ! --------------------------------------------
-C ! MESHFS4和MESHBD在meshda4.f中
+
 
       !  call MESHFS4   		        ! Read in data on free surface mesh
         
@@ -148,9 +110,6 @@ C ! MESHFS4和MESHBD在meshda4.f中
        ! CALL MESHBD(IPOL) 		    ! Read in data on body mesh
         WRITE(11,*),'  After MESHBD' 
 
-	   CLOSE(2)
-
-     
         
 C         OPEN(50, FILE='OUTPUT/DATBDMS.txt',    STATUS='UNKNOWN')
 
