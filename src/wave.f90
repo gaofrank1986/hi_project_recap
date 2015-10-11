@@ -4,9 +4,9 @@ module wave
     real(8),protected :: wk,h,beta,amp
     real(8),protected :: w1,tper,v,wl 
     real(8),protected :: timerk,rampf
-    real(8),parameter :: g = 9.87
-    real(8),parameter :: rho = 1.023e3
-    real(8),parameter :: pi = 3.14159265359 
+    real(8),parameter,protected :: g = 9.807
+    real(8),parameter,protected :: rho = 1.023e3
+    real(8),parameter,protected :: pi = 3.14159265359 
     !w1 => angular freq
     !v => wav num deep water
     !wk =>wave num
@@ -37,7 +37,7 @@ contains
              else 
                  call waveck(w1,h,wk)
              end if
-          end if
+         end if
 
           tper = 2.*pi/w1
           beta = beta*pi/180.0d0
@@ -53,6 +53,9 @@ contains
         open(1, file='output/wave_info.txt',      status='unknown') 
         write(1,*) 
         write(1,*) '                   ================='
+        write(1,*) " gravity =",g
+        write(1,*) " rho     =",rho
+        write(1,*) " pi      =",pi  
         write(1,1111)  h,amp,wk,v,wl,w1,tper,beta*180./pi 
 
         1111    format(//,'  water depth=',f9.3,'    wave amplitude=', f6.2,/,&
