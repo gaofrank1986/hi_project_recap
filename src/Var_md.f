@@ -87,10 +87,11 @@ C   Constants and Variables for body mesh
 C
         MODULE MVar_mod
             use wave
+            use mesh
             implicit none
 C
-        INTEGER NTIME,ITIME,ISYS,NSYS,IORDER
-	  INTEGER NELEM,NELEMB,NELEMF,NNODE,NNODED,NNB,NNBD,NNF,NNTCH
+        INTEGER NTIME,ITIME,IORDER!ISYS,NSYS,
+!	  INTEGER NELEM,NELEMB,NELEMF,NNODE,NNODED,NNB,NNBD,NNF,NNTCH
 
 	  INTEGER NPLOUT
 !
@@ -130,11 +131,11 @@ C
 ! RampF: ramp function for incident potential
 ! RampV: ramp function for damping
 !    
-   	 INTEGER, ALLOCATABLE:: NCN(:),IETYPE(:),NCON(:,:),NCOND(:,:),
-	1                        NNORMC(:)
-       INTEGER, ALLOCATABLE:: NODELE(:,:),NODNOE(:),
-	1			            NODELJ(:,:),NODQUA(:)
-   	 INTEGER, ALLOCATABLE:: NCONB(:,:),NCONDB(:,:)
+!   	 INTEGER, ALLOCATABLE:: NCN(:),IETYPE(:),NCON(:,:),NCOND(:,:),
+!	1                        NNORMC(:)
+!       INTEGER, ALLOCATABLE:: NODELE(:,:),NODNOE(:),
+!	1			            NODELJ(:,:),NODQUA(:)
+!   	 INTEGER, ALLOCATABLE:: NCONB(:,:),NCONDB(:,:)
 
 ! NCN: number of nodes in the element
 ! IETYPE: type of the element; =1, on body surface; =2, on free surface
@@ -146,11 +147,11 @@ C
 ! NODELJ:
 ! NODQUA:
 !
-       REAL*8,ALLOCATABLE:: XYZE(:,:,:),DXYZE(:,:,:),XYZ(:,:),DXYZ(:,:),
-	1                      DAMPE(:,:),DAMPF(:)
-       REAL*8,ALLOCATABLE:: XYZB(:,:),DXYZB(:,:)
+!       REAL*8,ALLOCATABLE:: XYZE(:,:,:),DXYZE(:,:,:),XYZ(:,:),DXYZ(:,:),
+!	1                      DAMPE(:,:),DAMPF(:)
+!       REAL*8,ALLOCATABLE:: XYZB(:,:),DXYZB(:,:)
 
-       REAL*8,ALLOCATABLE:: TXYZE(:,:,:)
+!       REAL*8,ALLOCATABLE:: TXYZE(:,:,:)
 !
 ! XYZE  : Initial Coordinates of nodes of body mesh
 ! DXYZE:
@@ -200,8 +201,8 @@ C
 ! ------------------------------------
 ! Temporary arrayes
 ! 
-   	 INTEGER, ALLOCATABLE:: NNORMN(:)
-       REAL*8,  ALLOCATABLE:: XYZTP(:,:),DXYZTP(:,:),DAMPTP(:)
+!   	 INTEGER, ALLOCATABLE:: NNORMN(:)
+!       REAL*8,  ALLOCATABLE:: XYZTP(:,:),DXYZTP(:,:),DAMPTP(:)
         integer :: max_level
         real(8) :: al!
 	   DATA AL/1.2/

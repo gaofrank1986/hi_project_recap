@@ -2,16 +2,16 @@ module mesh
     
     implicit none
     
-    real(8),private,allocatable :: XYZB(:,:),DXYZB(:,:)
+    real(8),public,allocatable :: XYZB(:,:),DXYZB(:,:)
     !xyzb => (3,node_id)  node data 
     !dxyzb => (3,nrml_id) derivative data
-    integer,private,allocatable :: NCONB(:,:),NCONDB(:,:)   
+    integer,public,allocatable :: NCONB(:,:),NCONDB(:,:)   
     ! nconb => node list body mesh
     ! ncondb => normal list body
     real(8),allocatable :: XYZE(:,:,:),DXYZE(:,:,:),TXYZE(:,:,:)
     ! xyze =>  before combine, new full mesh for node (3,8,elem_id)
     ! dxyze => before combine, new full mesh for normal (3,8,elem,id)
-    real(8),private,allocatable :: XYZTP(:,:),DXYZTP(:,:)
+    real(8),public,allocatable :: XYZTP(:,:),DXYZTP(:,:)
     ! xyztp => convsb, combined node mesh, xyztp(3,node_id)
     ! dxyztp = > combined normal mesh, dxyztp(3,nrml_id)
     integer,allocatable :: NCN(:),NCON(:,:),NCOND(:,:),IETYPE(:)
@@ -20,7 +20,7 @@ module mesh
     ! ncond => combined nrml list,ncond(8,elem_id)
     ! ietype => flag show if a elem is free surface mesh or a body mesh
 
-    integer,private,allocatable :: NNORMN(:)
+    integer,public,allocatable :: NNORMN(:),NNORMC(:)
     real(8),allocatable :: xyz(:,:),dxyz(:,:)
     integer :: nsys,nelem,nnode,nnoded,isys
     ! nsys => about symmetr
@@ -33,9 +33,8 @@ module mesh
     ! nnbd => nrml num in body
     ! nelemf => elem num in fs
     ! nnf => node num in fs
-    
-    ! wave information
 
+    real(8),allocatable :: dampe(:,:),dampf(:),damptp(:)
     integer,allocatable :: nodele(:,:),nodnoe(:),nodelj(:,:),nodqua(:) 
 contains
 
@@ -85,17 +84,17 @@ contains
         !&         DSAMB(NELEM,16,6))
 
 
-        call MESHFS4()! Read in data on free surface mesh
-        call MESHBD(IPOL) ! Read in data on body mesh
-
-        close(2)
-        close(1)
-        close(3)
-
-        call convsb()
-        call prepare_mesh()
-
-        deallocate(xyzb,dxyzb,nconb,ncondb,nnormn,xyztp,dxyztp)
+!        call MESHFS4()! Read in data on free surface mesh
+!        call MESHBD(IPOL) ! Read in data on body mesh
+!
+!        close(2)
+!        close(1)
+!        close(3)
+!
+!        call convsb()
+!        call prepare_mesh()
+!
+!        deallocate(xyzb,dxyzb,nconb,ncondb,nnormn,xyztp,dxyztp)
 
     end subroutine
 
@@ -165,7 +164,7 @@ contains
 !C *                                                                 *
 !C *******************************************************************
 !C 
-    subroutine meshfs4()
+    subroutine meshfs42()
 
         implicit none
 
@@ -198,7 +197,7 @@ contains
 !C *                                                             *
 !C ***************************************************************
 !C 
-        SUBROUTINE MESHBD(NCOR)
+        SUBROUTINE MESHBD_2(NCOR)
 
 !     USE MVAR_MOD
         IMPLICIT   NONE  
