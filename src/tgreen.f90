@@ -34,7 +34,7 @@
         SR =DSQRT(SR2) 
         SR1=DSQRT(ST2)   
 ! 
-        XHF(1)= 1.D0/SR +  1.D0/SR1 
+        XHF(1)= 1.D0/SR! +  1.D0/SR1 
         XHF(2)=-DX/SR**3 -  DX /SR1**3 
         XHF(3)=-DY/SR**3 -  DY /SR1**3 
         XHF(4)=-DZ/SR**3 -  DZ1/SR1**3    

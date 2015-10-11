@@ -2,11 +2,11 @@ module wave
   implicit none
       
     real(8),protected :: wk,h,beta,amp
-    real(8),protected :: w1 
-    real(8),protected :: timerk
-    real(8),parameter,private :: g = 9.87
-    real(8),parameter,private :: rho = 1.023e3
-    real(8),parameter,private :: pi = 3.14159265359 
+    real(8),protected :: w1,tper,v,wl 
+    real(8),protected :: timerk,rampf
+    real(8),parameter :: g = 9.87
+    real(8),parameter :: rho = 1.023e3
+    real(8),parameter :: pi = 3.14159265359 
     !w1 => angular freq
     !v => wav num deep water
     !wk =>wave num
@@ -17,7 +17,7 @@ contains
         implicit none
 
         integer :: ifwko
-        real(8) :: wl,tper,v
+!        real(8) :: wl
 
         OPEN(1, FILE='INPUT/DATIN.txt',      STATUS='OLD') 
 
@@ -43,6 +43,7 @@ contains
           beta = beta*pi/180.0d0
           v = w1**2/g
           wl = 2.0d0*pi/wk
+          close(1)
     end subroutine
 
     subroutine waveck(sigma,h,wk)
