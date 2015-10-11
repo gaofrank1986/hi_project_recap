@@ -116,7 +116,7 @@ C         OPEN(50, FILE='OUTPUT/DATBDMS.txt',    STATUS='UNKNOWN')
         WRITE(11,*),'  Before CONVSB' 
         WRITE(11,*) ' NNODE=',NNODE
 	  
-	      CALL CONVSB
+	   !   CALL CONVSB
         WRITE(11,*),'  After CONVSB' 
         
 C ! mvr÷– NNODE:  total number of nodes according to the coordinate

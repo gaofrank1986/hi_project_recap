@@ -76,9 +76,8 @@ contains
         allocate(NNORMN(8*NELEM) )
 
         ALLOCATE( XYZE(3,8,NELEM),DXYZE(3,8,NELEM))
-        !allocate(DAMPE(8,NELEM))
         ALLOCATE( TXYZE(3,8,NELEM))
-        ALLOCATE( XYZTP(3,8*NELEM),DXYZTP(3,8*NELEM))!,DAMPTP(8*NELEM))
+        allocate(xyztp(3,8*nelem),dxyztp(3,8*nelem))
         allocate(dampe(8,nelem),damptp(8*nelem))
         !ALLOCATE(SAMB(NELEM,16,0:8),SAMBXY(NELEM,16,3),
         !&         DSAMB(NELEM,16,6))
@@ -86,12 +85,12 @@ contains
 
         call MESHFS4_2()! Read in data on free surface mesh
         call MESHBD_2(IPOL) ! Read in data on body mesh
-!
-!        close(2)
-!        close(1)
-!        close(3)
-!
-!        call convsb()
+
+        close(2)
+        close(1)
+        close(3)
+
+        call convsb_2()
 !        call prepare_mesh()
 !
 !        deallocate(xyzb,dxyzb,nconb,ncondb,nnormn,xyztp,dxyztp)
@@ -280,7 +279,7 @@ contains
        END
   
 
-    SUBROUTINE CONVSB2
+    SUBROUTINE CONVSB_2
 
        !USE MVAR_mod
      IMPLICIT NONE
