@@ -46,6 +46,22 @@ contains
           close(1)
     end subroutine
 
+    subroutine output_wav_data()
+
+        implicit none
+
+        open(1, file='output/wave_info.txt',      status='unknown') 
+        write(1,*) 
+        write(1,*) '                   ================='
+        write(1,1111)  h,amp,wk,v,wl,w1,tper,beta*180./pi 
+
+        1111    format(//,'  water depth=',f9.3,'    wave amplitude=', f6.2,/,&
+            &    '  wave number=',f9.5,'  k0=',f9.5,'  wave length=',f9.4,/, &
+            &    '  angular frequ.=',f9.5,'   wave period=',f7.3,/,      &
+            &    '  wave direction:',f7.3,'  degree',/)
+       close(1)
+    end subroutine 
+
     subroutine waveck(sigma,h,wk)
         implicit  none
 
@@ -54,8 +70,8 @@ contains
         !c  c: wave celerity  wk: wave number
         if( sigma .le. 0.0d0 )  then
             print *,' in waveck:  w=',sigma
-		stop
-	
+        stop
+    
         else 
 
             if( h .gt. 0.0d0) then

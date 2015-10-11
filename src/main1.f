@@ -127,18 +127,7 @@ C
 !C       
 !
         call read_wav_data()
-        WRITE(10,*) 
-        WRITE(9,*)
-	  WRITE(10,*) '                   ================='
-        WRITE(9,*) '                   ================='
-C
-        WRITE(10,1111)  H,AMP,WK,V,WL,W1,TPER,BETA*180./PI 
-        WRITE(9,1111)  H,AMP,WK,V,WL,W1,TPER,BETA*180./PI 
-
-C 1111    FORMAT(//,'  WATER DEPTH=',F9.3,'    WAVE AMPLITUDE=', F6.2,/,
-C      1    '  WAVE NUMBER=',F9.5,'  K0=',F9.5,'  WAVE LENGTH=',F9.4,/, 
-C      3    '  ANGULAR FREQU.=',F9.5,'   WAVE PERIOD=',F7.3,/,      
-C      2    '  WAVE DIRECTION:',F7.3,'  Degree',/)
+        call output_wav_data()
 C !  ------------------------------------
 C !bodmass‘⁄mass.f÷–
 
