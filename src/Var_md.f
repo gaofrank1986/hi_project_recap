@@ -86,6 +86,8 @@ C ===================================================
 C   Constants and Variables for body mesh
 C
         MODULE MVar_mod
+            use wave
+            implicit none
 C
         INTEGER NTIME,ITIME,ISYS,NSYS,IORDER
 	  INTEGER NELEM,NELEMB,NELEMF,NNODE,NNODED,NNB,NNBD,NNF,NNTCH
@@ -109,11 +111,11 @@ C
 ! NNF:    number of nodes on the free surface
 ! NNTCH:  number of nodes and the centers of element (For plotting by Techplot)
 ! 
-        REAL*8 G,RHO,PI,PI4     
-        REAL*8 H,AMP,BETA,W1,V 
-        REAL*8 WK,TPER
-	  REAL*8 Tstep,TIME,TimeRK,RAMPF,RAMPV
-        real*8 line_sum
+        REAL*8 PI4!G,RHO,PI,PI4     
+        !REAL*8 H,AMP,BETA,W1,V 
+        !REAL*8 WK,TPER
+	  !REAL*8 Tstep,TIME,TimeRK,RAMPF,RAMPV
+        !real*8 line_sum
 
 ! H   : water depth
 ! Amp : amplitude of incident waves
@@ -192,15 +194,16 @@ C
        REAL*8,ALLOCATABLE::   AMATA(:,:,:),BMATA(:,:)
 !       REAL*8,ALLOCATABLE::   LEFT(:,:,:),RIGHT(:,:,:),RIGHT1(:,:)
 
-       DATA G,PI,RHO/9.807,3.14159265359,
-	1	               1023.0/  
+!       DATA G,PI,RHO/9.807,3.14159265359,
+!	1	               1023.0/  
 
 ! ------------------------------------
 ! Temporary arrayes
 ! 
    	 INTEGER, ALLOCATABLE:: NNORMN(:)
        REAL*8,  ALLOCATABLE:: XYZTP(:,:),DXYZTP(:,:),DAMPTP(:)
-!
+        integer :: max_level
+        real(8) :: al!
 	   DATA AL/1.2/
 	   DATA MAX_LEVEL/ 8/
        END MODULE MVar_mod
