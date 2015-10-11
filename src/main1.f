@@ -80,52 +80,6 @@ C
 	NBETA=0
 	 
         WRITE(10, *) ' Test on huper-singular integration'
-
-C
-C ---------------------------------------- 
-C
-C  IFWKO=0 : input wave number, otherwise input wave frequency
-C  H<0: infinite water depth
-C  Nwave: Number of waves to simulate
-C
-!        READ(1,*)      IFWKO
-!
-!        IF (IFWKO .EQ. 0)  THEN
-!          READ(1,*)      H, AMP, WK, BETA
-!          IF (H .LE. 0.0D0) THEN
-!            W1=DSQRT(G*WK)
-!          ELSE
-!            W1=DSQRT(G*WK*DTANH(WK*H))
-!          END IF
-!        ELSE
-!          READ(1,*)      H, AMP, W1, BETA
-!          IF(H .LE. 0.0D0) THEN
-!            WK=W1**2/G
-!          ELSE
-!            CALL WAVECK(W1,H,WK)				 ! Compute wave number
-!          END IF
-!        END IF
-!C !
-!C !
-!C !  Waves: number of waves to simulate (may be 10 or 0.5)
-!!C !  NTnum: number of time steps in one wave
-!C !  NPLOUT=1-5, Output the wave profile with step intervals 
-!C !  NDRFA=0, plot force; =1, plot response
-!C !
-!	  PI4=4.0*PI
-!        IORDER=1
-!   
-!        WRITE(10,*)  '  After 10'
-!!  
-!!  PI4，IORDER 的定义在mvar中 perturbation order of the problem 
-!! 
-!        TPER=2.*PI/W1 
-!        BETA=BETA*PI/180.0D0 
-!C C  beta化成弧度
-!        V=W1*W1/G 
-!	  WL=2.0D0*PI/WK
-!C       
-!
         call read_wav_data()
         call output_wav_data()
 C !  ------------------------------------
@@ -288,62 +242,14 @@ C         end DO
 !                              
 1010    FORMAT(F7.3,1x,F7.3,1x,6E14.5) 
 ! 
-1111    FORMAT(//,'  WATER DEPTH=',F9.3,'    WAVE AMPLITUDE=', F6.2,/,
-     1    '  WAVE NUMBER=',F9.5,'  K0=',F9.5,'  WAVE LENGTH=',F9.4,/, 
-     3    '  ANGULAR FREQU.=',F9.5,'   WAVE PERIOD=',F7.3,/,      
-     2    '  WAVE DIRECTION:',F7.3,'  Degree',/)
+!1111    FORMAT(//,'  WATER DEPTH=',F9.3,'    WAVE AMPLITUDE=', F6.2,/,
+!     1    '  WAVE NUMBER=',F9.5,'  K0=',F9.5,'  WAVE LENGTH=',F9.4,/, 
+!     3    '  ANGULAR FREQU.=',F9.5,'   WAVE PERIOD=',F7.3,/,      
+!     2    '  WAVE DIRECTION:',F7.3,'  Degree',/)
 ! 
 1115	  FORMAT(' I_time=',I5,'    at the time:',F10.5,' s')
 1200	FORMAT(2x,I3,3F12.5,1x,2F13.5)
         print *,"=================== main program ends ==============="
         STOP 
-        END      
-
- 
-
-C 
-C
-C
-C  *************************************************
-C  *    The subroutine computes wave number        *
-C  *  by wave frequency and water depth.           *
-C  *    For infinite water depth, give negative H. *
-C  *************************************************
-!
-!        SUBROUTINE WAVECK(SIGMA,H,WK)
-!        IMPLICIT  NONE
-!
-!	  real(8) SIGMA,H,WK,B,G,A,Y,C
-!C
-!C  H: WATER DEPTH    SIGMA: WAVE FREQUENCY
-!C  C: WAVE CELERITY  Wk: wave number
-!C
-!        DATA G/9.807D0/
-!C
-!        IF( SIGMA .LE. 0.0D0 )  THEN
-!	    Print *,' IN WAVECK:  W=',SIGMA
-!		STOP
-!	
-!        ELSE 
-!
-!          IF( H .GT. 0.0D0) THEN
-!           B = G * H
-!           Y = SIGMA * SIGMA *H/G
-!  12       A=1.0D0/(1.0D0+Y*(0.66667D0+Y*(0.35550D0+
-!     1       Y*(0.16084D0+Y*(0.063201D0+Y*(0.02174D0+
-!     2       Y*(0.00654D0+Y*(0.00171D0+
-!     2       Y*(0.00039D0+Y*0.00011D0)))))))))
-!  22       C=SQRT(B/(Y+A))
-!           WK=SIGMA/C
-!           ELSE IF( H .LE. 0.0D0) THEN
-!!           WK=SIGMA**2/G
-!!        END IF
-!!        RETURN
-!C
-!
-!	 END IF
-!
-!
-!        RETURN
-!        END
+       END      
 
