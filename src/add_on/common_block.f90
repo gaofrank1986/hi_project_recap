@@ -44,6 +44,9 @@
                     enddo
                 else 
                     do  is=1, nsys    
+                    !basically do the same job as above
+                    !and the trick part is for fs node in body elem
+                    !whcih should
                     if(jncon .gt. nnf)  then
                         amata(inode,jncon,ip)=amata(inode,jncon,ip)-&
                             &                   rsn(is,ip)*amatrix(is,j)
