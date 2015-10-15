@@ -88,6 +88,7 @@ C
         MODULE MVar_mod
             use wave
             use mesh
+            use gaussian_info
             implicit none
 C
         INTEGER NTIME,ITIME,IORDER!ISYS,NSYS,
@@ -175,7 +176,7 @@ C
 ! DPDT: time difference of potential
 
 !
-       REAL*8,ALLOCATABLE:: SAMB(:,:,:),SAMBXY(:,:,:),DSAMB(:,:,:)
+!       REAL*8,ALLOCATABLE:: SAMB(:,:,:),SAMBXY(:,:,:),DSAMB(:,:,:)
 	 REAL*8,ALLOCATABLE:: ANGLE(:),FrA3(:),FrC31(:),FrC32(:),FrC33(:)
 !
 ! SAMB: 
