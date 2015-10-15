@@ -24,7 +24,7 @@
 
     subroutine tassb0
         use mvar_mod
-        use pvar_mod
+        use body_property
         use mfunc_mod
         use sebsm_mod
 
@@ -48,7 +48,7 @@
 !
 !  ----------------------------------------------------
           WRITE(10, *)   ' IN TASSB0 '
-          DSDT(:)=0.0
+          !DSDT(:)=0.0
 !                 
         DO 50 INODE=1, NNODE 
         L=0

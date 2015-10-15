@@ -9,7 +9,8 @@ C *********************************************************************
 C
         SUBROUTINE BODYFD
 	  USE MVAR_MOD
-	  USE PVAR_MOD
+!	  USE PVAR_MOD
+          use body_property
 	  USE MFUNC_mod
 
         IMPLICIT   NONE  
