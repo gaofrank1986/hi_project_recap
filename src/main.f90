@@ -39,7 +39,7 @@ program hi_project
         &             dpdt(nnode,nsys))
     allocate(dh(4,nnf,nsys),dp(4,nnf,nsys),dposi(4,6))
 
-    call bodyfd                  
+    call get_gaussian_data(xc,yc,zc)                  
     call init_hi_var() 
     call tassb0   
 

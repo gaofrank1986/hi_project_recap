@@ -7,15 +7,10 @@
 !C *                                                                   *
 !C *********************************************************************
 !C
-        SUBROUTINE BODYFD
-!	  USE MVAR_MOD
-!	  USE PVAR_MOD
-          use mesh
-          use body_property
-	  USE MFUNC_mod
-
+        subroutine get_gaussian_data(xc,yc,zc)
+        use MFUNC_mod
         IMPLICIT   NONE  
-
+        real(8),intent(in) :: xc,yc,zc
 	  INTEGER IE,K,J,LK,LI,LJ,ISI,IETA,NSAMB,IND 
         REAL*8 XITSI(4),XITETA(4),WIT(4),XIQ(4),WIQ(4)
         REAL*8 SF(8),DSF(2,8),XJ(3,3) 
