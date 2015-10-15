@@ -299,7 +299,6 @@
         WRITE(102, *)
         WRITE(102, *) '  =========== After RLUDCMP =============='
            DO IP=1, NSYS
-           WRITE(6, *) '  IP=',IP,'    Before RLUDCMP'
              CALL RLUDCMP(IP,AMATA,NNODE,NNODE,NSYS,INDX,DSIGN)  
            ENDDO
 !
