@@ -49,6 +49,8 @@
         DATA WIQ/0.347854845137454D0,0.652145154862546D0,&
      &         0.652145154862546D0,0.347854845137454D0/
 !c
+            allocate(samb(nelem,16,0:8),sambxy(nelem,16,3))
+            allocate(dsamb(nelem,16,6))
 
         DO 500 IE=1, NELEM
 !c	Print *,' I=',I

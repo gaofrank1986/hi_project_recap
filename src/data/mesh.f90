@@ -91,7 +91,7 @@ contains
         close(3)
 
         call convsb_2()
-!        call prepare_mesh()
+        call pre_mesh_2()
 !
 !        deallocate(xyzb,dxyzb,nconb,ncondb,nnormn,xyztp,dxyztp)
 

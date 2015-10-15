@@ -21,23 +21,19 @@ program hi_project
     zc=0
 
     call read_mesh()
-
-
-    allocate(samb(nelem,16,0:8),sambxy(nelem,16,3))
-    allocate(dsamb(nelem,16,6))
-
-    call pre_mesh_2()!
 !  --------------------------------------------
+
     allocate(angle(nnode),fra3(nnode),&
         &          frc31(nnode),frc32(nnode),frc33(nnode))
 
     allocate(amata(nnode,nnode,nsys),&
         &                 bmata(nnode,nsys), indx(nnode,nsys))
     !       
-    allocate(unkn(nnode,nsys),  bkn(nnoded,nsys),&
-        &                 unkn_o(nnode,nsys),bkn_o(nnoded,nsys),&
-        &             dpdt(nnode,nsys))
-    allocate(dh(4,nnf,nsys),dp(4,nnf,nsys),dposi(4,6))
+    allocate(unkn(nnode,nsys))
+    !,  bkn(nnoded,nsys),&
+     !   &                 unkn_o(nnode,nsys),bkn_o(nnoded,nsys),&
+      !  &             dpdt(nnode,nsys))
+    !allocate(dh(4,nnf,nsys),dp(4,nnf,nsys),dposi(4,6))
 
     call get_gaussian_data(xc,yc,zc)                  
     call init_hi_var() 
