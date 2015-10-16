@@ -10,7 +10,6 @@ program hi_project
     open(10, file='output/output.txt' ,    status='unknown')
     open(101,file='output/outamt.txt' ,    status='unknown')          
     open(102,file='output/outbmt.txt' ,    status='unknown')
-    open(103,file='output/outcmt.txt' ,    status='unknown')
 
          
     call read_wav_data()
