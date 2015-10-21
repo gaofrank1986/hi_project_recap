@@ -7,7 +7,7 @@
         real(8),intent(out) :: hiresult(nf),str_result(nf)
         ! nf : num of kernel funcs
 
-        real(8) :: src_lcl(ndim-1),pt_intg(ndim-1),seg_start(ndim - 1)  
+        real(8) :: src_lcl(ndim-1),seg_ctr(ndim-1),seg_start(ndim - 1)  
         ! src point, integration point , temporary integration point     
 
         real(8) :: end_nodes(2,2),ri(3),RINT(nf),rint2(nf)
@@ -66,10 +66,10 @@
                 edge_direct = dsign(1.d0,end_nodes(unfixed,2)-end_nodes(unfixed,1))
                 !dsign(a,b) a time sign of b,end_node(:,id)
 
-                !segment start from  end node 1 for each edge
+                !line segment start from  end node 1 for each edge
                 seg_start=end_nodes(:,1) 
 
-                pt_intg(fixed)=seg_start(fixed)
+                seg_ctr(fixed)=seg_start(fixed)
                 dist_fixed2=(seg_start(fixed)-src_lcl(fixed))**2
 
                 do num_converge=1,500 
@@ -105,17 +105,17 @@
 
                     do igl = 1,iabs(ngl) !cutting each intg segment to ngl parts 
 
-                        pt_intg(unfixed)=seg_start(unfixed)+half_step*(1.d0+gpl(igl))
+                        seg_ctr(unfixed)=seg_start(unfixed)+half_step*(1.d0+gpl(igl))
                         ! 1+gpl , is shifted gpl to start at least from 0
                         ! gpl span from -1 to 1, so intg-seg-size if half buffer point step
-                        rho_q=norm2(pt_intg-src_lcl)
-                        drdn_p=dabs(pt_intg(fixed)-src_lcl(fixed))/rho_q !sin(theta)
+                        rho_q=norm2(seg_ctr-src_lcl)
+                        drdn_p=dabs(seg_ctr(fixed)-src_lcl(fixed))/rho_q !sin(theta)
 
                         call compute_coeff_gh(num_dim,num_dim - 1,npw,elem_type,n_pwr_g,src_glb &
-                                                & ,src_lcl,pt_intg,coef_g,coef_h)
+                                                & ,src_lcl,seg_ctr,coef_g,coef_h)
 
-                        call integrate_rho(1,ndim,nf,hi_beta,npw,n_pwr_g,src_lcl,pt_intg,coef_g,coef_h,rint)
-                        call integrate_rho(2,ndim,nf,2.d0,npw,n_pwr_g,src_lcl,pt_intg,coef_g,coef_h,rint2)
+                        call integrate_rho(1,ndim,nf,hi_beta,npw,n_pwr_g,src_lcl,seg_ctr,coef_g,coef_h,rint)
+                        call integrate_rho(2,ndim,nf,2.d0,npw,n_pwr_g,src_lcl,seg_ctr,coef_g,coef_h,rint2)
 
                         hiresult = hiresult + (dabs(half_step)*gwl(igl)*drdn_p/rho_q)*rint
                         str_result = str_result + (dabs(half_step)*gwl(igl)*drdn_p/rho_q)*rint2
