@@ -22,7 +22,7 @@
         real(8) :: rho_step,fjcb,robar
         real(8) :: rho,r2,r,gm,drdn
 
-        NBDM = num_dim - 1
+        NBDM = ndim - 1
 
         slop = xiq - xip
         rho_q = norm2(slop)
