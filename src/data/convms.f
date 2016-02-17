@@ -26,7 +26,7 @@ C  NNF   : total number of nodes on the free surface
 C  NNB   : total number of nodes on the body surface
 C ------------------------------------------------------------
 C    
-C ** check nodes' situation 
+C ** check nodes situation 
 C		  
 
 	 WRITE(6,*) '  Inside CONVSB'

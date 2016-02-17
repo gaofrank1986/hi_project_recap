@@ -123,10 +123,10 @@
             zp=xyz(3,inode)
 
             fterm_coef = 0
-            !call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,&
-             !&                        h,xyz,dxyze,s_angle)    
+            call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,&
+             &                        h,xyz,dxyze,s_angle)    
 
-            !s_angle=1.0d0-s_angle
+            s_angle=1.0d0-s_angle
 
             !write(9,102)  inode, xp, yp, zp, s_angle
             !write(*,102)  inode, xp, yp, zp, s_angle
@@ -180,8 +180,8 @@
 
             !         write(10,620) inode,angle(inode),fra3(inode),&
             !     &                 frc31(inode),frc32(inode),frc33(inode)
-            write (402,499) fterm_coef(0:3,1)
-            499 format(4f10.6)
+            write (402,499) fterm_coef(0:3,1),s_angle
+            499 format(5f14.8)
              phi=poxy(xp,yp,zp) ! this in known since src on free surface
              call dinp(xp,yp,zp,dpox,dpoy,dpoz)! this is unkown, so is this a mistake
              bmata(inode,1)=bmata(inode,1)-fra3(inode)*phi-&
@@ -199,10 +199,10 @@
             zp=xyz(3,inode) 
             
             fterm_coef = 0
-            !call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,&
-             !&                    h,xyz,dxyze,s_angle) 
+            call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,&
+             &                    h,xyz,dxyze,s_angle) 
 
-            !s_angle=1.0d0-s_angle
+            s_angle=1.0d0-s_angle
 
             !write(9,102)  inode, xp, yp, zp, s_angle
             !write(*,102)  inode, xp, yp, zp, s_angle
@@ -233,7 +233,7 @@
             end do
 
             fra3(inode)=fterm_coef(0,1)!
-            write (402,499) fterm_coef(0:3,1)
+            write (402,499) fterm_coef(0:3,1),s_angle
             amata(inode,inode,1:nsys)= amata(inode,inode,1:nsys)+fra3(inode)
 1000     continue
 !

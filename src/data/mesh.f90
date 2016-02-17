@@ -51,6 +51,7 @@ contains
     
         OPEN(2, FILE='INPUT/DATBDMS.txt',    STATUS='OLD') 
         OPEN(3, FILE='INPUT/DATWPMS.txt',    STATUS='OLD')
+        OPEN(11, FILE='OUTPUT/outmesh.txt',    STATUS='UNKNOWN')
 
         !==================body mesh================================
         READ(2,*)   ISYS 
@@ -290,7 +291,7 @@ contains
        !USE MVAR_mod
      IMPLICIT NONE
 
-       INTEGER IEB,IEL,IND,I,L,M,NND0,kk
+       INTEGER IEB,IEL,IND,I,L,M,NND0,kk,N
      REAL(8) X,Y,Z,DX,DY,DZ,DR2,tmp1,tmp2,tmp3,tol
 
         !C ------------------------------------------------------------
@@ -482,6 +483,29 @@ contains
 500     CONTINUE
 
 1000   FORMAT(1X,8I6)
-  
+         write(11,*) Isys
+        write(11,*)  NELEM, NNODE,NNODED,1
+        write(11,*) ' 1  0  0.0  0.0  0.0'
+
+	 DO N=1, NNODE
+	  write(11,1010) N, 1, XYZTP(1,N),XYZTP(2,N),XYZTP(3,N)
+	 ENDDO
+	 DO N=1, NNODED
+	  write(11,1010) N, 1, DXYZTP(1,N),DXYZTP(2,N),DXYZTP(3,N)
+	 ENDDO
+!
+	 DO IEL=1, NELEM
+	  write(11,1001) IEL, NCN(IEL)
+        write(11,1005) (NCON(IEL, I), I=1, NCN(IEL))
+	 ENDDO
+!
+	 DO IEL=1, NELEM
+	  write(11,1001) IEL, NCN(IEL)
+        WRITE(11,1005) (NCOND(IEL, I), I=1, NCN(IEL))
+	 ENDDO
+1001   FORMAT(1X,2I6,3F14.6)
+1010   FORMAT(1X,I6,I4,3F14.6)
+1005   FORMAT(8(1X,I6))
+1020   FORMAT(1X,I6,I4,6F14.6)
        END
    end module
