@@ -18,67 +18,67 @@ C ===================================================
 !C  Varibles used in the pFFT method 
 !C ===================================================
 !C
-      MODULE SEBSM_MOD
-        REAL*8,ALLOCATABLE:: A_SEBSM(:,:),B_SEBSM(:)
-      INTEGER N_SEBSM
-      END MODULE SEBSM_MOD
+      !MODULE SEBSM_MOD
+        !REAL*8,ALLOCATABLE:: A_SEBSM(:,:),B_SEBSM(:)
+      !INTEGER N_SEBSM
+      !END MODULE SEBSM_MOD
 
-      MODULE PFFT_mod
-!C
-        INTEGER Ncube,Nps,Npr,NNps
-        INTEGER NCNcube_TOTAL,NCNcubeE_TOTAL
-        INTEGER NcubeX,NcubeY,NcubeZ
-        INTEGER NprX,NprY,NprZ
-        INTEGER Npt
+      !MODULE PFFT_mod
+!!C
+        !INTEGER Ncube,Nps,Npr,NNps
+        !INTEGER NCNcube_TOTAL,NCNcubeE_TOTAL
+        !INTEGER NcubeX,NcubeY,NcubeZ
+        !INTEGER NprX,NprY,NprZ
+        !INTEGER Npt
 
-        REAL*8 Xmax,Xmin,Ymax,Ymin,Zmax,Zmin,Dlength,blap,Dsp
+        !REAL*8 Xmax,Xmin,Ymax,Ymin,Zmax,Zmin,Dlength,blap,Dsp
 
-        INTEGER,ALLOCATABLE:: NCNcube(:,:,:),NCONcube(:,:,:,:)
-        INTEGER,ALLOCATABLE:: NcubeNODX(:),NcubeNODY(:),NcubeNODZ(:) 
+        !INTEGER,ALLOCATABLE:: NCNcube(:,:,:),NCONcube(:,:,:,:)
+        !INTEGER,ALLOCATABLE:: NcubeNODX(:),NcubeNODY(:),NcubeNODZ(:) 
          
-        INTEGER,ALLOCATABLE:: NCNcubeE(:,:,:),NCONcubeE(:,:,:,:)
-        INTEGER,ALLOCATABLE:: NcubeELEX(:),NcubeELEY(:),NcubeELEZ(:) 
+        !INTEGER,ALLOCATABLE:: NCNcubeE(:,:,:),NCONcubeE(:,:,:,:)
+        !INTEGER,ALLOCATABLE:: NcubeELEX(:),NcubeELEY(:),NcubeELEZ(:) 
 
-        INTEGER,ALLOCATABLE:: IprX(:,:),IprY(:,:),IprZ(:,:)
+        !INTEGER,ALLOCATABLE:: IprX(:,:),IprY(:,:),IprZ(:,:)
         
-        REAL*8,ALLOCATABLE:: Xcube_pFFT(:,:,:)
-        REAL*8,ALLOCATABLE:: Ycube_pFFT(:,:,:)
-        REAL*8,ALLOCATABLE:: Zcube_pFFT(:,:,:)
-        REAL*8,ALLOCATABLE:: Xpr(:,:,:),Ypr(:,:,:),Zpr(:,:,:)
-        REAL*8,ALLOCATABLE:: Xtest(:),Ytest(:),Ztest(:),RGTINV(:,:)
+        !REAL*8,ALLOCATABLE:: Xcube_pFFT(:,:,:)
+        !REAL*8,ALLOCATABLE:: Ycube_pFFT(:,:,:)
+        !REAL*8,ALLOCATABLE:: Zcube_pFFT(:,:,:)
+        !REAL*8,ALLOCATABLE:: Xpr(:,:,:),Ypr(:,:,:),Zpr(:,:,:)
+        !REAL*8,ALLOCATABLE:: Xtest(:),Ytest(:),Ztest(:),RGTINV(:,:)
         
 
-         COMPLEX*16,ALLOCATABLE:: UUU(:,:)
-         COMPLEX*16,ALLOCATABLE:: HTPLZ(:,:,:),HHKL(:,:,:)
+         !COMPLEX*16,ALLOCATABLE:: UUU(:,:)
+         !COMPLEX*16,ALLOCATABLE:: HTPLZ(:,:,:),HHKL(:,:,:)
 
 
-         COMPLEX*16,ALLOCATABLE::  HHKLV(:,:,:,:)       
-         COMPLEX*16,ALLOCATABLE::  QVT(:,:,:,:),QVH(:,:,:,:)
-         COMPLEX*16,ALLOCATABLE::  QVV(:,:,:)
+         !COMPLEX*16,ALLOCATABLE::  HHKLV(:,:,:,:)       
+         !COMPLEX*16,ALLOCATABLE::  QVT(:,:,:,:),QVH(:,:,:,:)
+         !COMPLEX*16,ALLOCATABLE::  QVV(:,:,:)
 
-         COMPLEX*16,ALLOCATABLE::  WPROL(:,:,:,:),WPROR(:,:,:,:)
-         COMPLEX*16,ALLOCATABLE::  HTPLZL(:,:,:,:),HTPLZR(:,:,:,:)
+         !COMPLEX*16,ALLOCATABLE::  WPROL(:,:,:,:),WPROR(:,:,:,:)
+         !COMPLEX*16,ALLOCATABLE::  HTPLZL(:,:,:,:),HTPLZR(:,:,:,:)
 
 
-!       REAL*8,ALLOCATABLE:: WPQL(:,:,:),WPQR(:,:,:,:)
+!!       REAL*8,ALLOCATABLE:: WPQL(:,:,:),WPQR(:,:,:,:)
 
-      END MODULE PFFT_mod
-!
-! ===================================================
-!  Varibles used in the SUBROUTINEs PRECORRECTED_R and PRECORRECTED_L
-! ===================================================
-!
-       MODULE  PRECOR_MOD
+      !END MODULE PFFT_mod
+!!
+!! ===================================================
+!!  Varibles used in the SUBROUTINEs PRECORRECTED_R and PRECORRECTED_L
+!! ===================================================
+!!
+       !MODULE  PRECOR_MOD
 
-                 COMPLEX*16,ALLOCATABLE:: WPRO(:,:,:,:)
-                 COMPLEX*16,ALLOCATABLE:: TPLZ(:,:,:,:)
+                 !COMPLEX*16,ALLOCATABLE:: WPRO(:,:,:,:)
+                 !COMPLEX*16,ALLOCATABLE:: TPLZ(:,:,:,:)
 
-       END MODULE PRECOR_MOD
+       !END MODULE PRECOR_MOD
 
-       MODULE INTVar_mod
+       !MODULE INTVar_mod
 
-       INTEGER MFREE,NBETA   
-         END MODULE INTVar_mod  
+       !INTEGER MFREE,NBETA   
+         !END MODULE INTVar_mod  
 
 
 !
@@ -300,65 +300,65 @@ C
 C
 
 
-!
-C  **************************************************
-C  *                                                                                              *
-C  *  variables for fenders and cables              *
-C  *                                                *
-C  *      April. 20, 2005        by   Bin Teng      *
-C  **************************************************                           
-C
-       MODULE FCVAR_mod
-C
-          INTEGER NOCABLE,NCKIND,NOFender,NFender(50),JCPRO(50)
-          REAL*4  WTL
-          REAL*4  DLS(50),CLNT(50),CXYZ0(3,50),CXYZ1(3,50)
-          REAL*4  DLNT(50),DXYZ0(3,50),DXYZ1(3,50)
-C 
-C NCABLE: Number of cables;        
-C NCKIND: Number of cable kinds;
-C NOFender: Number of Fenders;
-C NFender(KD): Number of data for tension curve for each Fender
+!!
+!C  **************************************************
+!C  *                                                                                              *
+!C  *  variables for fenders and cables              *
+!C  *                                                *
+!C  *      April. 20, 2005        by   Bin Teng      *
+!C  **************************************************                           
+!C
+       !MODULE FCVAR_mod
+!C
+          !INTEGER NOCABLE,NCKIND,NOFender,NFender(50),JCPRO(50)
+          !REAL*4  WTL
+          !REAL*4  DLS(50),CLNT(50),CXYZ0(3,50),CXYZ1(3,50)
+          !REAL*4  DLNT(50),DXYZ0(3,50),DXYZ1(3,50)
+!C 
+!C NCABLE: Number of cables;        
+!C NCKIND: Number of cable kinds;
+!C NOFender: Number of Fenders;
+!C NFender(KD): Number of data for tension curve for each Fender
 
-!  WTL: water level
-C    CLNT: length of each cable;     DLNT: length of each Fender
-C  CXYZ0, CXYZ1: the coordinates of the two ends of each cable
-C  DXYZ0, DXYZ1: the coordinates of the two ends of each Fender
+!!  WTL: water level
+!C    CLNT: length of each cable;     DLNT: length of each Fender
+!C  CXYZ0, CXYZ1: the coordinates of the two ends of each cable
+!C  DXYZ0, DXYZ1: the coordinates of the two ends of each Fender
 
-        INTEGER NCABLEU,NFenderU,JDRMXY(50),JDRM(50),KindDrm
-          REAL*4 CABX1(50),CABX2(50),CABXYCON(200,2,50),CABUTJ(200,50)
-          REAL*4 DRMX1(50),DRMX2(50),DRMXYCON(200,2,50),DRMUTJ(200,50)
-          REAL*4 CEPSMAX(50), FCRMAX(50)
-          REAL*4 FDRMAX(6,50),EPSMAX(50)
-C
-C  JDRM    : The code of Fender character
-C JDRMXY(N): the code for Fender direction, 
-C          =1, force in x-direction; =2, force in y-direction
-C KindDrm  : Number of Fender's kinds
+        !INTEGER NCABLEU,NFenderU,JDRMXY(50),JDRM(50),KindDrm
+          !REAL*4 CABX1(50),CABX2(50),CABXYCON(200,2,50),CABUTJ(200,50)
+          !REAL*4 DRMX1(50),DRMX2(50),DRMXYCON(200,2,50),DRMUTJ(200,50)
+          !REAL*4 CEPSMAX(50), FCRMAX(50)
+          !REAL*4 FDRMAX(6,50),EPSMAX(50)
+!C
+!C!  JDRM    : The code of Fender character
+!C! JDRMXY(N): the code for Fender direction, 
+!C!          =1, force in x-direction; =2, force in y-direction
+!C! KindDrm  : Number of Fender's kinds
 
-       END MODULE FCVAR_mod
+       !END MODULE FCVAR_mod
 
-!
-! ===================================================
-!  Varibles used in the SUBROUTINE CGR
-! ===================================================
-!
-       MODULE  GCR_MOD
+!!
+!! ===================================================
+!!  Varibles used in the SUBROUTINE CGR
+!! ===================================================
+!!
+       !MODULE  GCR_MOD
 
-                 COMPLEX*16,ALLOCATABLE:: R(:,:,:),P(:,:,:)     
-             COMPLEX*16,ALLOCATABLE:: AR(:,:,:)
-             COMPLEX*16,ALLOCATABLE:: AP(:,:,:),B(:,:)
-             COMPLEX*16,ALLOCATABLE:: X(:,:,:),XS(:,:)
-             COMPLEX*16,ALLOCATABLE:: AAP(:),AIT(:)
-             COMPLEX*16,ALLOCATABLE:: RAP(:),ERRR(:)
+                 !COMPLEX*16,ALLOCATABLE:: R(:,:,:),P(:,:,:)     
+             !COMPLEX*16,ALLOCATABLE:: AR(:,:,:)
+             !COMPLEX*16,ALLOCATABLE:: AP(:,:,:),B(:,:)
+             !COMPLEX*16,ALLOCATABLE:: X(:,:,:),XS(:,:)
+             !COMPLEX*16,ALLOCATABLE:: AAP(:),AIT(:)
+             !COMPLEX*16,ALLOCATABLE:: RAP(:),ERRR(:)
 
-       END MODULE GCR_MOD
+       !END MODULE GCR_MOD
 
-         MODULE WMAT_MOD
-       real*8,ALLOCATABLE:: WMAT_L(:,:,:),WMAT_R(:,:,:)
-         INTEGER COUNT_W_L,COUNT_W_R
-         END MODULE WMAT_MOD
+         !MODULE WMAT_MOD
+       !real*8,ALLOCATABLE:: WMAT_L(:,:,:),WMAT_R(:,:,:)
+         !INTEGER COUNT_W_L,COUNT_W_R
+         !END MODULE WMAT_MOD
 
-      MODULE  GMRES_MOD
-                   REAL*8,ALLOCATABLE:: work(:) 
-      END MODULE GMRES_MOD
+      !MODULE  GMRES_MOD
+                   !REAL*8,ALLOCATABLE:: work(:) 
+      !END MODULE GMRES_MOD
