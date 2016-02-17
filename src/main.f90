@@ -1,7 +1,8 @@
 program hi_project
 
     use mvar_mod
-    use body_property
+    !use body_property
+    use pvar_mod
     use hi_intg
 
     implicit  none  
@@ -13,7 +14,7 @@ program hi_project
 
          
     call read_wav_data()
-    call output_wav_data()
+    !call output_wav_data()
     print *,xc,yc,zc
     xc=0
     yc=0
@@ -22,11 +23,15 @@ program hi_project
     call read_mesh()
 !  --------------------------------------------
 
-    allocate(angle(nnode),fra3(nnode),&
-        &          frc31(nnode),frc32(nnode),frc33(nnode))
+    allocate(angle(nnode))
+    !allocate(fra3(nnode),&
+        !&          frc31(nnode),frc32(nnode),frc33(nnode))
+    allocate(fra3(nnode,nsys),&
+        &          frc31(nnode,nsys),frc32(nnode,nsys),frc33(nnode,nsys))
 
     allocate(amata(nnode,nnode,nsys),&
         &                 bmata(nnode,nsys), indx(nnode,nsys))
+    allocate(cmata(nnode,nnoded,nsys))
     !       
     allocate(unkn(nnode,nsys))
     !,  bkn(nnoded,nsys),&

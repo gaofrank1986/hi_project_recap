@@ -2,25 +2,25 @@ module mesh
     use wave 
     implicit none
     
-    real(8),public,allocatable :: XYZB(:,:),DXYZB(:,:)
+    real(8),public,allocatable :: xyzb(:,:),dxyzb(:,:)
     !xyzb => (3,node_id)  node data 
     !dxyzb => (3,nrml_id) derivative data
-    integer,public,allocatable :: NCONB(:,:),NCONDB(:,:)   
+    integer,public,allocatable :: nconb(:,:),ncondb(:,:)   
     ! nconb => node list body mesh
     ! ncondb => normal list body
-    real(8),allocatable :: XYZE(:,:,:),DXYZE(:,:,:),TXYZE(:,:,:)
+    real(8),allocatable :: xyze(:,:,:),dxyze(:,:,:),txyze(:,:,:)
     ! xyze =>  before combine, new full mesh for node (3,8,elem_id)
     ! dxyze => before combine, new full mesh for normal (3,8,elem,id)
-    real(8),public,allocatable :: XYZTP(:,:),DXYZTP(:,:)
+    real(8),public,allocatable :: xyztp(:,:),dxyztp(:,:)
     ! xyztp => convsb, combined node mesh, xyztp(3,node_id)
     ! dxyztp = > combined normal mesh, dxyztp(3,nrml_id)
-    integer,allocatable :: NCN(:),NCON(:,:),NCOND(:,:),IETYPE(:)
+    integer,allocatable :: ncn(:),ncon(:,:),ncond(:,:),ietype(:)
     ! ncn => elem_type ,namely, the node number in a elem
     ! ncon => combined node list,ncon(8,elem_id)
     ! ncond => combined nrml list,ncond(8,elem_id)
     ! ietype => flag show if a elem is free surface mesh or a body mesh
 
-    integer,public,allocatable :: NNORMN(:),NNORMC(:)
+    integer,public,allocatable :: nnormn(:),nnormc(:)
     real(8),allocatable :: xyz(:,:),dxyz(:,:)
     integer :: nsys,nelem,nnode,nnoded,isys
     ! nsys => about symmetr
@@ -41,51 +41,51 @@ contains
     subroutine read_mesh()
         implicit none
 
-        INTEGER IFWKO,IPOL
-      !INTEGER NTnum,IFLAG_T,IND,
+        integer ifwko,ipol
+      !integer ntnum,iflag_t,ind,
       
-!        REAL*8  WL
-      !REAL*8  FAMPR(6),FAMPI(6),FORCER(6),FORCEI(6)
-      !REAL*8  PL_AMP(6),FORAMP
-      !REAL*8  FCD_AMR,  FCD_AMI
+!        real*8  wl
+      !real*8  fampr(6),fampi(6),forcer(6),forcei(6)
+      !real*8  pl_amp(6),foramp
+      !real*8  fcd_amr,  fcd_ami
     
-        OPEN(2, FILE='INPUT/DATBDMS.txt',    STATUS='OLD') 
-        OPEN(3, FILE='INPUT/DATWPMS.txt',    STATUS='OLD')
-        OPEN(11, FILE='OUTPUT/outmesh.txt',    STATUS='UNKNOWN')
+        open(2, file='input/datbdms.txt',    status='old') 
+        open(3, file='input/datwpms.txt',    status='old')
+        open(11, file='output/outmesh.txt',    status='unknown')
 
         !==================body mesh================================
-        READ(2,*)   ISYS 
-        READ(2,*)   NELEMB, NNB, NNBD, IPOL
+        read(2,*)   isys 
+        read(2,*)   nelemb, nnb, nnbd, ipol
 
         
-        IF(ISYS.EQ.0) NSYS=1
-        IF(ISYS.EQ.1) NSYS=2
-        IF(ISYS.EQ.2) NSYS=4
+        if(isys.eq.0) nsys=1
+        if(isys.eq.1) nsys=2
+        if(isys.eq.2) nsys=4
 
-        READ(3,*)   NELEMF
+        read(3,*)   nelemf
     
         ! =========================================
 
-        NELEM=NELEMB+NELEMF
+        nelem=nelemb+nelemf
 
-        ALLOCATE (NCONB(NELEMB,8),NCONDB(NELEMB,8))!body node/normal list
-        ALLOCATE (XYZB(3,NNB),DXYZB(3,NNBD))    !body node/normal
+        allocate (nconb(nelemb,8),ncondb(nelemb,8))!body node/normal list
+        allocate (xyzb(3,nnb),dxyzb(3,nnbd))    !body node/normal
         
 
-        ALLOCATE(NCN(NELEM),NCON(NELEM,8),NCOND(NELEM,8),IETYPE(NELEM))
+        allocate(ncn(nelem),ncon(nelem,8),ncond(nelem,8),ietype(nelem))
     
-        allocate(NNORMN(8*NELEM) )
+        allocate(nnormn(8*nelem) )
 
-        ALLOCATE( XYZE(3,8,NELEM),DXYZE(3,8,NELEM))
-        ALLOCATE( TXYZE(3,8,NELEM))
+        allocate( xyze(3,8,nelem),dxyze(3,8,nelem))
+        allocate( txyze(3,8,nelem))
         allocate(xyztp(3,8*nelem),dxyztp(3,8*nelem))
         allocate(dampe(8,nelem),damptp(8*nelem))
-        !ALLOCATE(SAMB(NELEM,16,0:8),SAMBXY(NELEM,16,3),
-        !&         DSAMB(NELEM,16,6))
+        !allocate(samb(nelem,16,0:8),sambxy(nelem,16,3),
+        !&         dsamb(nelem,16,6))
 
 
-        call MESHFS4_2()! Read in data on free surface mesh
-        call MESHBD_2(IPOL) ! Read in data on body mesh
+        call meshfs4_2()! read in data on free surface mesh
+        call meshbd_2(ipol) ! read in data on body mesh
 
         close(2)
         close(1)
@@ -119,7 +119,7 @@ contains
        ! didn't assing damptp 
         do ind = 1,nnoded
             dxyz(1:3,ind) = dxyztp(1:3,ind)
-                NNORMC(IND)=NNORMN(IND)
+                nnormc(ind)=nnormn(ind)
 
         end do
         dampf(:) = w1*dampf(:) 
@@ -130,55 +130,55 @@ contains
                 &,nodqua(nnode))
         
         
-!        DO 50 INODE=1, NNODE 
-!        L=0
-!        DO 40 IELEM=1,  NELEM
-!        DO 30 J=1,      NCN(IELEM)
-!        IF(INODE.EQ.NCON(IELEM,J)) THEN
-!        L=L+1
-!        NODELE(INODE,L)=IELEM
-!        NODELJ(INODE,L)=J
-!        ENDIF
-!30      CONTINUE
-!40      CONTINUE
-!        NODNOE(INODE)=L
+!        do 50 inode=1, nnode 
+!        l=0
+!        do 40 ielem=1,  nelem
+!        do 30 j=1,      ncn(ielem)
+!        if(inode.eq.ncon(ielem,j)) then
+!        l=l+1
+!        nodele(inode,l)=ielem
+!        nodelj(inode,l)=j
+!        endif
+!30      continue
+!40      continue
+!        nodnoe(inode)=l
 !!                          
-!        NODQUA(INODE)=0
-!        IF( NSYS .GE. 2) THEN
-!          IF( DABS(XYZ(2,INODE)).LT.1.0E-06 ) THEN
-!          NODQUA(INODE)=2
-!          END IF
-!        END IF
+!        nodqua(inode)=0
+!        if( nsys .ge. 2) then
+!          if( dabs(xyz(2,inode)).lt.1.0e-06 ) then
+!          nodqua(inode)=2
+!          end if
+!        end if
 !!
-!        IF( NSYS .EQ. 4) THEN
-!          IF( DABS(XYZ(1,INODE)).LT.1.0E-06.AND.&
-!             & DABS(XYZ(2,INODE)).LT.1.0E-06) THEN
-!           NODQUA(INODE)=5
-!          ELSE IF( DABS(XYZ(1,INODE)).LT.1.0E-06 ) THEN
-!           NODQUA(INODE)=4
-!          ENDIF
-!        END IF
+!        if( nsys .eq. 4) then
+!          if( dabs(xyz(1,inode)).lt.1.0e-06.and.&
+!             & dabs(xyz(2,inode)).lt.1.0e-06) then
+!           nodqua(inode)=5
+!          else if( dabs(xyz(1,inode)).lt.1.0e-06 ) then
+!           nodqua(inode)=4
+!          endif
+!        end if
 !!
-!50      CONTINUE
+!50      continue
     end subroutine 
-!       MESHFS4 + MESHBD 
+!       meshfs4 + meshbd 
 !
-!C *******************************************************************
-!C *                                                                 *
-!C *  Read in the data file of the mesh on the free surface          *
-!C *                                                                 *
-!C *                                                                 *
-!C *******************************************************************
-!C 
+!c *******************************************************************
+!c *                                                                 *
+!c *  read in the data file of the mesh on the free surface          *
+!c *                                                                 *
+!c *                                                                 *
+!c *******************************************************************
+!c 
     subroutine meshfs4_2()
 
         implicit none
 
-        integer :: IE,J,M
+        integer :: ie,j,m
         
-        XYZE(3,1:8, 1:NELEMF)=0.0d0
+        xyze(3,1:8, 1:nelemf)=0.0d0
         
-        DO 100 IE=1, NELEMF
+        do 100 ie=1, nelemf
             IETYPE(IE)=2
             READ(3, *)    M, NCN(IE)
             READ(3, *) (XYZE(1,J,IE), J=1, NCN(IE))

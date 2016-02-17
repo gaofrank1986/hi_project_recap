@@ -426,8 +426,8 @@ C
 	SUBROUTINE TRIPOL(NODNUM,NCNE,XYZT,DXYZT)
 	USE MVAR_MOD
 
-	!USE PVAR_MOD
-        use body_property
+	USE PVAR_MOD
+        !use body_property
 	USE TRVAR_MOD
 	IMPLICIT NONE
 C
@@ -1645,7 +1645,7 @@ C  U, W, V as returned by SVDCMP. M and N are the logical dimensions
 C  of A, and will be equal for square matrices. MP and NP are the 
 C  physical dimensions of A. B is the input right-hand side. X is 
 C  the output solution vector. No input quantities are destroyed, 
-C  so the routine may be called sequentially with different B's. 
+C!  so the routine may be called sequentially with different B's. 
 C  M must be greater or equal to N; see SVDCMP
 C
       SUBROUTINE svbksb(u,w,v,m,n,mp,np,b,x)
@@ -1679,3 +1679,14 @@ C
 
 
 
+! 
+! 
+!============================================================================ 
+!  
+!    Spacial Derivatives of the first and the second order components  
+!    of incident wave potential 
+!       IORDER=1: for the first order potential 
+!       IORDER=2: for the second order potential  
+! 
+!============================================================================ 
+ 
