@@ -28,7 +28,7 @@
 !       
          CALL Runge_Kutta(1) 
  
-!        WRITE(*,*) 'RK1 COMPLETED' 
+        WRITE(*,*) 'RK1 COMPLETED' 
 ! 
 !  ============================================ 
 !  RK2 
@@ -40,7 +40,7 @@
  
          call runge_kutta(2) 
  
-!        WRITE(*,*) 'RK2 COMPLETED'  
+        WRITE(*,*) 'RK2 COMPLETED'  
 ! 
 !  ============================================= 
 !  R-K3 
@@ -50,7 +50,7 @@
 ! 
           CALL Runge_Kutta(3) 
  
-!         WRITE(*,*) 'RK3 COMPLETED'  
+         WRITE(*,*) 'RK3 COMPLETED'  
 ! 
 !  ============================================= 
 !  R-K4 
@@ -59,11 +59,12 @@
 !  
          CALL Runge_Kutta(4) 
  
-!        WRITE(*,*) 'RK4 COMPLETED' 
+        WRITE(*,*) 'RK4 COMPLETED' 
 ! 
 ! 
 !C *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 
 ! 
+        ! bkn is boudnary value
        do ip=1, nsys 
          do inode=1, nnf 
             et(inode,ip)=et_o(inode,ip)+tstep/6.0* &
@@ -102,8 +103,8 @@
                               &        FORCE(4), FORCE(5), FORCE(6) 
  
 !C 
- 
-!C Displacement and velocity of the body 
+! SG FIXME: try to make body fixed 
+!C Displacement and d_phi/dt of the body 
 !C 
          !DO 120 K=1, 6 
            !DSDT(K)=DSDT_O(K)+(Dposi(1,K)+2.0D0*Dposi(2,K)+ 
@@ -120,13 +121,13 @@
  
 !         IF(TIME .GT. 2.0d0*TPER) THEN 
  
-          WRITE(22, 1010)  TIME, DISP(1), DISP(2), DISP(3), &
-        &             RAL*DISP(4), RAL*DISP(5), RAL*DISP(6) 
-! 
-          WRITE(23, 1010)  TIME, DSDT(1),     DSDT(2), &
-        &               DSDT(3),     RAL*DSDT(4), &
-        &               RAL*DSDT(5), RAL*DSDT(6) 
-!         ENDIF 
+          !WRITE(22, 1010)  TIME, DISP(1), DISP(2), DISP(3), &
+        !&             RAL*DISP(4), RAL*DISP(5), RAL*DISP(6) 
+!! 
+          !WRITE(23, 1010)  TIME, DSDT(1),     DSDT(2), &
+        !&               DSDT(3),     RAL*DSDT(4), &
+        !&               RAL*DSDT(5), RAL*DSDT(6) 
+!!         ENDIF 
          DO 150 K=1, 6 
         IF( DISP(K).GT. 1000.0d0) DISP(K)= 1000.0d0 
         IF( DISP(K).LT.-1000.0d0) DISP(K)=-1000.0d0 
@@ -199,52 +200,33 @@
 ! 
           DISP(:)= DISP_O(:) 
           DSDT(:)= DSDT_O(:) 
-! 
+!         prin 
           CALL TASSBT 
+          !solve for unkn
+
           DO IP=1,    NSYS 
           DO INODE=1, NNF 
-                  DH(1,INODE,IP)=  UNKN(INODE,IP) -DAMPF(INODE)*ET(INODE,IP) 
-                  DP(1,INODE,IP)= -G*ET(INODE,IP) -DAMPF(INODE)*BKN(INODE,IP) 
+               DH(1,INODE,IP)=  UNKN(INODE,IP) -DAMPF(INODE)*ET(INODE,IP) 
+               DP(1,INODE,IP)= -G*ET(INODE,IP) -DAMPF(INODE)*BKN(INODE,IP) 
           ENDDO   
           ENDDO 
-!  
+          !print *,"after dh,dp"
+!        print 
 !  Compute wave force, and body response 
-!  dpdt is velocity??  
+!  dpdt is d_phi/dt velocity??  
            DPDT(1:NNF,:)=DP(1,1:NNF,:) 
            DPDT(NNF+1:NNODE,:)=(UNKN(NNF+1:NNODE,:) &
      &                      -UNKN_O(NNF+1:NNODE,:))/Tstep 
- 
-!         write(10,*) 
-!         write(10,*) 'DTDP   -RK1' 
-!         DO J=1, NNODE 
-!          write(10,*) J,DPDT(J,:) 
-!         ENDDO 
-           
-!         write(10,*) 
-!         write(10,*) '  P   -RK1' 
-!         DO J=NNF+1, NNODE 
-!          write(10,*) J,UNKN(J,:) 
-!         ENDDO 
- 
- 
-!        write(10,*) 
-!        write(10,*) ' P0   -RK1' 
-!        DO J=NNF+1, NNODE 
-!         write(10,*) J,UNKN_O(J,:) 
-!        ENDDO 
- 
- 
-!         DPDT(:,:)=(UNKN(:,:)-UNKN_O(-1,:,:))/Tstep 
- 
- 
+
           CALL TFORCE                      
+           !processing in time
             UNKN_O(:,:)=UNKN(:,:) 
  
 ! 
          ! CALL TRMAX(DISP,TRXYZ) 
-!         CALL MESHT(TRXYZ) 
           !CALL ACCEL(1,TRXYZ,COMP) 
          ! DO K=1, 6 
+         !dposi is acceleration?? SG
           !Dposi(1,K)=COMP(K) ! can set to 0 if no force
           !END DO 
           Dposi(1,1:6)=0.0d0
@@ -280,10 +262,6 @@
      &                            -UNKN_O(NNF+1:NNODE,:))/(0.5*Tstep) 
 
 
- !        write(10,*) 'DTDP   -RK2' 
- !        DO J=1, NNODE 
- !         write(10,*) J,DPDT(J,:) 
- !        ENDDO 
            
  
           CALL TFORCE 
@@ -324,7 +302,6 @@
               DPDT(NNF+1:NNODE,:)=(UNKN(NNF+1:NNODE,:) &
      &                           -UNKN_O(NNF+1:NNODE,:))/(0.5*Tstep) 
  
-!         DPDT(:,:)=(UNKN(:,:)-UNKN_O(-1,:,:))/(1.5*Tstep) 
  
 !         write(10,*) 'DTDP   -RK3' 
 !         DO J=1, NNODE 
@@ -373,13 +350,6 @@
               DPDT(1:NNF,:)=DP(4,1:NNF,:) 
               DPDT(NNF+1:NNODE,:)=(UNKN(NNF+1:NNODE,:) &
      &                           -UNKN_O(NNF+1:NNODE,:))/Tstep 
- 
-!        DPDT(:,:)=(UNKN(:,:)-UNKN_O(-1,:,:))/(2.0*Tstep) 
- 
-!         write(10,*) 'DTDP   -RK4' 
-!         DO J=1, NNODE 
-!          write(10,*) J,DPDT(J,:) 
-!         ENDDO 
            
  
           CALL TFORCE 

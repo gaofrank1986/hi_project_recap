@@ -133,10 +133,10 @@
                     !frc33(inode,ip)=fterm_coef(3,ip)-fterm_coef(0,ip)*zp!
             end do
             !TODO only works for ip=1
-            write(2000,5001) fterm_coef(0:3,1),s_angle 
+            write(2000,5001) xp,yp,fterm_coef(0:3,1)
             !write(2000,5000) inode,fra3(inode,1),frc31(inode,1),frc32(inode,1)
             5000 format(I6,3f14.6)
-            5001 format(5f14.6)
+            5001 format(6f14.8)
             
             !||----------------------------------    
 
@@ -219,16 +219,16 @@
             enddo
         endif
         !-------output amata,cmata to txt file
-        do i = 1,nnode
-            do j = 1,nnode
-                write(400,*) amata(i,j,1:nsys)
-        end do;end do
-        do i = 1,nnode
-          do j = 1,nnoded
+        !do i = 1,nnode
+            !do j = 1,nnode
+                !write(400,*) amata(i,j,1:nsys)
+        !end do;end do
+        !do i = 1,nnode
+          !do j = 1,nnoded
 
-            write(401,*) cmata(i,j,1:nsys)
-         end do;end do
-! =============================================
+            !write(401,*) cmata(i,j,1:nsys)
+         !end do;end do
+!! =============================================
         print *,"I am here!"
 !
         write(102, *) '  =========== before rludcmp =============='
@@ -241,7 +241,7 @@
         do ip=1, nsys
             call rludcmp(ip,amata,nnode,nnode,nsys,indx,dsign)  
         enddo
-        
+
         write(102, *) 
         write(102, *)
         write(102, *) '  =========== after rludcmp =============='

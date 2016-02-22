@@ -17,7 +17,8 @@ contains
               implicit none
               integer :: i,m,kp,ifwko,wvsimu,ntnum 
               real(8) :: ntime
-        OPEN(1, FILE='INPUT/DATIN.txt',      STATUS='OLD') 
+
+       OPEN(1, FILE='INPUT/DATIN.txt',      STATUS='OLD') 
        READ(1,*)      Rho, G  
        READ(1,*)      H,  BETA
        READ(1,*)    IORDER

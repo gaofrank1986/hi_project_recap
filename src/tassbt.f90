@@ -66,7 +66,7 @@
         zp=       xyz(3,inode)
 !       call dinp(h,amp,beta,wk,w1,g,timerk,rampf,
 !     1                   xp,yp,zp,dpox,dpoy,dpoz)
-
+        !timerk at each rugga kutta time step
         call dpoxyz(h,g,ampn,phi_w,beta,wkn,freq,timerk,rampf,xp,yp,zp,&
      &              nfreq,nwave,iorder,dpox,dpoy,dpoz)
 

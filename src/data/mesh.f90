@@ -88,7 +88,6 @@ contains
         call meshbd_2(ipol) ! read in data on body mesh
 
         close(2)
-        close(1)
         close(3)
 
         call convsb_2()
@@ -503,6 +502,7 @@ contains
 	  write(11,1001) IEL, NCN(IEL)
         WRITE(11,1005) (NCOND(IEL, I), I=1, NCN(IEL))
 	 ENDDO
+        close(11)
 1001   FORMAT(1X,2I6,3F14.6)
 1010   FORMAT(1X,I6,I4,3F14.6)
 1005   FORMAT(8(1X,I6))
