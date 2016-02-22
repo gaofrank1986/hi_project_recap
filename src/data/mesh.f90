@@ -182,8 +182,9 @@ contains
             READ(3, *)    M, NCN(IE)
             READ(3, *) (XYZE(1,J,IE), J=1, NCN(IE))
             READ(3, *) (XYZE(2,J,IE), J=1, NCN(IE))
+            READ(3, *) (DAMPE(J,IE), J=1, NCN(IE))
 
-      dampe(:,:)=0.0d0
+      !dampe(:,:)=0.0d0
 
 100    CONTINUE
         ! in dat file ,positive nrml is set as pointing into fulid field
