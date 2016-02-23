@@ -50,6 +50,7 @@ program hi_project
     call init_hi_var() 
     call tassb0   
 
+    print *,"tassb0 ended"
     itime=0
     time=0.0d0
 
