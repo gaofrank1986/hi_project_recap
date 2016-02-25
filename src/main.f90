@@ -2,6 +2,7 @@ program hi_project
 
     use mvar_mod
     !use motion
+    use free_term,only:fterm,get_free_term,init_ft
     use pvar_mod
     use hi_intg
 
@@ -24,6 +25,8 @@ program hi_project
 
     call read_mesh()
 !  --------------------------------------------
+
+    call init_ft(nsys,nnf) 
 
     allocate(angle(nnode))
     !time domian: var def changed
@@ -48,9 +51,16 @@ program hi_project
     call bodmass       
     call get_gaussian_data(xc,yc,zc)                  
     call init_hi_var() 
+    call get_free_term()
     call tassb0   
 
     print *,"tassb0 ended"
+    !do ip = 1,nsys
+            !fra3(inode,ip)=fterm_coef(0,ip,inode)
+            !frc31(inode,ip)=fterm_coef(1,ip,inode)-fterm_coef(0,ip)*xp!
+            !frc32(inode,ip)=fterm_coef(2,ip)-fterm_coef(0,ip)*yp!
+            !frc33(inode,ip)=fterm_coef(3,ip)-fterm_coef(0,ip)*zp!
+    !end do
     itime=0
     time=0.0d0
 
@@ -82,7 +92,7 @@ program hi_project
     dsdt_o(:)= dsdt(:)
 
     !c                  force_o=force
-    !call time_intg_rk4
+    call time_intg_rk4
     500      continue      
     deallocate(amata,cmata,bmata,indx)
 

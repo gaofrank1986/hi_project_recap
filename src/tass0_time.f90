@@ -27,6 +27,7 @@
         use mvar_mod
         use pvar_mod
         use body_property
+        use free_term,only:fterm
         use mfunc_mod
         use sebsm_mod
 
@@ -38,7 +39,7 @@
         real(8)  bmatrix(4,8),amatrix(4,8),bmat(4)
 
         real(8)  s_angle
-        real(8) :: fterm_coef(0:3,4)
+        !real(8) :: fterm_coef(0:3,4)
         real(8) :: dsign
 
         DATA RSN /1.,  1.,  1.,  1., &
@@ -88,11 +89,12 @@
 ! =======================================================================
 
         do  500   inode=1,  nnf
+                print *,inode
             xp=xyz(1,inode)
             yp=xyz(2,inode)
             zp=xyz(3,inode)
 
-            fterm_coef = 0
+            !fterm_coef = 0
             call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,&
              &                        h,xyz,dxyze,s_angle)    
 
@@ -110,10 +112,9 @@
                     call sing_ele1(inode,ielem,nodqua(inode),xp,yp,zp,&
                         &                   amatrix,bmatrix)
                 end if 
-                call common_block(0,0,ielem,inode,amatrix,bmatrix,fterm_coef)
+                call common_block(0,0,ielem,inode,amatrix,bmatrix)!,fterm_coef)
             end do
             !  Integration on the body surface
-            
             do    ielem=nelemf+1,  nelem
 
                 call comp_link(ielem,inode,ii)
@@ -123,17 +124,24 @@
                     call sing_ele1(inode,ielem,nodqua(inode),xp,yp,zp,&
                      &                   amatrix,bmatrix)
                 end if
-                call common_block(1,0,ielem,inode,amatrix,bmatrix,fterm_coef)
+                call common_block(1,0,ielem,inode,amatrix,bmatrix)
 
             end do
             do ip = 1,nsys
-                    fra3(inode,ip)=fterm_coef(0,ip)!
-                    frc31(inode,ip)=fterm_coef(1,ip)-fterm_coef(0,ip)*xp!
-                    frc32(inode,ip)=fterm_coef(2,ip)-fterm_coef(0,ip)*yp!
-                    !frc33(inode,ip)=fterm_coef(3,ip)-fterm_coef(0,ip)*zp!
+                    fra3(inode,ip) = fterm(inode,ip,0)!
+                    frc31(inode,ip)=fterm(inode,ip,1)-fterm(inode,ip,0)*xp!
+                    frc32(inode,ip)=fterm(inode,ip,2)-fterm(inode,ip,0)*yp!
+                    !frc33(inode,ip)=fterm(inode,ip,3)-fterm(inode,ip,0)*zp!
             end do
+
+            !do ip = 1,nsys
+                    !fra3(inode,ip)=fterm_coef(inode,ip,0)!
+                    !frc31(inode,ip)=fterm_coef(1,ip)-fterm_coef(0,ip)*xp!
+                    !frc32(inode,ip)=fterm_coef(2,ip)-fterm_coef(0,ip)*yp!
+                    !frc33(inode,ip)=fterm_coef(3,ip)-fterm_coef(0,ip)*zp!
+            !end do
             !TODO only works for ip=1
-            write(2000,5001) xp,yp,fterm_coef(0:3,1),s_angle
+            write(2000,5001) xp,yp,fterm(inode,1,0:3),s_angle
             !write(2000,5000) inode,fra3(inode,1),frc31(inode,1),frc32(inode,1)
             5000 format(I6,3f14.6)
             5001 format(7f14.8)
@@ -159,7 +167,7 @@
             yp=xyz(2,inode)
             zp=xyz(3,inode) 
             
-            fterm_coef = 0
+            !fterm_coef = 0
             call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,&
              &                    h,xyz,dxyze,s_angle) 
 
@@ -171,7 +179,7 @@
 
                 ii=0   
                 call norm_ele0(ielem,xp,yp,zp,amatrix,bmatrix)
-                call common_block(0,1,ielem,inode,amatrix,bmatrix,fterm_coef)
+                call common_block(0,1,ielem,inode,amatrix,bmatrix)
 
             end do
 
@@ -185,7 +193,7 @@
                      &                   amatrix,bmatrix)
                 end if
 
-                call common_block(1,1,ielem,inode,amatrix,bmatrix,fterm_coef)
+                call common_block(1,1,ielem,inode,amatrix,bmatrix)
             end do
         !-----commented indriect method for solid angle
         !do ip = 1,nsys     
@@ -238,9 +246,9 @@
             !write(2000,*) amata(i,ii,1)
         !end do;end do
 
-        !do ip=1, nsys
-            !call rludcmp(ip,amata,nnode,nnode,nsys,indx,dsign)  
-        !enddo
+        do ip=1, nsys
+            call rludcmp(ip,amata,nnode,nnode,nsys,indx,dsign)  
+        enddo
 
         write(102, *) 
         write(102, *)

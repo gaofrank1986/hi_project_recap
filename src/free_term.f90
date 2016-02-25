@@ -15,7 +15,7 @@ contains
           !nnode = 5
           print *,'nsys=',nsys,'   ,  nnode=',nnode
           allocate(fterm(nnode,nsys,1:4))
-          open(1,file = './fterm_final.txt',status='old')
+          open(1,file = './INPUT/fterm_final.txt',status='old')
           do j = 1,nnode
                do i=1,nsys
                     !read (1,*) (fterm(j,i,k) k=1,4)
