@@ -9,7 +9,7 @@ module wave2!
 ! 
 ! 
 contains
-        FUNCTION ETI2(H,G,Ampn,Phi,BETA,WKN,FREQ,Time,Ramp,X,Y,NN,Nwave,IOrder) 
+        function eti2(h,g,ampn,phi,beta,wkn,freq,time,ramp,x,y,nn,nwave,iorder) 
   
  !DEC$ATTRIBUTES DLLEXPORT::ETI2 
  

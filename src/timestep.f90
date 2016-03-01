@@ -67,10 +67,11 @@
         ! bkn is boudnary value
        do ip=1, nsys 
          do inode=1, nnf 
+         !wave height
             et(inode,ip)=et_o(inode,ip)+tstep/6.0* &
      &                       (dh(1,inode,ip)+2.0*dh(2,inode,ip)+ &
      &               2.0*dh(3,inode,ip)+dh(4,inode,ip) ) 
- 
+        !wave potential on surface 
             bkn(inode,ip)=bkn_o(inode,ip)+tstep/6.0d0* &
      &                    (dp(1,inode,ip)+2.0d0*dp(2,inode,ip)+ &
      &                2.0d0*dp(3,inode,ip)+dp(4,inode,ip) ) 
@@ -207,13 +208,16 @@
           DO IP=1,    NSYS 
           DO INODE=1, NNF 
                DH(1,INODE,IP)=  UNKN(INODE,IP) -DAMPF(INODE)*ET(INODE,IP) 
+               !d\eti / dt
                DP(1,INODE,IP)= -G*ET(INODE,IP) -DAMPF(INODE)*BKN(INODE,IP) 
+               !{d \phi}/dt
           ENDDO   
           ENDDO 
           !print *,"after dh,dp"
 !        print 
 !  Compute wave force, and body response 
-!  dpdt is d_phi/dt velocity??  
+!  dpdt is d_phi/dt potential deritive over time??  
+          !dsdt is velocity
            DPDT(1:NNF,:)=DP(1,1:NNF,:) 
            DPDT(NNF+1:NNODE,:)=(UNKN(NNF+1:NNODE,:) &
      &                      -UNKN_O(NNF+1:NNODE,:))/Tstep 
@@ -240,9 +244,10 @@
  
                   ET(:,:)      = ET_O(:,:)     +DH(1,:,:)*Tstep/2.0d0 
                   BKN(1:NNF,:) = BKN_O(1:NNF,:)+DP(1,:,:)*Tstep/2.0d0 
+                  !boundary potential changed on surface
 
                   DISP(:)=DISP_O(:) +Tstep*DSDT_O(:)/2.0d0  !gives displacement
-                  DSDT(:)= DSDT_O(:)+Dposi(1,:)/2.0d0! Dposi gives velocity 
+                  DSDT(:)= DSDT_O(:)+Dposi(1,:)/2.0d0!  gives velocity 
                   ! tassbt require dsdt and bkn updated before running
                   CALL TASSBT 
 ! 

@@ -29,12 +29,12 @@ contains
        READ(1,*) M,  WF_Temp(I), AMPN(I), PHi_w(I)     
        ENDDO     
 !
-! WVSimu: number of waves to simulate, 
+! WVSimu: number of waves period to simulate,(time span) 
 ! NtNUM: number of time steps in a wave
 ! Nwave: number of compositing waves for irregular incident waves
 !
 
-        IF (IFWKO .EQ. 0)  THEN
+        IF (IFWKO .EQ. 0)  THEN!ifwki=0 wave number given
                 WKN(:)=WF_Temp(:)
 
                 DO I=1, Nwave
@@ -89,6 +89,8 @@ contains
        WK=WKN(KP)
        WL=2.0d0*PI/WK !wave number to wave len
        Tper=2.0*PI/FREQ(KP)! wave frewq to wave period
+       print *,"pi=  ",pi
+       print *,"tper=   ",tper
      
        TSTEP=TPER/NTNUM   ! a perid divded to ntnum 
          NTIME=INT(WVSimu*TPER/TSTEP)!how many steps total to simulate
