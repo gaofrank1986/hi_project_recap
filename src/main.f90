@@ -5,10 +5,12 @@ program hi_project
     use free_term,only:fterm,get_free_term,init_ft
     use pvar_mod
     use hi_intg
+    use gradient,only:init_gradient
 
     implicit  none  
 
     real(8) Stime,Etime
+    integer :: i,j,k,inode
 
     open(9,  file='output/output1.txt',    status='unknown')
     open(10, file='output/output.txt' ,    status='unknown')
@@ -53,6 +55,16 @@ program hi_project
     call init_hi_var() 
     call get_free_term()
     call tassb0   
+    !do i=1,nnf 
+        !print *,i
+        !print *,nodelj(:,inode)
+    call init_gradient(nnf,nelemf,xyze(1:2,:,1:nelemf),nodele(1:nnf,1),nodelj(1:nnf,1))
+    !do inode =1,nnf
+!  print *,"inode =",inode
+        !print *,nodele(inode,1:5)
+        !print *,nodelj(inode,1:5)
+        !pause
+        !end do
 
     print *,"tassb0 ended"
     !do ip = 1,nsys

@@ -63,7 +63,7 @@
         endif
 30      continue
 40      continue
-        nodnoe(inode)=l !total number of links
+              nodnoe(inode)=l !total number of links
 !        below related to symmetry
         nodqua(inode)=0
         if( nsys .ge. 2) then

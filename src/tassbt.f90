@@ -13,6 +13,7 @@
       USE PVAR_MOD
       use wave2,only:dpoxyz
       use mfunc_mod,only:rlubksb
+      use gradient,only:eval_gradient
 
       implicit none  
 
@@ -20,7 +21,7 @@
       real(8) xp,yp,zp,dpox,dpoy,dpoz,dpdn
       real(8) rsn(4,4),ex(4),ey(4)
       real(8) bmat(nsys),cmat(nnoded,nsys)
-      real(8) :: dpoxyz_save(3,4,nnoded)
+      real(8) :: dpoxyz_save(2,4,nnoded),tmp(8),tmp2(2,1)
 
       data rsn /1.,  1.,  1.,  1.,& 
      &            1., -1.,  1., -1.,&
@@ -29,6 +30,7 @@
       data ex / 1.,  1., -1., -1./                                     
       data ey / 1., -1., -1.,  1./
 
+       print *,"Entering tassbt"
 !
 !        WRITE(102,*)
 !        WRITE(102,*)   'T=', TimeRK                 
@@ -38,14 +40,34 @@
 !C
       cmat(:,:)=0.0
       dpoxyz_save = 0.0
-       ! print *,"bkn",bkn
         ! assign boundary value has potentials--------
         do  20   inode=1,  nnf  
             do is=1, nsys
                 do ip=1, nsys
                   cmat(inode,is)=cmat(inode,is)+rsn(is,ip)*bkn(inode,ip)
             enddo;enddo
+                !call dpoxyz(h,g,ampn,phi_w,beta,wkn,freq,timerk,rampf,xp,yp,zp,&
+     !&              nfreq,nwave,iorder,dpox,dpoy,dpoz)
+          !dpoxyz_save(1,ip,inode) = dpox
+        !dpoxyz_save(2,ip,inode) = dpoy
+        !print *,inode,"surface list getting"
+        !print *,"nodele",nodele(inode,1)
+        !print *,ncon(nodele(inode,1),:)
+        do j=1,ncn(nodele(inode,1))
+             tmp(j) = bkn(ncon(nodele(inode,1),j),1)!get surface value
+        end do
+        !print *,"surface list finished"
+                !write(*,1021) tmp
+                call eval_gradient(inode,tmp,tmp2)
+                dpoxyz_save(1,1,inode) = tmp2(1,1)
+                dpoxyz_save(2,1,inode) = tmp2(2,1)
+                !write(*,*) tmp2(1,1),tmp2(2,1)
+                
+                !print *,"finished free surface node ",inode
+        
+ 
     20   continue
+    1021 format(8f10.6)
     !print *,"cmat",cmat
 !
 !        WRITE(102,*)  'INODE,    CMAT(INODE,1) --20'
@@ -64,8 +86,8 @@
         xp=ex(ip)*xyz(1,inode)
         yp=ey(ip)*xyz(2,inode)
         zp=       xyz(3,inode)
-!       call dinp(h,amp,beta,wk,w1,g,timerk,rampf,
-!     1                   xp,yp,zp,dpox,dpoy,dpoz)
+ !      call dinp(h,amp,beta,wk,w1,g,timerk,rampf,
+     !1                   xp,yp,zp,dpox,dpoy,dpoz)
         !timerk at each rugga kutta time step
         call dpoxyz(h,g,ampn,phi_w,beta,wkn,freq,timerk,rampf,xp,yp,zp,&
      &              nfreq,nwave,iorder,dpox,dpoy,dpoz)
@@ -89,9 +111,7 @@
             cmat(inode,is)=cmat(inode,is)+rsn(is,ip)*dpdn
         enddo
 
-        dpoxyz_save(1,ip,inode) = dpox
-        dpoxyz_save(2,ip,inode) = dpoy
-        dpoxyz_save(3,ip,inode) = dpoz
+             !this is only incident wave, missing the diffraction wave
 40      continue   
 !
 
