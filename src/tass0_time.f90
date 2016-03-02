@@ -234,6 +234,10 @@
             call rludcmp(ip,amata,nnode,nnode,nsys,indx,dsign)  
         enddo
 
+        do i = 1,nnode
+            do j = 1,nnode
+                write(400,*) amata(i,j,1:nsys)
+        end do;end do
         write(102, *) 
         write(102, *)
         write(102, *) '  =========== after rludcmp =============='

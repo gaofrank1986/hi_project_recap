@@ -1,6 +1,7 @@
 program hi_project
 
     use mvar_mod
+    use free_term,only:fterm,get_free_term,init_ft,output_fterms
     use body_property
     use hi_intg
     use gradient,only:init_gradient
@@ -22,6 +23,8 @@ program hi_project
 
     call read_mesh()
 !  --------------------------------------------
+    call init_ft(nsys,nnf) 
+ 
 
     allocate(angle(nnode))
     allocate(fra3(nnode,nsys),&
