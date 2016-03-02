@@ -39,14 +39,7 @@ program hi_project
     allocate(bkn(nnoded,nsys),&
         &                 unkn_o(nnode,nsys),bkn_o(nnoded,nsys),&
         &            et(nnf,nsys),et_o(nnf,nsys), dpdt(nnode,nsys))
-    allocate(angle(nnode),fra3(nnode,isys),&
-        &          frc31(nnode,isys),frc32(nnode,isys),frc33(nnode,isys))
-
-    allocate(amata(nnode,nnode,nsys),&
-        &                 bmata(nnode,nsys), indx(nnode,nsys))
-    !       
-    allocate(unkn(nnode,nsys))
-    !,  bkn(nnoded,nsys),&
+     !,  bkn(nnoded,nsys),&
      !   &                 unkn_o(nnode,nsys),bkn_o(nnoded,nsys),&
       !  &             dpdt(nnode,nsys))
     !allocate(dh(4,nnf,nsys),dp(4,nnf,nsys),dposi(4,6))
