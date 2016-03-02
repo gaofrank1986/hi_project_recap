@@ -103,7 +103,7 @@
              &                        h,xyz,dxyze,s_angle)    
 
             angle(inode)=1.0d0- s_angle
-            amata(inode,inode,1:nsys)= angle(inode)
+            amata(inode,inode,1:nsys)= 1.0d0-s_angle!angle(inode)
             !  ---------------------------
             !  Integration on the free surface
                 
@@ -140,7 +140,7 @@
             end do
 
             !TODO only works for ip=1
-            write(2000,5001) xp,yp,fterm(inode,1,1:4),s_angle
+            write(2000,5001) xp,yp,fterm(inode,1,1:4),angle(inode)
             !write(2000,5000) inode,fra3(inode,1),frc31(inode,1),frc32(inode,1)
             5000 format(I6,3f14.6)
             5001 format(7f14.8)
@@ -167,7 +167,7 @@
 
             angle(inode)=1.0d0 - s_angle
 
-            amata(inode,inode,1:nsys)= angle(inode)
+            amata(inode,inode,1:nsys)= 1.0d0-s_angle! angle(inode)
 
             do   ielem=1,  nelemf
 
@@ -187,8 +187,9 @@
                      &                   amatrix,bmatrix)
                 end if
 
-                call common_block(1,1,ielem,inode,amatrix,bmatrix)
+                !call common_block(1,1,ielem,inode,amatrix,bmatrix)
             end do
+            write(2000,5001) xp,yp,angle(inode)
 1000     continue
 !
 ! =============================================
@@ -233,16 +234,19 @@
         !do ii = 1,560 
             !write(2000,*) amata(i,ii,1)
         !end do;end do
-
-        do ip=1, nsys
-            call rludcmp(ip,amata,nnode,nnode,nsys,indx,dsign)  
-        enddo
-
         do i = 1,nnode
             do j = 1,nnode
                 write(400,*) amata(i,j,1:nsys)
         end do;end do
-        write(102, *) 
+
+        do i = 1,nnode
+                write(401,*) amata(i,i,1:nsys)
+        end do
+        !do ip=1, nsys
+            !call rludcmp(ip,amata,nnode,nnode,nsys,indx,dsign)  
+        !enddo
+
+                write(102, *) 
         write(102, *)
         write(102, *) '  =========== after rludcmp =============='
 
