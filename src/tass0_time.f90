@@ -27,7 +27,7 @@
         use mvar_mod
         use pvar_mod
         use body_property
-        use free_term,only:fterm
+        use free_term,only:fterm,output_fterms
         use mfunc_mod
         use sebsm_mod
 
@@ -87,7 +87,7 @@
         cmata = 0.0d0
 
 ! =======================================================================
-
+        call output_fterms()
         do  500   inode=1,  nnf
                 print *,inode
             xp=xyz(1,inode)
@@ -127,10 +127,11 @@
                 call common_block(1,0,ielem,inode,amatrix,bmatrix)
 
             end do
+            !todo no
             do ip = 1,nsys
-                    fra3(inode,ip) = fterm(inode,ip,0)!
-                    frc31(inode,ip)=fterm(inode,ip,1)-fterm(inode,ip,0)*xp!
-                    frc32(inode,ip)=fterm(inode,ip,2)-fterm(inode,ip,0)*yp!
+                    fra3(inode,ip) = fterm(inode,ip,1)!
+                    frc31(inode,ip)=fterm(inode,ip,2)-fterm(inode,ip,1)*xp!
+                    frc32(inode,ip)=fterm(inode,ip,3)-fterm(inode,ip,1)*yp!
                     !frc33(inode,ip)=fterm(inode,ip,3)-fterm(inode,ip,0)*zp!
             end do
 
@@ -141,7 +142,7 @@
                     !frc33(inode,ip)=fterm_coef(3,ip)-fterm_coef(0,ip)*zp!
             !end do
             !TODO only works for ip=1
-            write(2000,5001) xp,yp,fterm(inode,1,0:3),s_angle
+            write(2000,5001) xp,yp,fterm(inode,1,1:4),s_angle
             !write(2000,5000) inode,fra3(inode,1),frc31(inode,1),frc32(inode,1)
             5000 format(I6,3f14.6)
             5001 format(7f14.8)

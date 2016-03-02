@@ -19,11 +19,16 @@ subroutine init_gradient(nnf,nelemf,xyze,nodele,nodelj,debug)
     allocate(sf_info(nnf,3,8),jacob_info(nnf,2,2))
     do i = 1,nnf
         global_pos_value = xyze(1:2,1:8,nodele(i))
+        !nodele is the first linked element for node i
+        !get global x,y for all nodes on the elem
         if (present(debug) .and. debug) then
         print *,"global pos"
         !print *,global_pos_value
         endif
         call spfunc8(param_pos(nodelj(i),:),sf,dsf)
+        !nodelj is the pos of node i in the element
+        !get its local shape func and deriv of shape func
+        !record the info in sf_info
         sf_info(i,1,:) = sf
         sf_info(i,2:3,:) = dsf
         if (present(debug) .and. debug) then
@@ -31,6 +36,7 @@ subroutine init_gradient(nnf,nelemf,xyze,nodele,nodelj,debug)
         !print *,sf_info(1,2,:)
         !print *,sf_info(1,3,:)
         end if
+        !cal the jacobian mtx at node i
         jacobian_mt = matmul(dsf,transpose(global_pos_value))!(global over local jacobain) 
         if (present(debug) .and. debug) then
         print *,"jacobian before inversion"
@@ -52,9 +58,10 @@ subroutine eval_gradient(inode,surface_value,global_grad)
     real(8),intent(out) :: global_grad(2,1)
     real(8),dimension(8,1),intent(in) :: surface_value
     real(8) :: local_grad(2,1),tmp(2,8)
-    tmp = sf_info(inode,2:3,:)
 
-    
+    tmp = sf_info(inode,2:3,:)
+    !dsf info of node i
+    ! local gradient = dsf.*z_value 
     local_grad = matmul(tmp,surface_value)
     global_grad  = matmul(jacob_info(inode,:,:),local_grad)
     ! jacobian inverse(identically local over global jacobian) * local grad

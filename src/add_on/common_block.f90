@@ -21,15 +21,15 @@
         
         
         do     j=1,  ncn(ielem) 
-            jncon=ncon(ielem,j)
-            cur_nrml=ncond(ielem,j)  
+            jncon=ncon(ielem,j)!jth node in ielem
+            cur_nrml=ncond(ielem,j)  !jth nrml in ielem
             do     ip=1, nsys          
-                xsb=ex(ip)*xyz(1,jncon)
-                ysb=ey(ip)*xyz(2,jncon)
-                zsb=       xyz(3,jncon)
-                nx=ex(ip)*dxyz(1,cur_nrml)
-                ny=ey(ip)*dxyz(2,cur_nrml)
-                nz=       dxyz(3,cur_nrml)
+                !xsb=ex(ip)*xyz(1,jncon)
+                !ysb=ey(ip)*xyz(2,jncon)
+                !zsb=       xyz(3,jncon)
+                !nx=ex(ip)*dxyz(1,cur_nrml)
+                !ny=ey(ip)*dxyz(2,cur_nrml)
+                !nz=       dxyz(3,cur_nrml)
                 !TODO ??? change dinp for time domain??
                 !call dinp(xsb,ysb,zsb,dpox,dpoy,dpoz)   !get initial condition    
                 !dpdn=dpox*nx+dpoy*ny+dpoz*nz !get initial condition
@@ -41,7 +41,7 @@
 
                     !bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)&
                         !&           *amatrix(is,j)!*poxy(xsb,ysb,zsb)
-                        
+                       !surface cmata multiply potential 
                         cmata(inode,jncon,ip)=cmata(inode,jncon,ip)+rsn(is,ip)&
                              &           *amatrix(is,j)!*poxy(xsb,ysb,zsb)
                     enddo
@@ -49,14 +49,14 @@
                     do  is=1, nsys    
                     !basically do the same job as above
                     !and the trick part is for fs node in body elem
-                    !whcih should
                     if(jncon .gt. nnf)  then
+                            !if on surface,amatrix goes to amata
                         amata(inode,jncon,ip)=amata(inode,jncon,ip)-&
                             &                   rsn(is,ip)*amatrix(is,j)
                     else
                         !phi=poxy(xsb,ysb,zsb)! get intial conditon
                         !bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)*amatrix(is,j)*phi
-
+                        !
                         cmata(inode,jncon,ip)=cmata(inode,jncon,ip)+rsn(is,ip)*amatrix(is,j)!*phi2
                     endif
 

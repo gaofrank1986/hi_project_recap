@@ -1,5 +1,5 @@
 module free_term
-     real(8),allocatable,protected :: fterm(:,:,:)
+     real(8),allocatable,protected,save :: fterm(:,:,:)
      integer,private :: nsys,nnode
 contains
      subroutine init_ft(a,b)
@@ -11,6 +11,7 @@ contains
      subroutine get_free_term()
           implicit none
           integer :: m,i,j,k
+          real(8)::tmp
           !nsys = 1
           !nnode = 5
           print *,'nsys=',nsys,'   ,  nnode=',nnode
@@ -20,7 +21,7 @@ contains
                do i=1,nsys
                     !read (1,*) (fterm(j,i,k) k=1,4)
                     !FIXME
-                    read(1,*) m,(fterm(m,i,k),k=1,4)
+                    read(1,*) m,(fterm(m,i,k),k=1,4),tmp
 
           enddo;enddo
           close(1)
@@ -29,13 +30,13 @@ contains
       subroutine output_fterms()
            implicit none
            integer :: j,i,k
-           open(1,file='./ft_reout.txt',status='unknown')
+           open(1000,file='./ft_reout.txt',status='unknown')
            do j =1,nnode
                do i=1,nsys
-               write (1,1000) (fterm(j,i,k),k=1,4)
+               write (1000,1000) (fterm(j,i,k),k=1,4)
            enddo;enddo
            1000  format(4f14.8)
-           close(1)
+           close(1000)
       end subroutine
 
            

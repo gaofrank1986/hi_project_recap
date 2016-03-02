@@ -41,6 +41,7 @@
       cmat(:,:)=0.0
       dpoxyz_save = 0.0
         ! assign boundary value has potentials--------
+        ! bkn is the potential from time stepping----on surface node
         do  20   inode=1,  nnf  
             do is=1, nsys
                 do ip=1, nsys
@@ -50,9 +51,6 @@
      !&              nfreq,nwave,iorder,dpox,dpoy,dpoz)
           !dpoxyz_save(1,ip,inode) = dpox
         !dpoxyz_save(2,ip,inode) = dpoy
-        !print *,inode,"surface list getting"
-        !print *,"nodele",nodele(inode,1)
-        !print *,ncon(nodele(inode,1),:)
         do j=1,ncn(nodele(inode,1))
              tmp(j) = bkn(ncon(nodele(inode,1),j),1)!get surface value
         end do

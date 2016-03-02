@@ -2,7 +2,7 @@ program hi_project
 
     use mvar_mod
     !use motion
-    use free_term,only:fterm,get_free_term,init_ft
+    use free_term,only:fterm,get_free_term,init_ft,output_fterms
     use pvar_mod
     use hi_intg
     use gradient,only:init_gradient
@@ -21,7 +21,7 @@ program hi_project
     call read_wav_data()
     !call output_wav_data()
     !print *,xc,yc,zc
-    !xc=0
+    !xc=0 notem fixme contained
     !yc=0
     !zc=0
 
@@ -54,6 +54,7 @@ program hi_project
     call get_gaussian_data(xc,yc,zc)                  
     call init_hi_var() 
     call get_free_term()
+
     call tassb0   
     !do i=1,nnf 
         !print *,i
