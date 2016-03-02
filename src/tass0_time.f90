@@ -187,7 +187,7 @@
                      &                   amatrix,bmatrix)
                 end if
 
-                !call common_block(1,1,ielem,inode,amatrix,bmatrix)
+                call common_block(1,1,ielem,inode,amatrix,bmatrix)
             end do
             write(2000,5001) xp,yp,angle(inode)
 1000     continue
