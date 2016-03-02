@@ -3,6 +3,7 @@ program hi_project
     use mvar_mod
     use body_property
     use hi_intg
+    use gradient,only:init_gradient
 
     implicit  none  
 
@@ -22,6 +23,19 @@ program hi_project
     call read_mesh()
 !  --------------------------------------------
 
+    allocate(angle(nnode))
+    allocate(fra3(nnode,nsys),&
+        &          frc31(nnode,nsys),frc32(nnode,nsys),frc33(nnode,nsys))
+
+    allocate(amata(nnode,nnode,nsys),&
+        &                 bmata(nnode,nsys), indx(nnode,nsys))
+    allocate(cmata(nnode,nnoded,nsys))
+    allocate(unkn(nnode,nsys))
+
+
+    allocate(bkn(nnoded,nsys),&
+        &                 unkn_o(nnode,nsys),bkn_o(nnoded,nsys),&
+        &            et(nnf,nsys),et_o(nnf,nsys), dpdt(nnode,nsys))
     allocate(angle(nnode),fra3(nnode,isys),&
         &          frc31(nnode,isys),frc32(nnode,isys),frc33(nnode,isys))
 
@@ -37,7 +51,7 @@ program hi_project
     call get_gaussian_data(xc,yc,zc)                  
     call init_hi_var() 
     call tassb0   
-
+    call init_gradient(nnf,nelemf,xyze(1:2,:,1:nelemf),nodele(1:nnf,1),nodelj(1:nnf,1))
     print *,"=================== main program ends ==============="
 end  program      
 
