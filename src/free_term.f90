@@ -16,15 +16,17 @@ contains
           !nnode = 5
           print *,'nsys=',nsys,'   ,  nnode=',nnode
           allocate(fterm(nnode,nsys,1:4))
-          open(1,file = './INPUT/fterm_final.txt',status='old')
+          open(1001,file = './INPUT/fterm_final.txt',status='old')
           do j = 1,nnode
                do i=1,nsys
                     !read (1,*) (fterm(j,i,k) k=1,4)
                     !FIXME
-                    read(1,*) m,(fterm(m,i,k),k=1,4),tmp
+                    read(1001,*) (fterm(j,i,k),k=1,4),tmp
+                    print *,(fterm(j,i,k),k=1,4)
+                    !pause
 
           enddo;enddo
-          close(1)
+          close(1001)
       end subroutine
 
       subroutine output_fterms()

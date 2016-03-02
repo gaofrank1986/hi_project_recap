@@ -1,7 +1,7 @@
 program hi_project
 
     use mvar_mod
-    use free_term,only:fterm,get_free_term,init_ft,output_fterms
+    use free_term,only:get_free_term,init_ft
     use body_property
     use hi_intg
     use gradient,only:init_gradient
@@ -46,6 +46,7 @@ program hi_project
 
     call get_gaussian_data(xc,yc,zc)                  
     call init_hi_var() 
+    call get_free_term()
     call tassb0   
     call init_gradient(nnf,nelemf,xyze(1:2,:,1:nelemf),nodele(1:nnf,1),nodelj(1:nnf,1))
     print *,"=================== main program ends ==============="

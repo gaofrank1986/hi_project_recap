@@ -26,30 +26,31 @@
     subroutine tassb0
         use mvar_mod
         use pvar_mod
-        use body_property
-        use free_term,only:fterm,output_fterms
-        use mfunc_mod
-        use sebsm_mod
+                use body_property
+                use free_term,only:fterm,output_fterms
+                use mfunc_mod
+                use sebsm_mod
 
-        implicit   none  
-        integer  inode,ielem,j,jnode,ind,indd,ip
-        integer ::    i,ii,is,l
-        real(8)  xp,yp,zp,dpox,dpoy,dpoz,phi2
-        real(8)  rsn(4,4)
-        real(8)  bmatrix(4,8),amatrix(4,8),bmat(4)
+                implicit   none  
+                integer  inode,ielem,j,jnode,ind,indd,ip
+                integer ::    i,ii,is,l
+                real(8)  xp,yp,zp,dpox,dpoy,dpoz,phi2
+                real(8)  rsn(4,4)
+                real(8)  bmatrix(4,8),amatrix(4,8),bmat(4)
 
-        real(8)  s_angle
-        !real(8) :: fterm_coef(0:3,4)
-        real(8) :: dsign
+                real(8)  s_angle
+                !real(8) :: fterm_coef(0:3,4)
+                real(8) :: dsign
 
-        DATA RSN /1.,  1.,  1.,  1., &
-     &            1., -1.,  1., -1., &
-     &            1.,  1., -1., -1., &
-     &            1., -1., -1.,  1./ 
-!
+                DATA RSN /1.,  1.,  1.,  1., &
+             &            1., -1.,  1., -1., &
+             &            1.,  1., -1., -1., &
+             &            1., -1., -1.,  1./ 
+        !
 !`
 !  ----------------------------------------------------
           WRITE(10, *)   ' IN TASSB0 '
+         
           !DSDT(:)=0.0
 !                 
         do 50 inode=1, nnode 
@@ -82,12 +83,15 @@
         end if
 !
 50      continue
+        PRINT *,"topology analysis finished"
 
         amata = 0.0d0
         cmata = 0.0d0
 
 ! =======================================================================
         call output_fterms()
+        pause
+        print *,"finished fterm output"
         do  500   inode=1,  nnf
                 print *,inode
             xp=xyz(1,inode)
@@ -98,7 +102,7 @@
             call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,&
              &                        h,xyz,dxyze,s_angle)    
 
-            angle(inode)=s_angle
+            angle(inode)=1.0d0- s_angle
             amata(inode,inode,1:nsys)= angle(inode)
             !  ---------------------------
             !  Integration on the free surface
@@ -161,7 +165,7 @@
             call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,&
              &                    h,xyz,dxyze,s_angle) 
 
-            angle(inode)=s_angle
+            angle(inode)=1.0d0 - s_angle
 
             amata(inode,inode,1:nsys)= angle(inode)
 
