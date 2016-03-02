@@ -127,32 +127,21 @@
                 call common_block(1,0,ielem,inode,amatrix,bmatrix)
 
             end do
-            !todo no
+            
             do ip = 1,nsys
                     fra3(inode,ip) = fterm(inode,ip,1)!
                     frc31(inode,ip)=fterm(inode,ip,2)-fterm(inode,ip,1)*xp!
                     frc32(inode,ip)=fterm(inode,ip,3)-fterm(inode,ip,1)*yp!
-                    !frc33(inode,ip)=fterm(inode,ip,3)-fterm(inode,ip,0)*zp!
+                    !frc33(inode,ip)=fterm(inode,ip,4)-fterm(inode,ip,0)*zp!
             end do
 
-            !do ip = 1,nsys
-                    !fra3(inode,ip)=fterm_coef(inode,ip,0)!
-                    !frc31(inode,ip)=fterm_coef(1,ip)-fterm_coef(0,ip)*xp!
-                    !frc32(inode,ip)=fterm_coef(2,ip)-fterm_coef(0,ip)*yp!
-                    !frc33(inode,ip)=fterm_coef(3,ip)-fterm_coef(0,ip)*zp!
-            !end do
             !TODO only works for ip=1
             write(2000,5001) xp,yp,fterm(inode,1,1:4),s_angle
             !write(2000,5000) inode,fra3(inode,1),frc31(inode,1),frc32(inode,1)
             5000 format(I6,3f14.6)
             5001 format(7f14.8)
             
-            !||----------------------------------    
 
-            !||-  phi,dinp is evolving with time, need to be implemented in tassbt.f
-            !||-------------------------------------------------------------------
-             !phi2=poxy(xp,yp,zp) ! this in known since src on free surface
-             !call dinp(xp,yp,zp,dpox,dpoy,dpoz)! this is unkown, so is this a mistake
              !cmata(inode,1)=cmata(inode,1)-fra3(inode)*phi2-&
                  !&     frc31(inode)*dpox-frc32(inode)*dpoy
              !amata(inode,inode,1:nsys)= amata(inode,inode,1:nsys)+frc33(inode)
@@ -196,12 +185,6 @@
 
                 call common_block(1,1,ielem,inode,amatrix,bmatrix)
             end do
-        !-----commented indriect method for solid angle
-        !do ip = 1,nsys     
-            !fra3(inode)=fterm_coef(0,ip)!
-            !write (402,499) fterm_coef(0:3,1)
-            !amata(inode,inode,ip)=amata(inode,inode,ip)+fterm_coef(0,ip)
-        !end do
 1000     continue
 !
 ! =============================================

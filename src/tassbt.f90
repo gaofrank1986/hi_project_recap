@@ -47,21 +47,12 @@
                 do ip=1, nsys
                   cmat(inode,is)=cmat(inode,is)+rsn(is,ip)*bkn(inode,ip)
             enddo;enddo
-                !call dpoxyz(h,g,ampn,phi_w,beta,wkn,freq,timerk,rampf,xp,yp,zp,&
-     !&              nfreq,nwave,iorder,dpox,dpoy,dpoz)
-          !dpoxyz_save(1,ip,inode) = dpox
-        !dpoxyz_save(2,ip,inode) = dpoy
-        do j=1,ncn(nodele(inode,1))
-             tmp(j) = bkn(ncon(nodele(inode,1),j),1)!get surface value
-        end do
-        !print *,"surface list finished"
-                !write(*,1021) tmp
-                call eval_gradient(inode,tmp,tmp2)
-                dpoxyz_save(1,1,inode) = tmp2(1,1)
-                dpoxyz_save(2,1,inode) = tmp2(2,1)
-                !write(*,*) tmp2(1,1),tmp2(2,1)
-                
-                !print *,"finished free surface node ",inode
+            do j=1,ncn(nodele(inode,1))
+                 tmp(j) = bkn(ncon(nodele(inode,1),j),1)!get surface value
+            end do
+            call eval_gradient(inode,tmp,tmp2)
+            dpoxyz_save(1,1,inode) = tmp2(1,1)
+            dpoxyz_save(2,1,inode) = tmp2(2,1)
         
  
     20   continue
@@ -84,8 +75,6 @@
         xp=ex(ip)*xyz(1,inode)
         yp=ey(ip)*xyz(2,inode)
         zp=       xyz(3,inode)
- !      call dinp(h,amp,beta,wk,w1,g,timerk,rampf,
-     !1                   xp,yp,zp,dpox,dpoy,dpoz)
         !timerk at each rugga kutta time step
         call dpoxyz(h,g,ampn,phi_w,beta,wkn,freq,timerk,rampf,xp,yp,zp,&
      &              nfreq,nwave,iorder,dpox,dpoy,dpoz)
