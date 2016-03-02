@@ -247,9 +247,9 @@
             !write(2000,*) amata(i,ii,1)
         !end do;end do
 
-        do ip=1, nsys
-            call rludcmp(ip,amata,nnode,nnode,nsys,indx,dsign)  
-        enddo
+      !  do ip=1, nsys
+            !call rludcmp(ip,amata,nnode,nnode,nsys,indx,dsign)  
+        !enddo
 
         write(102, *) 
         write(102, *)

@@ -84,7 +84,7 @@ program hi_project
     force(:) =0.0
     disp(:)  =0.0
     dsdt(:)  =0.0
-    !
+    call tassbt!
     !         CALL PLOTOUT8
     print *,"before time step"
     do 500 itime=0, 0!ntime
@@ -105,7 +105,7 @@ program hi_project
     dsdt_o(:)= dsdt(:)
 
     !c                  force_o=force
-    call time_intg_rk4
+    !call time_intg_rk4
     500      continue      
     deallocate(amata,cmata,bmata,indx)
 
