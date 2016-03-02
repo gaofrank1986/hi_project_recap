@@ -76,8 +76,8 @@
         yp=ey(ip)*xyz(2,inode)
         zp=       xyz(3,inode)
         !timerk at each rugga kutta time step
-        call dpoxyz(h,g,ampn,phi_w,beta,wkn,freq,timerk,rampf,xp,yp,zp,&
-     &              nfreq,nwave,iorder,dpox,dpoy,dpoz)
+        !call dpoxyz(h,g,ampn,phi_w,beta,wkn,freq,timerk,rampf,xp,yp,zp,&
+     !&              nfreq,nwave,iorder,dpox,dpoy,dpoz)
 
         dpdn=(dpox*ex(ip)*dxyz(1,inode)+&
     &           dpoy*ey(ip)*dxyz(2,inode)+&
