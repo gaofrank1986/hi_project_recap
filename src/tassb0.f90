@@ -180,7 +180,7 @@
 
             !         write(10,620) inode,angle(inode),fra3(inode),&
             !     &                 frc31(inode),frc32(inode),frc33(inode)
-            write (402,499) fterm_coef(0:3,1),s_angle
+            write (403,499) fterm_coef(0:3,1),s_angle
             499 format(5f14.8)
              phi=poxy(xp,yp,zp) ! this in known since src on free surface
              call dinp(xp,yp,zp,dpox,dpoy,dpoz)! this is unkown, so is this a mistake
@@ -207,9 +207,9 @@
             !write(9,102)  inode, xp, yp, zp, s_angle
             !write(*,102)  inode, xp, yp, zp, s_angle
 
-            !angle(inode)=s_angle
+            angle(inode)=s_angle
 
-            !amata(inode,inode,1:nsys)= angle(inode)
+            amata(inode,inode,1:nsys)= angle(inode)
 
             do   ielem=1,  nelemf
 
@@ -232,9 +232,9 @@
                 call common_block(1,1,ielem,inode,amatrix,bmatrix,fterm_coef)
             end do
 
-            fra3(inode)=fterm_coef(0,1)!
-            write (402,499) fterm_coef(0:3,1),s_angle
-            amata(inode,inode,1:nsys)= amata(inode,inode,1:nsys)+fra3(inode)
+            !fra3(inode)=fterm_coef(0,1)!
+            !write (402,499) fterm_coef(0:3,1),s_angle
+            !amata(inode,inode,1:nsys)= amata(inode,inode,1:nsys)+fra3(inode)
 1000     continue
 !
 ! =============================================
@@ -267,6 +267,9 @@
         end do;end do
         do i = 1,nnode
             write(401,*) bmata(i,1:nsys)
+        end do
+        do i = 1,nnode
+                write(402,*) amata(i,i,1:nsys)
         end do
 ! =============================================
 !
