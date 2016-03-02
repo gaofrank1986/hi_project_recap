@@ -47,7 +47,7 @@ program hi_project
     call get_gaussian_data(xc,yc,zc)                  
     call init_hi_var() 
     call get_free_term()
-    call tassb0   
+    call tassb0_freq
     call init_gradient(nnf,nelemf,xyze(1:2,:,1:nelemf),nodele(1:nnf,1),nodelj(1:nnf,1))
     print *,"=================== main program ends ==============="
 end  program      

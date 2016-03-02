@@ -5,7 +5,7 @@
 !C * coefficients of the corresponding system of equationn *
 !C *                                                       *
 !C *********************************************************
-    include './add_on/common_block.f90'
+    include './add_on/common_block_freq.f90'
     subroutine comp_link(ielem,inode,ii) 
         use MVAR_MOD
         implicit none
@@ -173,10 +173,10 @@
 
             end do
 
-            fra3(inode)=fterm_coef(0,1)!
-            frc31(inode)=fterm_coef(1,1)-fterm_coef(0,1)*xp!
-            frc32(inode)=fterm_coef(2,1)-fterm_coef(0,1)*yp!
-            frc33(inode)=fterm_coef(3,1)-fterm_coef(0,1)*zp!
+            fra3(inode,1)=fterm_coef(0,1)!
+            frc31(inode,1)=fterm_coef(1,1)-fterm_coef(0,1)*xp!
+            frc32(inode,1)=fterm_coef(2,1)-fterm_coef(0,1)*yp!
+            frc33(inode,1)=fterm_coef(3,1)-fterm_coef(0,1)*zp!
 
             !         write(10,620) inode,angle(inode),fra3(inode),&
             !     &                 frc31(inode),frc32(inode),frc33(inode)
@@ -184,9 +184,9 @@
             499 format(5f14.8)
              phi=poxy(xp,yp,zp) ! this in known since src on free surface
              call dinp(xp,yp,zp,dpox,dpoy,dpoz)! this is unkown, so is this a mistake
-             bmata(inode,1)=bmata(inode,1)-fra3(inode)*phi-&
-                 &     frc31(inode)*dpox-frc32(inode)*dpoy
-             amata(inode,inode,1:nsys)= amata(inode,inode,1:nsys)+frc33(inode)
+             bmata(inode,1)=bmata(inode,1)-fra3(inode,1)*phi-&
+                 &     frc31(inode,1)*dpox-frc32(inode,1)*dpoy
+             amata(inode,inode,1:nsys)= amata(inode,inode,1:nsys)+frc33(inode,1)
         500     continue
 !
 ! =======================================================================
@@ -232,9 +232,9 @@
                 call common_block(1,1,ielem,inode,amatrix,bmatrix,fterm_coef)
             end do
 
-            fra3(inode)=fterm_coef(0,1)!
+            fra3(inode,1)=fterm_coef(0,1)!
             write (402,499) fterm_coef(0:3,1),s_angle
-            amata(inode,inode,1:nsys)= amata(inode,inode,1:nsys)+fra3(inode)
+            amata(inode,inode,1:nsys)= amata(inode,inode,1:nsys)+fra3(inode,1)
 1000     continue
 !
 ! =============================================
