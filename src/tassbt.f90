@@ -11,14 +11,14 @@
   
       USE MVAR_MOD
       USE PVAR_MOD
-      use wave2,only:dpoxyz
-      use mfunc_mod,only:rlubksb
-      use gradient,only:eval_gradient
+      !use wave2,only:dpoxyz
+      use mfunc_mod,only:rlubksb,dinp,poxy,dinp0
+      !use gradient,only:eval_gradient
 
       implicit none  
 
-      integer  inode,ind,is,ip,j
-      real(8) xp,yp,zp,dpox,dpoy,dpoz,dpdn
+      integer  inode,ind,is,ip,j,i
+      real(8) xp,yp,zp,dpox,dpoy,dpoz,dpdn,nx,ny,nz
       real(8) rsn(4,4),ex(4),ey(4)
       real(8) bmat(nsys),cmat(nnoded,nsys)
       real(8) :: dpoxyz_save(2,4,nnoded),tmp(8),tmp2(2,1)
@@ -40,6 +40,18 @@
 !C
       cmat(:,:)=0.0
       dpoxyz_save = 0.0
+      bkn=0
+      do inode =1,nnf
+          xp=ex(ip)*xyz(1,inode)
+          yp=ey(ip)*xyz(2,inode)
+          zp=       xyz(3,inode)
+
+          bkn(inode,1) =poxy(xp,yp,zp) 
+          call dinp(xp,yp,zp,dpox,dpoy,dpoz)
+          dpoxyz_save(1,1,inode) = dpox 
+          dpoxyz_save(2,1,inode) = dpoy 
+      end do
+
         ! assign boundary value has potentials--------
         ! bkn is the potential from time stepping----on surface node
         do  20   inode=1,  nnf  
@@ -47,15 +59,15 @@
                 do ip=1, nsys
                   cmat(inode,is)=cmat(inode,is)+rsn(is,ip)*bkn(inode,ip)
             enddo;enddo
-            do j=1,ncn(nodele(inode,1))
-                 tmp(j) = bkn(ncon(nodele(inode,1),j),1)!get surface value
-            end do
-            call eval_gradient(inode,tmp,tmp2)
-            dpoxyz_save(1,1,inode) = tmp2(1,1)
-            dpoxyz_save(2,1,inode) = tmp2(2,1)
+            !do j=1,ncn(nodele(inode,1))
+                 !tmp(j) = bkn(ncon(nodele(inode,1),j),1)!get surface value
+            !end do
+            !call eval_gradient(inode,tmp,tmp2)
+            !dpoxyz_save(1,1,inode) = tmp2(1,1)
+            !dpoxyz_save(2,1,inode) = tmp2(2,1)
         
  
-    20   continue
+        20   continue
     1021 format(8f10.6)
     !print *,"cmat",cmat
 !
@@ -75,6 +87,12 @@
         xp=ex(ip)*xyz(1,inode)
         yp=ey(ip)*xyz(2,inode)
         zp=       xyz(3,inode)
+                !nx=ex(ip)*dxyz(1,cur_nrml)
+                !ny=ey(ip)*dxyz(2,cur_nrml)
+                !nz=       dxyz(3,cur_nrml)
+        call dinp(xp,yp,zp,dpox,dpoy,dpoz)   !get initial condition    
+        !dpdn=dpox*nx+dpoy*ny+dpoz*nz !get initial condition
+        !================================================================
         !timerk at each rugga kutta time step
         !call dpoxyz(h,g,ampn,phi_w,beta,wkn,freq,timerk,rampf,xp,yp,zp,&
      !&              nfreq,nwave,iorder,dpox,dpoy,dpoz)
@@ -127,21 +145,15 @@
         !---------------------------------------------------
          200     continue   
         
-       ! 
-       !        WRITE(102,*)  'INODE,XP,YP,ZP,BMATA(INODE,1) '
-!        DO    INODE=1,  NNODE
-!         XP=XYZ(1,INODE)
-!         YP=XYZ(2,INODE)
-!         ZP=XYZ(3,INODE) 
-!        WRITE(102, 620)  INODE,XP,YP,ZP,BMATA(INODE,1)
-!        ENDDO 
-!
 
-          do 300 is=1, nsys   
-            call rlubksb(is,amata,nnode,nnode, 1,nsys, 1,indx,bmata)
-300       continue
+          !do 300 is=1, nsys   
+            !call rlubksb(is,amata,nnode,nnode, 1,nsys, 1,indx,bmata)
+!300       continue
 
 
+        do i = 1,nnode
+            write(401,*) bmata(i,1:nsys)
+        end do
 !C                 
 !C ** output the results, compute unkn[1:NNF] is dpdn,unkn[NNF+1:nnode]
 ! is potential

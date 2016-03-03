@@ -141,14 +141,12 @@
 
             !TODO only works for ip=1
             write(2000,5001) xp,yp,fterm(inode,1,1:4),angle(inode)
-            !write(2000,5000) inode,fra3(inode,1),frc31(inode,1),frc32(inode,1)
+            write(2001,5000) inode,fra3(inode,1),frc31(inode,1),frc32(inode,1)
             5000 format(I6,3f14.6)
             5001 format(7f14.8)
             
 
-             !cmata(inode,1)=cmata(inode,1)-fra3(inode)*phi2-&
-                 !&     frc31(inode)*dpox-frc32(inode)*dpoy
-             !amata(inode,inode,1:nsys)= amata(inode,inode,1:nsys)+frc33(inode)
+
         500     continue
 !
         
@@ -194,46 +192,33 @@
 !
 ! =============================================
 
-        if( nsys .eq. 2) then
-            do inode=1, nnf
-            if(nodqua(inode) .eq. 2) then
-                amata(inode,inode,2)=1.0e20         
-            endif
-            enddo
-        else if( nsys .eq. 4) then
-            do inode=1, nnf
-            if(nodqua(inode) .eq. 2) then
-                amata(inode,inode,2)=1.0e20
-                amata(inode,inode,4)=1.0e20            
-            else if(nodqua(inode) .eq. 4) then
-                amata(inode,inode,3)=1.0e20
-                amata(inode,inode,2)=1.0e20
-            else if(nodqua(inode) .eq. 5) then
-                amata(inode,inode,2)=1.0e20
-                amata(inode,inode,3)=1.0e20            
-                amata(inode,inode,4)=1.0e20            
-            endif
-            enddo
-        endif
-        !-------output amata,cmata to txt file
-        !do i = 1,nnode
-            !do j = 1,nnode
-                !write(400,*) amata(i,j,1:nsys)
-        !end do;end do
-        !do i = 1,nnode
-          !do j = 1,nnoded
+!        if( nsys .eq. 2) then
+            !do inode=1, nnf
+            !if(nodqua(inode) .eq. 2) then
+                !amata(inode,inode,2)=1.0e20         
+            !endif
+            !enddo
+        !else if( nsys .eq. 4) then
+            !do inode=1, nnf
+            !if(nodqua(inode) .eq. 2) then
+                !amata(inode,inode,2)=1.0e20
+                !amata(inode,inode,4)=1.0e20            
+            !else if(nodqua(inode) .eq. 4) then
+                !amata(inode,inode,3)=1.0e20
+                !amata(inode,inode,2)=1.0e20
+            !else if(nodqua(inode) .eq. 5) then
+                !amata(inode,inode,2)=1.0e20
+                !amata(inode,inode,3)=1.0e20            
+                !amata(inode,inode,4)=1.0e20            
+            !endif
+            !enddo
+        !endif
 
-            !write(401,*) cmata(i,j,1:nsys)
-         !end do;end do
 !! =============================================
         print *,"I am here!"
 !
         write(102, *) '  =========== before rludcmp =============='
 
-!        do i= 1,560
-        !do ii = 1,560 
-            !write(2000,*) amata(i,ii,1)
-        !end do;end do
         do i = 1,nnode
             do j = 1,nnode
                 write(400,*) amata(i,j,1:nsys)
@@ -252,38 +237,4 @@
 
       return
       end
-
-       !subroutine  dinp0(ptype,x,y,z,phi,dpox,dpoy,dpoz) 
-               !implicit    none 
-
-               !integer ptype 
-               !real(8),intent(in)::   x,y,z 
-               !real(8),intent(out)::  phi,dpox,dpoy,dpoz 
-
-
-               !if (ptype==0) then 
-                       !phi=1.0d0            
-                       !dpox=0.0d0 
-                       !dpoy=0.0d0 
-                       !dpoz=0.0d0 
-               !else if (ptype==1) then 
-                       !phi=x        
-                       !dpox=1.0d0 
-                       !dpoy=0.0d0 
-                       !dpoz=0.0d0 
-               !else if (ptype==2) then 
-                       !phi=y            
-                       !dpox=0.0d0 
-                       !dpoy=1.0d0 
-                       !dpoz=0.0d0 
-               !else if (ptype==3) then 
-                       !phi=z            
-                       !dpox=0.0d0 
-                       !dpoy=0.0d0 
-                       !dpoz=1.0d0           
-               !endif 
-!! 
-        !return 
-        !end subroutine  dinp0          
-
 
