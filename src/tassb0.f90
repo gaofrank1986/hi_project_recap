@@ -267,7 +267,7 @@
         end do;end do
         do i = 1,nnode
             write(4001,*) bmata(i,1:nsys)
-            write(4003,*) cmat(i,1:nsys)
+            write(4003,*) cmat(i)
         end do
         do i = 1,nnode
                 write(4002,*) amata(i,i,1:nsys)
