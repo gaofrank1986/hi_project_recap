@@ -63,10 +63,12 @@
 40      CONTINUE
         NODNOE(INODE)=L
 !                          
+
         NODQUA(INODE)=0
         IF( NSYS .GE. 2) THEN
           IF( DABS(XYZ(2,INODE)).LT.1.0E-06 ) THEN
           NODQUA(INODE)=2
+          !indicate y symetric line
           END IF
         END IF
 !
@@ -74,8 +76,10 @@
           IF( DABS(XYZ(1,INODE)).LT.1.0E-06.AND.&
      &        DABS(XYZ(2,INODE)).LT.1.0E-06) THEN
            NODQUA(INODE)=5
+           !indicate originial
           ELSE IF( DABS(XYZ(1,INODE)).LT.1.0E-06 ) THEN
            NODQUA(INODE)=4
+           !how come only sysmteric about x orginal line
           ENDIF
         END IF
 !
