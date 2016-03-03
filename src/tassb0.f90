@@ -263,13 +263,13 @@
         !-------output amata,bmata to txt file
         do i = 1,nnode
             do j = 1,nnode
-                write(400,*) amata(i,j,1:nsys)
+                write(4000,*) amata(i,j,1:nsys)
         end do;end do
         do i = 1,nnode
-            write(401,*) bmata(i,1:nsys)
+            write(4001,*) bmata(i,1:nsys)
         end do
         do i = 1,nnode
-                write(402,*) amata(i,i,1:nsys)
+                write(4002,*) amata(i,i,1:nsys)
         end do
 ! =============================================
 !
