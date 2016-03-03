@@ -194,6 +194,7 @@ C
 !
 	 INTEGER, ALLOCATABLE:: INDX(:,:)
        REAL*8,ALLOCATABLE::   AMATA(:,:,:),BMATA(:,:)
+       REAL*8,ALLOCATABLE::   cmat(:)
 !       REAL*8,ALLOCATABLE::   LEFT(:,:,:),RIGHT(:,:,:),RIGHT1(:,:)
 
 !       DATA G,PI,RHO/9.807,3.14159265359,

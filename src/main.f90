@@ -27,6 +27,9 @@ program hi_project
 
     allocate(amata(nnode,nnode,nsys),&
         &                 bmata(nnode,nsys), indx(nnode,nsys))
+    allocate(cmat(nnode))
+    cmat=0
+    
     !       
     allocate(unkn(nnode,nsys))
     !,  bkn(nnoded,nsys),&
