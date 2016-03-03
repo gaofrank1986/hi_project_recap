@@ -56,40 +56,40 @@
           BMATRIX= 0.0d0     
           AMATRIX= 0.0d0  
 !
-        IF(NUMQUA.EQ.0)       THEN
+        !IF(NUMQUA.EQ.0)       THEN
             do IS=1,  NSYS
                 IF(IS.EQ.1) THEN 
                     CALL SING_INT1(IS,IELEM,NODNUM,XP,YP,ZP,AMATRIX,BMATRIX)
-                ELSE IF( IS.NE.1 ) THEN   
-                    CALL NORM_INT1(IS,IELEM,NCN(IELEM),XP,YP,ZP,AMATRIX,BMATRIX)
+                !ELSE IF( IS.NE.1 ) THEN   
+                    !CALL NORM_INT1(IS,IELEM,NCN(IELEM),XP,YP,ZP,AMATRIX,BMATRIX)
                     ! write(*,*) 'After Subroutine SGWP0_1'
                 END IF
              end do
 !
-        ELSE IF(NUMQUA.EQ.2) THEN
-        DO 200 IS=1,NSYS     
-            IF(IS.EQ.1.OR.IS.EQ.2) THEN  
-                CALL SING_INT1(IS,IELEM,NODNUM,XP,YP,ZP,AMATRIX,BMATRIX)
-            ELSE IF(IS.EQ.3.OR.IS.EQ.4) THEN  
-                CALL NORM_INT1(IS,IELEM,NCN(IELEM),XP,YP,ZP,AMATRIX,BMATRIX) 
-            END IF
-            !
-        200      CONTINUE  
-!
-        ELSE IF(NUMQUA.EQ.4) THEN
-         DO 300  IS=1,  NSYS
-          IF(IS.EQ.1.OR.IS.EQ.4) THEN   
-            CALL SING_INT1(IS,IELEM,NODNUM,XP,YP,ZP,AMATRIX,BMATRIX)
-          ELSE  IF(IS.EQ.2.OR.IS.EQ.3) THEN  
-            CALL NORM_INT1(IS,IELEM,NCN(IELEM),XP,YP,ZP,AMATRIX,BMATRIX) 
-          END IF
-300      CONTINUE
-!
-        ELSE IF(NUMQUA.EQ.5) THEN
-         DO 400 IS=1, NSYS  
-            CALL SING_INT1(IS,IELEM,NODNUM,XP,YP,ZP,AMATRIX,BMATRIX)
-400      CONTINUE
-        ENDIF
+       ! ELSE IF(NUMQUA.EQ.2) THEN
+        !DO 200 IS=1,NSYS     
+            !IF(IS.EQ.1.OR.IS.EQ.2) THEN  
+                !CALL SING_INT1(IS,IELEM,NODNUM,XP,YP,ZP,AMATRIX,BMATRIX)
+            !ELSE IF(IS.EQ.3.OR.IS.EQ.4) THEN  
+                !CALL NORM_INT1(IS,IELEM,NCN(IELEM),XP,YP,ZP,AMATRIX,BMATRIX) 
+            !END IF
+            !!
+        !200      CONTINUE  
+!!
+        !ELSE IF(NUMQUA.EQ.4) THEN
+         !DO 300  IS=1,  NSYS
+          !IF(IS.EQ.1.OR.IS.EQ.4) THEN   
+            !CALL SING_INT1(IS,IELEM,NODNUM,XP,YP,ZP,AMATRIX,BMATRIX)
+          !ELSE  IF(IS.EQ.2.OR.IS.EQ.3) THEN  
+            !CALL NORM_INT1(IS,IELEM,NCN(IELEM),XP,YP,ZP,AMATRIX,BMATRIX) 
+          !END IF
+!300      CONTINUE
+!!
+        !ELSE IF(NUMQUA.EQ.5) THEN
+         !DO 400 IS=1, NSYS  
+            !CALL SING_INT1(IS,IELEM,NODNUM,XP,YP,ZP,AMATRIX,BMATRIX)
+!400      CONTINUE
+        !ENDIF
 !
         RETURN
         END
@@ -138,8 +138,8 @@
           DGN=GXF(2)*Nx+GXF(3)*Ny+GXF(4)*Nz
                          
         DO   J=1,   NCNE
-          BMATRIX(IS,J)=BMATRIX(IS,J)+GXF(1)*SAMB(IELEM,N,J)!line integration
-          AMATRIX(IS,J)=AMATRIX(IS,J)+DGN*SAMB(IELEM,N,J)!line integration
+          BMATRIX(IS,J)=BMATRIX(IS,J)+GXF(1)*SAMB(IELEM,N,J)
+          AMATRIX(IS,J)=AMATRIX(IS,J)+DGN*SAMB(IELEM,N,J)
         ENDDO
 
 100     CONTINUE
@@ -176,11 +176,11 @@
         real(8) ::  x0,y0,z0,si,eta
 
         real(8) ::  xiqsi(8),xiqet(8)
-        real(8) ::  ex(4),ey(4)
+        !real(8) ::  ex(4),ey(4)
 
 
-        DATA EX/  1.0d0,  1.0d0, -1.0d0, -1.0d0/                                                  
-        DATA EY/  1.0d0, -1.0d0, -1.0d0,  1.0d0/
+        !DATA EX/  1.0d0,  1.0d0, -1.0d0, -1.0d0/                                                  
+        !DATA EY/  1.0d0, -1.0d0, -1.0d0,  1.0d0/
 
         ! ** XIQSI AND XIQET: NODE COORDINATES FOR QUADRILATERAL ELEMENTS
         data xiqsi/-1.0d0, 0.0d0, 1.0d0, 1.0d0, 1.0d0, 0.0d0,-1.0d0,-1.0d0/
@@ -190,20 +190,20 @@
         inode=ncon(ielem,nodj) ! corresponding node id
         inodd=ncond(ielem,nodj)!                 normal id
 
-        if(ncn(ielem).eq.8)  then 
+        !if(ncn(ielem).eq.8)  then 
 
             si =xiqsi(nodj) !get local coordinate for the src
             eta=xiqet(nodj)
 
-        else if(ncn(ielem).eq.6)  then
-            !si =xitsi(nodj)
-            !eta=xitet(nodj)
-        endif
+        !else if(ncn(ielem).eq.6)  then
+            !!si =xitsi(nodj)
+            !!eta=xitet(nodj)
+        !endif
 
         ! get src point in sysmetric mesh
-        x0=ex(is)*xp
-        y0=ey(is)*yp      
-        z0=zp
+        !x0=ex(is)*xp
+        !y0=ey(is)*yp      
+        !z0=zp
 
         ! if mesh is created by using symmetrical information
         ! basically, we get the same local layout
