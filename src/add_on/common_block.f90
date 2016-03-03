@@ -31,6 +31,7 @@
                 ny=ey(ip)*dxyz(2,jnrml)
                 nz=       dxyz(3,jnrml)
 
+                phi=poxy(xsb,ysb,zsb)! get intial conditon
                 call dinp(xsb,ysb,zsb,dpox,dpoy,dpoz)   !get initial condition    
                 dpdn=dpox*nx+dpoy*ny+dpoz*nz !get initial condition
 
@@ -40,8 +41,8 @@
                         &              rsn(is,ip)*bmatrix(is,j)
 
                     bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)&
-                        &           *amatrix(is,j)*poxy(xsb,ysb,zsb)
-                    cmat(inode) = poxy(xsb,ysb,zsb)
+                        &           *amatrix(is,j)*phi
+                    cmat(inode) = phi 
                     enddo
                 else 
                     do  is=1, nsys    
@@ -51,14 +52,17 @@
                     if(jncon .gt. nnf)  then
                         amata(inode,jncon,ip)=amata(inode,jncon,ip)-&
                             &                   rsn(is,ip)*amatrix(is,j)
+
+                        bmata(inode,ip)=bmata(inode,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn
+                        cmat(jnrml) = dpdn
                     else
-                        phi=poxy(xsb,ysb,zsb)! get intial conditon
-                        bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)*amatrix(is,j)*phi
+                        !bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)*amatrix(is,j)*phi
+                        bmata(inode,ip)=bmata(inode,ip)-rsn(is,ip)*bmatrix(is,j)*phi!dpdn
                         cmat(inode) = poxy(xsb,ysb,zsb)
                     endif
 
-                    bmata(inode,ip)=bmata(inode,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn
-                    cmat(inode) = dpdn
+                    !bmata(inode,ip)=bmata(inode,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn
+                    !cmat(jnrml) = dpdn
                     enddo
                 end if
                 if (flag2.eq.0) then!
