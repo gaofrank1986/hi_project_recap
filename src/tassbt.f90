@@ -70,6 +70,8 @@
 !         WRITE(102,*) 'DSDT=',DSDT
 
         ! assign boudary value has dp/dn ---------------:
+        ! FIXME There is a mistake here xp,yp,zp was not defined on inode >=node
+        ! also the right inode is the node id correspoding to a given nrml id
         do 40 inode=nnf+1, nnoded
         do 40 ip=1, nsys 
         xp=ex(ip)*xyz(1,inode)

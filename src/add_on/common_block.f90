@@ -6,7 +6,7 @@
         integer,intent(in) :: ielem,inode,flag1,flag2
         real(8),intent(in) :: amatrix(4,8),bmatrix(4,8)
 
-        integer :: jncon,cur_nrml,j,ip,is,i
+        integer :: jncon,jnrml,j,ip,is,i
         real(8) :: xsb,ysb,zsb,nx,ny,nz,dpdn,phi
         real(8) :: dpox,dpoy,dpoz
         real*8 rsn(4,4),ex(4),ey(4)
@@ -22,19 +22,19 @@
         
         do     j=1,  ncn(ielem) 
             jncon=ncon(ielem,j)!jth node in ielem
-            cur_nrml=ncond(ielem,j)  !jth nrml in ielem
+            jnrml=ncond(ielem,j)  !jth nrml in ielem
             do     ip=1, nsys          
                 !xsb=ex(ip)*xyz(1,jncon)
                 !ysb=ey(ip)*xyz(2,jncon)
                 !zsb=       xyz(3,jncon)
-                !nx=ex(ip)*dxyz(1,cur_nrml)
-                !ny=ey(ip)*dxyz(2,cur_nrml)
-                !nz=       dxyz(3,cur_nrml)
+                !nx=ex(ip)*dxyz(1,jnrml)
+                !ny=ey(ip)*dxyz(2,jnrml)
+                !nz=       dxyz(3,jnrml)
                 !TODO ??? change dinp for time domain??
                 !call dinp(xsb,ysb,zsb,dpox,dpoy,dpoz)   !get initial condition    
                 !dpdn=dpox*nx+dpoy*ny+dpoz*nz !get initial condition
 
-                if (flag1.eq.0) then
+                if (flag1.eq.0) then !surface elems
                     do   is=1, nsys    
                     amata(inode,jncon,ip)=amata(inode,jncon,ip)+&
                         &              rsn(is,ip)*bmatrix(is,j)
@@ -42,26 +42,20 @@
                     !bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)&
                         !&           *amatrix(is,j)!*poxy(xsb,ysb,zsb)
                        !surface cmata multiply potential 
-                        cmata(inode,jncon,ip)=cmata(inode,jncon,ip)+rsn(is,ip)&
+                        cmata(inode,jnrml,ip)=cmata(inode,jnrml,ip)+rsn(is,ip)&
                              &           *amatrix(is,j)!*poxy(xsb,ysb,zsb)
                     enddo
-                else 
+                else! body elems 
                     do  is=1, nsys    
-                    !basically do the same job as above
-                    !and the trick part is for fs node in body elem
-                    if(jncon .gt. nnf)  then
-                            !if on surface,amatrix goes to amata
+                    if(jncon .gt. nnf)  then !if jnocn not on surface 
                         amata(inode,jncon,ip)=amata(inode,jncon,ip)-&
-                            &                   rsn(is,ip)*amatrix(is,j)
-                    else
-                        !phi=poxy(xsb,ysb,zsb)! get intial conditon
-                        !bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)*amatrix(is,j)*phi
-                        !
+                            &                   rsn(is,ip)*amatrix(is,j)!high order terms go to lhs
+                    else!jnocon is on surface use surface nrml instead of body nrml/(and goes to rhs)
                         cmata(inode,jncon,ip)=cmata(inode,jncon,ip)+rsn(is,ip)*amatrix(is,j)!*phi2
                     endif
 
                     !bmata(inode,ip)=bmata(inode,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn
-                    cmata(inode,cur_nrml,ip)=cmata(inode,cur_nrml,ip)-rsn(is,ip)*bmatrix(is,j)!*dpdn
+                    cmata(inode,jnrml,ip)=cmata(inode,jnrml,ip)-rsn(is,ip)*bmatrix(is,j)!*dpdn
                     enddo
                 end if
 
