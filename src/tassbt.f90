@@ -17,7 +17,7 @@
 
       implicit none  
 
-      integer  inode,ind,is,ip,j,i
+      integer  inode,ind,is,ip,j,i,n1,n2
       real(8) xp,yp,zp,dpox,dpoy,dpoz,dpdn,nx,ny,nz
       real(8) rsn(4,4),ex(4),ey(4)
       real(8) bmat(nsys),cmat(nnoded,nsys)
@@ -35,7 +35,14 @@
 !        WRITE(102,*)
 !        WRITE(102,*)   'T=', TimeRK                 
 
-!C
+!
+      do i=1,nelem
+          do j=1,ncn(i)
+              n1 = ncon(i,j)
+              n2 = ncond(i,j)
+              nrml_2_node(n2) = n1
+      enddo;enddo
+
 !C ***************************************
 !C
       cmat(:,:)=0.0
@@ -84,9 +91,11 @@
         ! assign boudary value has dp/dn ---------------:
         do 40 inode=nnf+1, nnoded
         do 40 ip=1, nsys 
-        xp=ex(ip)*xyz(1,inode)
-        yp=ey(ip)*xyz(2,inode)
-        zp=       xyz(3,inode)
+        !FIXME inode is wrong
+        n2 = nrml_2_node(inode)
+        xp=ex(ip)*xyz(1,n2)
+        yp=ey(ip)*xyz(2,n2)
+        zp=       xyz(3,n2)
                 !nx=ex(ip)*dxyz(1,cur_nrml)
                 !ny=ey(ip)*dxyz(2,cur_nrml)
                 !nz=       dxyz(3,cur_nrml)
@@ -153,6 +162,7 @@
 
         do i = 1,nnode
             write(401,*) bmata(i,1:nsys)
+            write(404,*) cmat(i,1:nsys)
         end do
 !C                 
 !C ** output the results, compute unkn[1:NNF] is dpdn,unkn[NNF+1:nnode]

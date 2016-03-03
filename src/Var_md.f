@@ -182,6 +182,7 @@ C
          !real(8),allocatable ::FrA3(:),FrC31(:),FrC32(:),FrC33(:)
          real(8),allocatable ::fra3(:,:),frc31(:,:)
          real(8),allocatable :: frc32(:,:),frc33(:,:)
+         integer,allocatable :: nrml_2_node(:)
 
 !
 ! SAMB: 

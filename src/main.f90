@@ -33,6 +33,7 @@ program hi_project
     allocate(amata(nnode,nnode,nsys),&
         &                 bmata(nnode,nsys), indx(nnode,nsys))
     allocate(cmata(nnode,nnoded,nsys))
+    allocate(nrml_2_node(noded))
     amata=0
     bmata=0
     cmata = 0
