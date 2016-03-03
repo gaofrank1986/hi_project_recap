@@ -7,7 +7,7 @@
         real(8),intent(in) :: amatrix(4,8),bmatrix(4,8)
         real(8),intent(inout) :: fterm_coef(0:3,4)
 
-        integer :: jncon,cur_nrml,j,ip,is,i
+        integer :: jncon,jnrml,j,ip,is,i
         real(8) :: xsb,ysb,zsb,nx,ny,nz,dpdn,phi
         real(8) :: dpox,dpoy,dpoz
         real*8 rsn(4,4),ex(4),ey(4)
@@ -22,14 +22,14 @@
 
         do     j=1,  ncn(ielem) 
             jncon=ncon(ielem,j)
-            cur_nrml=ncond(ielem,j)  
+            jnrml=ncond(ielem,j)  
             do     ip=1, nsys          
                 xsb=ex(ip)*xyz(1,jncon)
                 ysb=ey(ip)*xyz(2,jncon)
                 zsb=       xyz(3,jncon)
-                nx=ex(ip)*dxyz(1,cur_nrml)
-                ny=ey(ip)*dxyz(2,cur_nrml)
-                nz=       dxyz(3,cur_nrml)
+                nx=ex(ip)*dxyz(1,jnrml)
+                ny=ey(ip)*dxyz(2,jnrml)
+                nz=       dxyz(3,jnrml)
 
                 call dinp(xsb,ysb,zsb,dpox,dpoy,dpoz)   !get initial condition    
                 dpdn=dpox*nx+dpoy*ny+dpoz*nz !get initial condition
@@ -41,6 +41,7 @@
 
                     bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)&
                         &           *amatrix(is,j)*poxy(xsb,ysb,zsb)
+                    cmat(inode) = poxy(xsb,ysb,zsb)
                     enddo
                 else 
                     do  is=1, nsys    
@@ -53,9 +54,11 @@
                     else
                         phi=poxy(xsb,ysb,zsb)! get intial conditon
                         bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)*amatrix(is,j)*phi
+                        cmat(inode) = poxy(xsb,ysb,zsb)
                     endif
 
                     bmata(inode,ip)=bmata(inode,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn
+                    cmat(inode) = dpdn
                     enddo
                 end if
                 if (flag2.eq.0) then!
