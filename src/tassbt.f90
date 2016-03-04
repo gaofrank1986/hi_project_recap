@@ -142,11 +142,11 @@
         !---------------loop-body--------------------------
           bmata(ind,is)=bmata(ind,is)+cmata(ind,inode,is)*cmat(inode,is)
                 end do
-                if (ind<=nnf) then!potential only
-                        bmata(ind,is) = bmata(ind,is)-fra3(ind,is)*cmat(ind,is)&
-                         &-frc31(ind,is)*dpoxyz_save(1,is,ind) &
-                         &-frc32(ind,is)*dpoxyz_save(2,is,ind)
-                end if
+                !if (ind<=nnf) then!potential only
+                        !bmata(ind,is) = bmata(ind,is)-fra3(ind,is)*cmat(ind,is)&
+                         !&-frc31(ind,is)*dpoxyz_save(1,is,ind) &
+                         !&-frc32(ind,is)*dpoxyz_save(2,is,ind)
+                !end if
         !---------------------------------------------------
          200     continue   
         
