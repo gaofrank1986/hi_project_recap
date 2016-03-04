@@ -160,7 +160,7 @@ SUBROUTINE SHAPEF(num_dim,elem_type,C,cnr_glb_mtx,Q_lcl,P_glb,RI,SP)
 subroutine dshape(ndim,node,c,ck,x,cosn,fjcb,gd) 
 
     ! C is cnr_lcl_mtx,CK is cnr_glb_mtx
-    ! X is local node
+    ! X is local node ksi(1:2)
     ! FJCB is ...........
     ! GD is ........cross product.tangent vector on two local direction.
     
@@ -205,6 +205,8 @@ subroutine dshape(ndim,node,c,ck,x,cosn,fjcb,gd)
 
 30  DO 50 I=1,NDIM; DO 50 J=1,NBDM; GD(I,J)=0.; DO 50 ID=1,NODE
 50    GD(I,J)=GD(I,J)+DN(J,ID)*CK(I,ID) ! partial shape over partial ksi/eta
+               !partial Ni(ksi)/ partial ksi*Ui 
+               !local gradient
 
     IF(NDIM.EQ.NBDM) THEN
      GOTO (51,52,53),NDIM
@@ -229,7 +231,7 @@ subroutine dshape(ndim,node,c,ck,x,cosn,fjcb,gd)
     GR(3)=GD(1,1)*GD(2,2)-GD(2,1)*GD(1,2)
     FJCB=DSQRT(GR(1)*GR(1)+GR(2)*GR(2)+GR(3)*GR(3)) ! 3D JACOBIAN
 
-70  COSN(1:NDIM)=GR(1:NDIM)/FJCB              ! 2D and 3D Normal
+70  COSN(1:NDIM)=GR(1:NDIM)/FJCB             !normalization ! 2D and 3D Normal
 
     END SUBROUTINE DSHAPE
 

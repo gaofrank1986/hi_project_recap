@@ -125,6 +125,8 @@
             xp=xyz(1,inode)
             yp=xyz(2,inode)
             zp=xyz(3,inode)
+            !print *,poxy(xp,yp,zp)
+            cmat(inode)=poxy(xp,yp,zp)
 
             fterm_coef = 0
             call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,&
@@ -271,8 +273,11 @@
         end do;end do
         do i = 1,nnode
             write(4001,*) bmata(i,1:nsys)
-            write(4003,*) cmat(i)
         end do
+        do i =1,nnoded
+            write(4003,*) cmat(i)
+        enddo
+                
         do i = 1,nnode
                 write(4002,*) amata(i,i,1:nsys)
         end do

@@ -42,7 +42,9 @@
 
                     bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)&
                         &           *amatrix(is,j)*phi
-                    cmat(inode) = phi 
+                    !cmat(inode) = phi 
+                    write(4004,*) inode,'phi',phi
+                    !print *,phi
                     enddo
                 else 
                     do  is=1, nsys    
@@ -54,11 +56,15 @@
                             &                   rsn(is,ip)*amatrix(is,j)
 
                         bmata(inode,ip)=bmata(inode,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn
+                        !sufrace node have no body surface nrml component
                         cmat(jnrml) = dpdn
+                    write(4004,*) jnrml,'dpdn',phi
+
                     else
                         !bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)*amatrix(is,j)*phi
                         bmata(inode,ip)=bmata(inode,ip)-rsn(is,ip)*bmatrix(is,j)*phi!dpdn
-                        cmat(inode) = poxy(xsb,ysb,zsb)
+                        !cmat(inode) = phi 
+                    write(4004,*) inode,'phi',phi
                     endif
 
                     !bmata(inode,ip)=bmata(inode,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn
