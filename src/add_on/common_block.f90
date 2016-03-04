@@ -63,6 +63,7 @@
                     else
                         !bmata(inode,ip)=bmata(inode,ip)+rsn(is,ip)*amatrix(is,j)*phi
                         bmata(inode,ip)=bmata(inode,ip)-rsn(is,ip)*bmatrix(is,j)*phi!dpdn
+                        cmat(jnrml) = dpdn
                         !cmat(inode) = phi 
                     write(4004,*) inode,'phi',phi
                     endif
