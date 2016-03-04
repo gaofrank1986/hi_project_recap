@@ -159,10 +159,10 @@
         do i = 1,nnode
             write(401,*) bmata(i,1:nsys)
         end do
-        do i=1,nnoded
-            !print *,cmat(i,1)
-            write(404,*) cmat(i,1)
-        enddo
+!        do i=1,nnoded
+            !!print *,cmat(i,1)
+            !write(404,*) cmat(i,1)
+        !enddo
 !C                 
 !C ** output the results, compute unkn[1:NNF] is dpdn,unkn[NNF+1:nnode]
 ! is potential
