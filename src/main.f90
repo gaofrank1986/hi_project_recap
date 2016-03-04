@@ -33,7 +33,7 @@ program hi_project
     allocate(amata(nnode,nnode,nsys),&
         &                 bmata(nnode,nsys), indx(nnode,nsys))
     allocate(cmata(nnode,nnoded,nsys))
-    allocate(nrml_2_node(noded))
+    allocate(nrml_2_node(nnoded))
     amata=0
     bmata=0
     cmata = 0
@@ -54,7 +54,7 @@ program hi_project
     !call tassb0_freq
     call tassb0
 !    call init_gradient(nnf,nelemf,xyze(1:2,:,1:nelemf),nodele(1:nnf,1),nodelj(1:nnf,1))
-    !call tassbt
+    call tassbt
     print *,"=================== main program ends ==============="
 end  program      
 

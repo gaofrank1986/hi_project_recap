@@ -35,7 +35,7 @@
 !        WRITE(102,*)
 !        WRITE(102,*)   'T=', TimeRK                 
 
-!
+      ! establish nrml to node relationship
       do i=1,nelem
           do j=1,ncn(i)
               n1 = ncon(i,j)
@@ -158,8 +158,11 @@
 
         do i = 1,nnode
             write(401,*) bmata(i,1:nsys)
-            write(404,*) cmat(i,1:nsys)
         end do
+        do i=1,nnoded
+            !print *,cmat(i,1)
+            write(404,*) cmat(i,1)
+        enddo
 !C                 
 !C ** output the results, compute unkn[1:NNF] is dpdn,unkn[NNF+1:nnode]
 ! is potential
