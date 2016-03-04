@@ -140,8 +140,8 @@
             end do
 
             !TODO only works for ip=1
-            write(2000,5001) xp,yp,fterm(inode,1,1:4),angle(inode)
-            write(2001,5000) inode,fra3(inode,1),frc31(inode,1),frc32(inode,1)
+            write(404,5001) xp,yp,fterm(inode,1,1:4),angle(inode)
+            write(405,5000) inode,fra3(inode,1),frc31(inode,1),frc32(inode,1)
             5000 format(I6,3f14.6)
             5001 format(7f14.8)
             
@@ -187,7 +187,7 @@
 
                 call common_block(1,1,ielem,inode,amatrix,bmatrix)
             end do
-            write(2000,5001) xp,yp,angle(inode)
+            write(404,5001) xp,yp,angle(inode)
 1000     continue
 !
 ! =============================================

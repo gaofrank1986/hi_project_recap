@@ -47,11 +47,12 @@
                     if(jncon .gt. nnf)  then
                         amata(inode,jncon,ip)=amata(inode,jncon,ip)-&
                             &                   rsn(is,ip)*amatrix(is,j)
+                        cmata(inode,jnrml,ip)=cmata(inode,jnrml,ip)-rsn(is,ip)*bmatrix(is,j)!*dpdn
                     else
                         cmata(inode,jncon,ip)=cmata(inode,jncon,ip)+rsn(is,ip)*amatrix(is,j)!*phi2
                     endif
 
-                    cmata(inode,jnrml,ip)=cmata(inode,jnrml,ip)-rsn(is,ip)*bmatrix(is,j)!*dpdn
+                    !cmata(inode,jnrml,ip)=cmata(inode,jnrml,ip)-rsn(is,ip)*bmatrix(is,j)!*dpdn
                     enddo
                 end if
 
