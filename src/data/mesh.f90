@@ -183,8 +183,9 @@ contains
             READ(3, *)    M, NCN(IE)
             READ(3, *) (XYZE(1,J,IE), J=1, NCN(IE))
             READ(3, *) (XYZE(2,J,IE), J=1, NCN(IE))
+        READ(3, *) (DAMPE(J,IE), J=1, NCN(IE))! damping zone coefficient
 
-      dampe(:,:)=0.0d0
+      !dampe(:,:)=0.0d0
 
 100    CONTINUE
         ! in dat file ,positive nrml is set as pointing into fulid field
@@ -355,7 +356,7 @@ contains
              XYZTP(1,M)=X
              XYZTP(2,M)=Y
              XYZTP(3,M)=Z
-
+               DAMPTP(M)=DAMPE(I,IEL) 
 180       CONTINUE
 200     CONTINUE
 
