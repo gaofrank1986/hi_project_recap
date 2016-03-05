@@ -138,10 +138,10 @@
         bmata(:,:)=0.0d0
         do 200 is=1, nsys
             do 200 ind=1,   nnode
-                do inode=1, nnoded
+                !do inode=1, nnoded
         !---------------loop-body--------------------------
-          bmata(ind,is)=bmata(ind,is)+cmata(ind,inode,is)*cmat(inode,is)
-                end do
+        bmata(ind,is)=dot_product(cmata(ind,:,is),cmat(:,is))
+                !end do
                 !if (ind<=nnf) then!potential only
                         !bmata(ind,is) = bmata(ind,is)-fra3(ind,is)*cmat(ind,is)&
                          !&-frc31(ind,is)*dpoxyz_save(1,is,ind) &
@@ -159,10 +159,10 @@
         do i = 1,nnode
             write(401,*) bmata(i,1:nsys)
         end do
-!        do i=1,nnoded
-            !!print *,cmat(i,1)
-            !write(404,*) cmat(i,1)
-        !enddo
+        do i=1,nnoded
+            !print *,cmat(i,1)
+            write(403,*) cmat(i,1)
+        enddo
 !C                 
 !C ** output the results, compute unkn[1:NNF] is dpdn,unkn[NNF+1:nnode]
 ! is potential
