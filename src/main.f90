@@ -20,6 +20,7 @@ program hi_project
     xc=0
     yc=0
     zc=0
+    call bodmass()
 
     call read_mesh()
 !  --------------------------------------------

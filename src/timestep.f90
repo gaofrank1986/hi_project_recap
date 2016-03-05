@@ -8,7 +8,7 @@
          SUBROUTINE Time_intg_RK4 
          USE MVAR_MOD 
          USE PVAR_MOD 
-         use wave2,only:eti2
+         use wave_func,only:eti2
 ! 
          IMPLICIT NONE 
 !         
@@ -385,7 +385,7 @@
 ! 
          SUBROUTINE PLOTOUT8 
           USE MVAR_MOD 
-         use wave2,only:eti2
+         use wave_func,only:eti2
         IMPLICIT   NONE   
  
          CHARACTER*16 NAME 
