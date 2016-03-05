@@ -15,7 +15,7 @@ program hi_project
 
          
     call read_wav_data()
-    call output_wav_data()
+    !call output_wav_data()
     print *,xc,yc,zc
     xc=0
     yc=0
@@ -53,7 +53,7 @@ program hi_project
     call get_free_term()
     !call tassb0_freq
     call tassb0
-!    call init_gradient(nnf,nelemf,xyze(1:2,:,1:nelemf),nodele(1:nnf,1),nodelj(1:nnf,1))
+    call init_gradient(nnf,nelemf,xyze(1:2,:,1:nelemf),nodele(1:nnf,1),nodelj(1:nnf,1))
     call tassbt
     print *,"=================== main program ends ==============="
 end  program      
