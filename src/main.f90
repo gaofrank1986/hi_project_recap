@@ -20,12 +20,12 @@ program hi_project
     xc=0
     yc=0
     zc=0
-    call bodmass()
 
     call read_mesh()
 !  --------------------------------------------
     call init_ft(nsys,nnf) 
  
+    call bodmass()
 
     allocate(angle(nnode))
     allocate(fra3(nnode,nsys),&
@@ -44,10 +44,8 @@ program hi_project
     allocate(bkn(nnoded,nsys),&
         &                 unkn_o(nnode,nsys),bkn_o(nnoded,nsys),&
         &            et(nnf,nsys),et_o(nnf,nsys), dpdt(nnode,nsys))
-     !,  bkn(nnoded,nsys),&
-     !   &                 unkn_o(nnode,nsys),bkn_o(nnoded,nsys),&
-      !  &             dpdt(nnode,nsys))
-    !allocate(dh(4,nnf,nsys),dp(4,nnf,nsys),dposi(4,6))
+    
+    allocate(dh(4,nnf,nsys),dp(4,nnf,nsys),dposi(4,6))
 
     call get_gaussian_data(xc,yc,zc)                  
     call init_hi_var() 
@@ -55,7 +53,40 @@ program hi_project
     !call tassb0_freq
     call tassb0
     call init_gradient(nnf,nelemf,xyze(1:2,:,1:nelemf),nodele(1:nnf,1),nodelj(1:nnf,1))
-    call tassbt
+    !call tassbt
+    print *,"tassb0 ended"
+    itime=0
+    time=0.0d0
+
+    et(:,:)  =0.0
+    bkn(:,:) =0.0
+    unkn(:,:)=0.0
+    unkn_o(:,:)=0.0
+    force(:) =0.0
+    disp(:)  =0.0
+    dsdt(:)  =0.0
+    
+    print *,"before time step"
+    do 500 itime=0, 0!ntime
+    write(10,*)
+    write(10,*) '  itime=',itime
+    write(11,*)
+    write(11,*) '  itime=',itime
+
+    time=itime*tstep
+    !if(mod(itime,10) .eq. 0)  then
+            !write(6,1115) itime,time     
+    !endif
+
+    bkn_o(:,:) = bkn(:,:)
+    et_o(:,:)  = et(:,:)  
+
+    disp_o(:) =disp(:)
+    dsdt_o(:)= dsdt(:)
+
+    !c                  force_o=force
+    call time_intg_rk4
+    500      continue      
     print *,"=================== main program ends ==============="
 end  program      
 
