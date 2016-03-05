@@ -102,8 +102,8 @@
             call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,&
              &                        h,xyz,dxyze,s_angle)    
 
-            angle(inode)=1.0d0- s_angle
-            amata(inode,inode,1:nsys)= 1.0d0-s_angle!angle(inode)
+            angle(inode)= s_angle
+            amata(inode,inode,1:nsys)= s_angle!angle(inode)
             !  ---------------------------
             !  Integration on the free surface
                 
@@ -163,9 +163,9 @@
             call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,&
              &                    h,xyz,dxyze,s_angle) 
 
-            angle(inode)=1.0d0 - s_angle
+            angle(inode)=s_angle
 
-            amata(inode,inode,1:nsys)= 1.0d0-s_angle! angle(inode)
+            amata(inode,inode,1:nsys)= s_angle! angle(inode)
 
             do   ielem=1,  nelemf
 
@@ -227,9 +227,9 @@
   !      do i = 1,nnode
                 !write(401,*) amata(i,i,1:nsys)
         !end do
-        !do ip=1, nsys
-            !call rludcmp(ip,amata,nnode,nnode,nsys,indx,dsign)  
-        !enddo
+        do ip=1, nsys
+            call rludcmp(ip,amata,nnode,nnode,nsys,indx,dsign)  
+        enddo
 
                 write(102, *) 
         write(102, *)

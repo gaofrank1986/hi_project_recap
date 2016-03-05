@@ -47,17 +47,17 @@
 !C
       cmat(:,:)=0.0
       dpoxyz_save = 0.0
-      bkn=0
-      do inode =1,nnf
-          xp=ex(ip)*xyz(1,inode)
-          yp=ey(ip)*xyz(2,inode)
-          zp=       xyz(3,inode)
+      !bkn=0
+      !do inode =1,nnf
+          !xp=ex(ip)*xyz(1,inode)
+          !yp=ey(ip)*xyz(2,inode)
+          !zp=       xyz(3,inode)
 
-          bkn(inode,1) =poxy(xp,yp,zp) 
-          !call dinp(xp,yp,zp,dpox,dpoy,dpoz)
-          !dpoxyz_save(1,1,inode) = dpox 
-          !dpoxyz_save(2,1,inode) = dpoy 
-      end do
+          !bkn(inode,1) =poxy(xp,yp,zp) 
+          !!call dinp(xp,yp,zp,dpox,dpoy,dpoz)
+          !!dpoxyz_save(1,1,inode) = dpox 
+          !!dpoxyz_save(2,1,inode) = dpoy 
+      !end do
 
         ! assign boundary value has potentials--------
         ! bkn is the potential from time stepping----on surface node
@@ -97,11 +97,11 @@
         xp=ex(ip)*xyz(1,n2)
         yp=ey(ip)*xyz(2,n2)
         zp=       xyz(3,n2)
-        call dinp(xp,yp,zp,dpox,dpoy,dpoz)   !get initial condition    
+        !call dinp(xp,yp,zp,dpox,dpoy,dpoz)   !get initial condition    
         !================================================================
         !timerk at each rugga kutta time step
-        !call dpoxyz(h,g,ampn,phi_w,beta,wkn,freq,timerk,rampf,xp,yp,zp,&
-     !&              nfreq,nwave,iorder,dpox,dpoy,dpoz)
+        call dpoxyz(h,g,ampn,phi_w,beta,wkn,freq,timerk,rampf,xp,yp,zp,&
+     &              nfreq,nwave,iorder,dpox,dpoy,dpoz)
 
         dpdn=(dpox*ex(ip)*dxyz(1,inode)+&
     &           dpoy*ey(ip)*dxyz(2,inode)+&
@@ -152,9 +152,9 @@
          200     continue   
         
 
-          !do 300 is=1, nsys   
-            !call rlubksb(is,amata,nnode,nnode, 1,nsys, 1,indx,bmata)
-!300       continue
+          do 300 is=1, nsys   
+            call rlubksb(is,amata,nnode,nnode, 1,nsys, 1,indx,bmata)
+300       continue
 
 
         do i = 1,nnode
