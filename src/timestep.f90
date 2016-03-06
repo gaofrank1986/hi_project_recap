@@ -180,11 +180,12 @@
         WRITE(11,*)  
         WRITE(11,*) ' Inside  Runge_Kutta        N=',N 
  
-        IF(TimeRK .LT. 2.0d0*TPER) THEN 
-                RAMPF=0.5d0*(1.0d0-COS(PI*TimeRK/2.0d0/TPER)) 
-        ELSE 
-                RAMPF=1.0D0 
-        END IF 
+     !   IF(TimeRK .LT. 2.0d0*TPER) THEN 
+                !RAMPF=0.5d0*(1.0d0-COS(PI*TimeRK/2.0d0/TPER)) 
+        !ELSE 
+                !RAMPF=1.0D0 
+        !END IF 
+        rampf=1.0d0
  
         IF(TimeRk .LT. 6.0d0*TPER) THEN 
                 RAMPV=0.5d0*(3.0D0+Cos(PI*TimeRK/6.0d0/TPER)) 
@@ -198,7 +199,7 @@
 ! 
 !  Computing wave height, potential at water surface  
 ! 
-! 
+!         
           DISP(:)= DISP_O(:) 
           DSDT(:)= DSDT_O(:) 
 !         prin 
@@ -288,7 +289,7 @@
            BKN(1:NNF,:) = BKN_O(1:NNF,:)+DP(2,:,:)*Tstep/2.0d0 
            
             DISP(:)=DISP_O(:)   + &
-        &                        Tstep*DSDT_O(:)/2.0d0+Tstep*Dposi(1,:)/4.0d0 
+        &                Tstep*DSDT_O(:)/2.0d0+Tstep*Dposi(1,:)/4.0d0 
             DSDT(:)= DSDT_O(:)+Dposi(2,:)/2.0d0 
  
           CALL TASSBT 

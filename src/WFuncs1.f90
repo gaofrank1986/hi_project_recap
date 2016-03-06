@@ -628,7 +628,7 @@ contains
  
        IF(IORDER.EQ.1) THEN 
            
-              IF(H .LE. 0.0D0) THEN 
+               IF(H .LE. 0.0D0) THEN !if h<=0
                 DPOX=0.D0 
                 DPOY=0.D0 
                 DPOZ=0.D0 

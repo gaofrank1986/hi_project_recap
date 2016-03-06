@@ -26,7 +26,7 @@
     subroutine tassb0
         use mvar_mod
         use pvar_mod
-                use body_property
+                !use body_property
                 use free_term,only:fterm,output_fterms
                 use mfunc_mod
                 use sebsm_mod
@@ -224,9 +224,6 @@
                 write(400,*) amata(i,j,1:nsys)
         end do;end do
 
-  !      do i = 1,nnode
-                !write(401,*) amata(i,i,1:nsys)
-        !end do
         do ip=1, nsys
             call rludcmp(ip,amata,nnode,nnode,nsys,indx,dsign)  
         enddo

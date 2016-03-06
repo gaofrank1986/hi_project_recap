@@ -1,8 +1,9 @@
 program hi_project
 
     use mvar_mod
+    use pvar_mod
     use free_term,only:get_free_term,init_ft
-    use body_property
+    !use body_property
     use hi_intg
     use gradient,only:init_gradient
 

@@ -9,7 +9,7 @@ C
  
           USE MVAR_MOD 
           USE PVAR_MOD 
-          use wave2,only:dpot2
+          use wave_func,only:dpot2
 ! 
         IMPLICIT   NONE 
 ! 
