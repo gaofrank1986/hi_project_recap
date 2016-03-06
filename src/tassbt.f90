@@ -11,7 +11,7 @@
   
       USE MVAR_MOD
       USE PVAR_MOD
-      use wave_func,only:dpoxyz
+      use wave_func,only:dpoxyz,poxy2
       use mfunc_mod,only:rlubksb
       use gradient,only:eval_gradient
 
@@ -21,7 +21,7 @@
       real(8) xp,yp,zp,dpox,dpoy,dpoz,dpdn,nx,ny,nz
       real(8) rsn(4,4),ex(4),ey(4)
       real(8) bmat(nsys),cmat(nnoded,nsys)
-      real(8) :: dpoxyz_save(2,4,nnoded),tmp(8),tmp2(2,1)
+      real(8) :: dpoxyz_save(2,4,nnoded),tmp(8),tmp2(2,1),tmp_phi
 
       data rsn /1.,  1.,  1.,  1.,& 
      &            1., -1.,  1., -1.,&
@@ -74,7 +74,15 @@
             dpoxyz_save(1,1,inode) = tmp2(1,1)
             dpoxyz_save(2,1,inode) = tmp2(2,1)
         
- 
+        !FUNCTION POXY2(H,G,Ampn,Phi,BETA,WKN,Freq,Time,Ramp,X,Y,Z,NN,Nwave,IOrder) 
+        if( timerk.eq.0.) then 
+        xp=ex(ip)*xyz(1,inode)
+        yp=ey(ip)*xyz(2,inode)
+        zp=       xyz(3,inode)
+        tmp_phi =  poxy2(h,g,ampn,phi_w,beta,wkn,freq,timerk,rampf,xp,yp,zp,&
+     &              nfreq,nwave,iorder)
+        write(408,tmp_phi)
+        end if
         20   continue
     1021 format(8f10.6)
     !print *,"cmat",cmat
@@ -85,6 +93,12 @@
 !        ENDDO
 
 
+        !write(409,*) h,g
+        !write(409,*) ampn(1:nwave)
+        !write(409,*) "phi_w",phi_w(1:nwave)
+        !write(409,*) "beta",beta,wkn(1:nwave),freq(1:nwave)
+        write(409,*) "timerk",timerk,rampf
+        !write(409,*) nfreq,nwave,iorder
 ! ==============================================
 !
 !         WRITE(102,*) 'DSDT=',DSDT
@@ -141,7 +155,7 @@
             do 200 ind=1,   nnode
                 !do inode=1, nnoded
         !---------------loop-body--------------------------
-        bmata(ind,is)=dot_product(cmata(ind,:,is),cmat(:,is))
+                bmata(ind,is)=dot_product(cmata(ind,:,is),cmat(:,is))
                 !end do
                 if (ind<=nnf) then!potential only
                         bmata(ind,is) = bmata(ind,is)-fra3(ind,is)*cmat(ind,is)&
