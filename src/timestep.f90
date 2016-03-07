@@ -78,9 +78,16 @@
  
        enddo 
        enddo 
- 
+       write(*,5001) dh(1:4,1,1)
+       write(*,5001) dp(1:4,1,1)
+       print *,"et=",et(1,1)
+       print *,"bkn=",bkn(1,1)
+       5001 format(4f14.8)
+
+        if (itime.eq.endtime) then
         write (3000,*) et
         write (3001,*) bkn
+        end if
  
          !IF (NPLOUT.EQ.1) THEN 
            !IPLOT=MOD(ITIME, 1) 
@@ -180,12 +187,12 @@
         WRITE(11,*)  
         WRITE(11,*) ' Inside  Runge_Kutta        N=',N 
  
-     !   IF(TimeRK .LT. 2.0d0*TPER) THEN 
-                !RAMPF=0.5d0*(1.0d0-COS(PI*TimeRK/2.0d0/TPER)) 
-        !ELSE 
-                !RAMPF=1.0D0 
-        !END IF 
-        rampf=1.0d0
+        IF(TimeRK .LT. 2.0d0*TPER) THEN 
+                RAMPF=0.5d0*(1.0d0-COS(PI*TimeRK/2.0d0/TPER)) 
+        ELSE 
+                RAMPF=1.0D0 
+        END IF 
+        !rampf=1.0d0
  
         IF(TimeRk .LT. 6.0d0*TPER) THEN 
                 RAMPV=0.5d0*(3.0D0+Cos(PI*TimeRK/6.0d0/TPER)) 

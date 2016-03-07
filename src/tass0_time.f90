@@ -219,16 +219,18 @@
 !
         write(102, *) '  =========== before rludcmp =============='
 
-        do i = 1,nnode
-            do j = 1,nnode
-                write(400,*) amata(i,j,1:nsys)
-        end do;end do
+       ! do i = 1,nnode
+            !do j = 1,nnode
+                !write(400,*) amata(i,j,1:nsys)
+        !end do;end do
 
+        write(*,*) "Beginning LHS matrix inversion............"
         do ip=1, nsys
             call rludcmp(ip,amata,nnode,nnode,nsys,indx,dsign)  
         enddo
-
-                write(102, *) 
+        write(*,*) "LHS matrix inversion  finished............"
+        
+        write(102, *) 
         write(102, *)
         write(102, *) '  =========== after rludcmp =============='
 

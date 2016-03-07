@@ -68,7 +68,8 @@ program hi_project
     dsdt(:)  =0.0
     
     print *,"before time step"
-    do 500 itime=0, 0!ntime
+    do 500 itime=0, endtime!0!ntime
+    print *,"Calculating",itime,"/",endtime
     write(10,*)
     write(10,*) '  itime=',itime
     write(11,*)

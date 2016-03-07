@@ -12,7 +12,7 @@
       USE MVAR_MOD
       USE PVAR_MOD
       use wave_func,only:dpoxyz,poxy2
-      use mfunc_mod,only:rlubksb
+      use mfunc_mod,only:rlubksb,poxy
       use gradient,only:eval_gradient
 
       implicit none  
@@ -81,8 +81,11 @@
         zp=       xyz(3,inode)
         tmp_phi =  poxy2(h,g,ampn,phi_w,beta,wkn,freq,timerk,rampf,xp,yp,zp,&
      &              nfreq,nwave,iorder)
-        write(408,tmp_phi)
+        write(4081,*) tmp_phi
+        !tmp_phi=poxy(xp,yp,zp)
+        !write(4082,*) tmp_phi
         end if
+        if (itime.eq.endtime) write(4082,*) tmp_phi
         20   continue
     1021 format(8f10.6)
     !print *,"cmat",cmat
@@ -92,13 +95,14 @@
 !        WRITE(102, 620)  INODE,CMAT(INODE,1)
 !        ENDDO
 
-
-        !write(409,*) h,g
-        !write(409,*) ampn(1:nwave)
-        !write(409,*) "phi_w",phi_w(1:nwave)
-        !write(409,*) "beta",beta,wkn(1:nwave),freq(1:nwave)
+        if (timerk.eq.0.) then 
+        write(409,*) h,g
+        write(409,*) "amp",ampn(1:nwave)
+        write(409,*) "phi_w",phi_w(1:nwave)
+        write(409,*) "beta,wkn,freq",beta,wkn(1:nwave),freq(1:nwave)
+        write(409,*) nfreq,nwave,iorder
+        endif
         write(409,*) "timerk",timerk,rampf
-        !write(409,*) nfreq,nwave,iorder
 ! ==============================================
 !
 !         WRITE(102,*) 'DSDT=',DSDT

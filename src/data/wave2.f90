@@ -8,7 +8,7 @@ module wave
       real(8) :: g,rho,pi4
       integer,parameter :: nfreq = 200
       real(8),parameter :: pi = 3.14159265359 
-      integer :: iorder,nwave
+      integer :: iorder,nwave,endtime
       real(8) :: time,tstep
 
 
@@ -92,8 +92,9 @@ contains
        print *,"pi=  ",pi
        print *,"tper=   ",tper
      
-       TSTEP=TPER/NTNUM   ! a perid divded to ntnum 
+       tstep=tper/ntnum   ! a perid divded to ntnum 
          NTIME=INT(WVSimu*TPER/TSTEP)!how many steps total to simulate
+         ENDTIME=int(2*tper/tstep)+1
          !wvsimu is how many periods of wave to simulate
       print *,"time info",tstep,ntime 
 
