@@ -5,6 +5,7 @@ program hi_project
     use body_property
     use hi_intg
     use gradient,only:init_gradient
+    use time_mod
 
     implicit  none  
 
@@ -15,6 +16,7 @@ program hi_project
 
          
     call read_wav_data()
+    call init_time_var
     call output_wav_data()
     print *,xc,yc,zc
     xc=0
