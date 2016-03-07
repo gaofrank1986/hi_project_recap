@@ -9,25 +9,50 @@
          USE MVAR_MOD 
          USE PVAR_MOD 
          use time_mod
-         use wave_func,only:eti2
-! 
+         use mfunc_mod,only:dinp,dpot,eti,deti,poxy
+         
          IMPLICIT NONE 
 !         
          Integer INODE,JNODE,N0,NELE,NLOC,MOD,IP,IPLOT 
          Integer K 
          real(8)  VECT(3) 
          real(8)  AMPF(6),RAL 
+         real(8) dp_comp(4),dh_comp(4),xp,yp,zp,p(4)
+         real(8) dpox,dpoy,dpoz,p2(4),e(4),e2(4)
+         real(8) x1,y1,z1
+         
  
 ! 
 !  ============================================ 
-!  RK1 
+!  RK1  
+
+       
  
-         RAL=180.0d0/PI 
  
          TimeRK=TIME 
-!  Computing velocity on the body surface, and normal velocity of free surface by BEM 
 !       
+         if ((timerk)<1e-6) then
+                   do inode =1,nnf
+                  xp = xyz(1,inode)
+                  yp = xyz(2,inode)
+                  zp = xyz(1,inode)
+                  bkn_o(inode,1) = poxy(xp,yp,zp)
+                  et_o(inode,1)= eti(xp,yp)
+                  end do
+          end if
+          
+         x1=xyz(1,1) 
+         y1=xyz(2,1) 
+         z1=xyz(3,1) 
+         
          CALL Runge_Kutta(1) 
+         !compute dp,dh at testing point 1
+         dp_comp(1)=dpot(x1,y1,z1)
+         dh_comp(1)=deti(x1,y1)
+         e(1)=eti(x1,y1)
+         p(1)=poxy(x1,y1,z1)
+         p2(1)=bkn(1,1)
+         e2(1)=et(1,1)
  
         WRITE(*,*) 'RK1 COMPLETED' 
 ! 
@@ -36,11 +61,15 @@
 ! 
          TimeRK=TIME+Tstep/2.0d0 
 !  
-!  Compute wave force, and body response 
-! 
  
          call runge_kutta(2) 
  
+         dp_comp(2)=dpot(x1,y1,z1)
+         dh_comp(2)=deti(x1,y1)
+         e(2)=eti(x1,y1)
+         p(2)=poxy(x1,y1,z1)
+         p2(2)=bkn(1,1)
+         e2(2)=et(1,1)
         WRITE(*,*) 'RK2 COMPLETED'  
 ! 
 !  ============================================= 
@@ -51,6 +80,12 @@
 ! 
           CALL Runge_Kutta(3) 
  
+         dp_comp(3)=dpot(x1,y1,z1)
+         dh_comp(3)=deti(x1,y1)
+         e(3)=eti(x1,y1)
+         p(3)=poxy(x1,y1,z1)
+         p2(3)=bkn(1,1)
+         e2(3)=et(1,1)
          WRITE(*,*) 'RK3 COMPLETED'  
 ! 
 !  ============================================= 
@@ -60,6 +95,12 @@
 !  
          CALL Runge_Kutta(4) 
  
+         dp_comp(4)=dpot(x1,y1,z1)
+         dh_comp(4)=deti(x1,y1)
+         e(4)=eti(x1,y1)
+         p(4)=poxy(x1,y1,z1)
+         p2(4)=bkn(1,1)
+         e2(4)=et(1,1)
         WRITE(*,*) 'RK4 COMPLETED' 
 ! 
 ! 
@@ -79,64 +120,32 @@
  
        enddo 
        enddo 
+       print *,"dh"
        write(*,5001) dh(1:4,1,1)
+       write(*,5001) dh_comp(1:4)
+       print *,"dp"
        write(*,5001) dp(1:4,1,1)
-       print *,"et=",et(1,1)
-       print *,"bkn=",bkn(1,1)
+       write(*,5001) dp_comp(1:4)
+       print *,"p"
+       write(*,5001) p2(1:4)
+       write(*,5001) p(1:4)
+       print *,"et"
+       write(*,5001) e2(1:4)
+       write(*,5001) e(1:4)
+       print *,"et=",et(1,1),eti(x1,y1)
+       print *,"bkn=",bkn(1,1),poxy(x1,y1,z1)
        5001 format(4f14.8)
 
-        if (itime.eq.endtime) then
-        write (3000,*) et
-        write (3001,*) bkn
-        end if
+        !if (itime.eq.endtime) then
+        write (4010,*) et
+        write (4011,*) bkn
+        !end if
  
-         !IF (NPLOUT.EQ.1) THEN 
-           !IPLOT=MOD(ITIME, 1) 
-           !IF (IPLOT .EQ. 0  )  CALL PLOTOUT8 
-         !ELSE IF (NPLOUT.EQ.2) THEN 
-           !IPLOT=MOD(ITIME, 2) 
-           !IF (IPLOT .EQ. 0  )  CALL PLOTOUT8 
-         !ELSE IF (NPLOUT.EQ.3) THEN 
-           !IPLOT=MOD(ITIME, 4) 
-           !IF (IPLOT .EQ. 0  )  CALL PLOTOUT8 
-         !ELSE IF (NPLOUT.EQ.4) THEN 
-           !IPLOT=MOD(ITIME, 8) 
-           !IF (IPLOT .EQ. 0  )  CALL PLOTOUT8 
-         !ELSE IF (NPLOUT.EQ.5) THEN 
-           !IPLOT=MOD(ITIME, 16) 
-           !IF (IPLOT .EQ. 0  )  CALL PLOTOUT8 
-         !ENDIF 
  
           FORCE=FORCEW 
           WRITE(21, 1010)  TIME, FORCE(1), FORCE(2), FORCE(3),& 
                               &        FORCE(4), FORCE(5), FORCE(6) 
  
-!C 
-! SG FIXME: try to make body fixed 
-!C Displacement and d_phi/dt of the body 
-!C 
-         !DO 120 K=1, 6 
-           !DSDT(K)=DSDT_O(K)+(Dposi(1,K)+2.0D0*Dposi(2,K)+ 
-        !1                       2.0D0*Dposi(3,K)+Dposi(4,K))/6.0D0 
-!120      CONTINUE 
- 
-         !DO 140 K=1, 6 
-         !DISP(K)=DISP_O(K)+ 
-        !1                Tstep*DSDT_O(K)+Tstep*(Dposi(1,K)+Dposi(2,K) 
-     !2               +Dposi(3,K))/6.0D0 
-!140      CONTINUE 
- 
-! 
- 
-!         IF(TIME .GT. 2.0d0*TPER) THEN 
- 
-          !WRITE(22, 1010)  TIME, DISP(1), DISP(2), DISP(3), &
-        !&             RAL*DISP(4), RAL*DISP(5), RAL*DISP(6) 
-!! 
-          !WRITE(23, 1010)  TIME, DSDT(1),     DSDT(2), &
-        !&               DSDT(3),     RAL*DSDT(4), &
-        !&               RAL*DSDT(5), RAL*DSDT(6) 
-!!         ENDIF 
          DO 150 K=1, 6 
         IF( DISP(K).GT. 1000.0d0) DISP(K)= 1000.0d0 
         IF( DISP(K).LT.-1000.0d0) DISP(K)=-1000.0d0 
@@ -154,7 +163,9 @@
         RETURN 
         END 
  
- 
+        !subroutine get_dp_cmp(inode, 
+                !use mvar_mod
+                
  
 ! 
 !  ========================================== 
@@ -167,6 +178,7 @@
          USE PVar_mod 
          use time_mod
          use mfunc_mod,only:rlubksb
+         use mfunc_mod,only:dinp,dpot,eti,deti,poxy
  
 ! 
          IMPLICIT real(8) (A-H,O-Z) 
@@ -174,6 +186,7 @@
          INTEGER INODE,N,J 
          real(8) BMAT(4),RSN(4,4) 
          real(8) COMP(6),AMPF(6)!,TRXYZ(3,3) 
+         real(8) xp,yp,zp,dpox,dpoy,dpoz
  
  
        DATA RSN /1.,  1.,  1.,  1.,  &
@@ -189,18 +202,13 @@
         WRITE(11,*)  
         WRITE(11,*) ' Inside  Runge_Kutta        N=',N 
  
-        IF(TimeRK .LT. 2.0d0*TPER) THEN 
-                RAMPF=0.5d0*(1.0d0-COS(PI*TimeRK/2.0d0/TPER)) 
-        ELSE 
-                RAMPF=1.0D0 
-        END IF 
-        !rampf=1.0d0
+        !IF(TimeRK .LT. 2.0d0*TPER) THEN 
+                !RAMPF=0.5d0*(1.0d0-COS(PI*TimeRK/2.0d0/TPER)) 
+        !ELSE 
+                !RAMPF=1.0D0 
+        !END IF 
+        rampf=1.0d0
  
-        IF(TimeRk .LT. 6.0d0*TPER) THEN 
-                RAMPV=0.5d0*(3.0D0+Cos(PI*TimeRK/6.0d0/TPER)) 
-        ELSE 
-                RAMPV=1.0D0 
-        END IF 
 ! 
 !  ================================================ at RK1 step 
 ! 
@@ -211,18 +219,35 @@
 !         
           DISP(:)= DISP_O(:) 
           DSDT(:)= DSDT_O(:) 
-!         prin 
+          if ((timerk)<1e-6) then
+                   do inode =1,nnf
+                  xp = xyz(1,inode)
+                  yp = xyz(2,inode)
+                  zp = xyz(1,inode)
+                  bkn(inode,1) = poxy(xp,yp,zp)
+                  et(inode,1) = eti(xp,yp)
+
+                 end do
+          end if
+!        
           CALL TASSBT 
           !solve for unkn
-
           DO IP=1,    NSYS 
           DO INODE=1, NNF 
-               DH(1,INODE,IP)=  UNKN(INODE,IP) -DAMPF(INODE)*ET(INODE,IP) 
+               DH(1,INODE,IP)=  UNKN(INODE,IP) !-DAMPF(INODE)*ET(INODE,IP) 
                !d\eti / dt
-               DP(1,INODE,IP)= -G*ET(INODE,IP) -DAMPF(INODE)*BKN(INODE,IP) 
+               DP(1,INODE,IP)= -G*ET(INODE,IP) !-DAMPF(INODE)*BKN(INODE,IP) 
                !{d \phi}/dt
           ENDDO   
           ENDDO 
+          !if ((timerk)<1e-6) then!first time running initial value given
+                  !do inode =1,nnf
+                  !xp = xyz(1,inode)
+                  !yp = xyz(2,inode)
+                  !zp = xyz(1,inode)
+                 !dp=dpot(xp,yp,zp) 
+                 !end do
+          !end if
           !print *,"after dh,dp"
 !        print 
 !  Compute wave force, and body response 
@@ -263,8 +288,8 @@
 ! 
                   DO IP=1,    NSYS 
                   DO INODE=1, NNF 
-                  DH(2,INODE,IP)=  UNKN(INODE,IP) -DAMPF(INODE)*ET(INODE,IP) 
-                  DP(2,INODE,IP)= -G*ET(INODE,IP) -DAMPF(INODE)*BKN(INODE,IP) 
+                  DH(2,INODE,IP)=  UNKN(INODE,IP) !-DAMPF(INODE)*ET(INODE,IP) 
+                  DP(2,INODE,IP)= -G*ET(INODE,IP) !-DAMPF(INODE)*BKN(INODE,IP) 
                   ENDDO   
                   ENDDO   
  
@@ -305,8 +330,8 @@
 ! 
           DO IP=1,    NSYS 
           DO INODE=1, NNF 
-            DH(3,INODE,IP)=  UNKN(INODE,IP) -DAMPF(INODE)*ET(INODE,IP) 
-          DP(3,INODE,IP)= -G*ET(INODE,IP) -DAMPF(INODE)*BKN(INODE,IP) 
+            DH(3,INODE,IP)=  UNKN(INODE,IP) !-DAMPF(INODE)*ET(INODE,IP) 
+          DP(3,INODE,IP)= -G*ET(INODE,IP) !-DAMPF(INODE)*BKN(INODE,IP) 
           ENDDO   
           ENDDO   
 ! 
@@ -354,8 +379,8 @@
 ! 
           DO IP=1,    NSYS 
           DO INODE=1, NNF 
-            DH(4,INODE,IP)=  UNKN(INODE,IP) -DAMPF(INODE)*ET(INODE,IP) 
-          DP(4,INODE,IP)= -G*ET(INODE,IP) -DAMPF(INODE)*BKN(INODE,IP) 
+            DH(4,INODE,IP)=  UNKN(INODE,IP) !-DAMPF(INODE)*ET(INODE,IP) 
+          DP(4,INODE,IP)= -G*ET(INODE,IP) !-DAMPF(INODE)*BKN(INODE,IP) 
           ENDDO   
           ENDDO   
 ! 

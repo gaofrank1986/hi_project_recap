@@ -34,6 +34,18 @@ C
         END FUNCTION ETI
 
 
+        FUNCTION dETI(X,Y)
+        USE MVAR_MOD
+        IMPLICIT  NONE
+!
+	  REAL*8,INTENT(IN):: X,Y
+        Real*8  dETI
+!
+         dETI=w1*Amp*Dsin(WK*(X*DCOS(BETA)+Y*DSIN(BETA)) -W1*TimeRK)
+	   dETI=RAMPF*dETI
+
+        RETURN
+        END FUNCTION dETI
 C
 C  Incident potential 
 C
@@ -100,7 +112,7 @@ C C
 C
 !	   DPOT=RAMPF*DPOT
 C         DPOT = DCOS(X)*DSIN(Y)*DEXP(DSQRT(2.0D0)*Z)*DCOS(-W1*TimeRK)*-W1
-
+          dpot=rampf*dpot
         RETURN
         END FUNCTION DPOT
 

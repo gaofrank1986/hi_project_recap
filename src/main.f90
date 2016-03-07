@@ -45,10 +45,16 @@ program hi_project
     allocate(bkn(nnoded,nsys),&
         &                 unkn_o(nnode,nsys),bkn_o(nnoded,nsys),&
         &            et(nnf,nsys),et_o(nnf,nsys), dpdt(nnode,nsys))
-     !,  bkn(nnoded,nsys),&
-     !   &                 unkn_o(nnode,nsys),bkn_o(nnoded,nsys),&
-      !  &             dpdt(nnode,nsys))
-    !allocate(dh(4,nnf,nsys),dp(4,nnf,nsys),dposi(4,6))
+    allocate(dh(4,nnf,nsys),dp(4,nnf,nsys),dposi(4,6))
+    unkn=0.
+    unkn=0.
+    bkn_o=0.
+    et=0.
+    et_o=0.
+    dh=0.
+    dp=0.
+    dpdt=0.
+    
 
     call get_gaussian_data(xc,yc,zc)                  
     call init_hi_var() 
@@ -56,7 +62,10 @@ program hi_project
     !call tassb0_freq
     call tassb0
     call init_gradient(nnf,nelemf,xyze(1:2,:,1:nelemf),nodele(1:nnf,1),nodelj(1:nnf,1))
-    call tassbt
+    !call tassbt
+    time=0.0d0
+    tstep=0.05
+    call time_intg_rk4
     print *,"=================== main program ends ==============="
 end  program      
 

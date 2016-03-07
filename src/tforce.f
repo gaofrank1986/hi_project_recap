@@ -9,6 +9,7 @@ C
  
           USE MVAR_MOD 
           USE PVAR_MOD 
+          use time_mod
           use wave_func,only:dpot2
 ! 
         IMPLICIT   NONE 
