@@ -47,7 +47,7 @@ program hi_project
         &            et(nnf,nsys),et_o(nnf,nsys), dpdt(nnode,nsys))
     allocate(dh(4,nnf,nsys),dp(4,nnf,nsys),dposi(4,6))
     unkn=0.
-    unkn=0.
+    unkn_o=0.
     bkn_o=0.
     et=0.
     et_o=0.

@@ -31,16 +31,23 @@
  
          TimeRK=TIME 
 !       
-         if ((timerk)<1e-6) then
-                   do inode =1,nnf
+         !if ((timerk)<1e-6) then
+          rampf=1
+          do inode =1,nnf
                   xp = xyz(1,inode)
                   yp = xyz(2,inode)
-                  zp = xyz(1,inode)
+                  zp = xyz(3,inode)
+                print *,"generating time 0 for node",inode
+                print *,xp,yp,zp
+                
                   bkn_o(inode,1) = poxy(xp,yp,zp)
                   et_o(inode,1)= eti(xp,yp)
-                  end do
-          end if
+                  print *,"here",poxy(xp,yp,zp),eti(xp,yp)
+                  !pause
+         end do
+          !end if
           
+          print *,bkn_o(1,1),et_o(1,1) 
          x1=xyz(1,1) 
          y1=xyz(2,1) 
          z1=xyz(3,1) 
@@ -53,6 +60,17 @@
          p(1)=poxy(x1,y1,z1)
          p2(1)=bkn(1,1)
          e2(1)=et(1,1)
+         print *,e(1),p(1)
+         pause
+                   !do inode =1,nnf
+                  !xp = xyz(1,inode)
+                  !yp = xyz(2,inode)
+                  !zp = xyz(3,inode)
+                  !call dinp(xp,yp,zp,dpox,dpoy,dpoz)
+                  !write (4011,450) unkn(inode,1),dpoz
+                  !end do
+         450 format(2f14.8)
+         pause
  
         WRITE(*,*) 'RK1 COMPLETED' 
 ! 
@@ -62,6 +80,7 @@
          TimeRK=TIME+Tstep/2.0d0 
 !  
  
+          print *,bkn_o(1,1),et_o(1,1) 
          call runge_kutta(2) 
  
          dp_comp(2)=dpot(x1,y1,z1)
@@ -137,8 +156,8 @@
        5001 format(4f14.8)
 
         !if (itime.eq.endtime) then
-        write (4010,*) et
-        write (4011,*) bkn
+        !write (4010,*) et
+        !write (4011,*) bkn
         !end if
  
  
@@ -223,7 +242,7 @@
                    do inode =1,nnf
                   xp = xyz(1,inode)
                   yp = xyz(2,inode)
-                  zp = xyz(1,inode)
+                  zp = xyz(3,inode)
                   bkn(inode,1) = poxy(xp,yp,zp)
                   et(inode,1) = eti(xp,yp)
 

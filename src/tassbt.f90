@@ -30,7 +30,7 @@
       data ex / 1.,  1., -1., -1./                                     
       data ey / 1., -1., -1.,  1./
 
-       print *,"Entering tassbt"
+       print *,"Entering tassbt",timerk
 !
 !        WRITE(102,*)
 !        WRITE(102,*)   'T=', TimeRK                 

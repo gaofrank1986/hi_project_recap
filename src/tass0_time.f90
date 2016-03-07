@@ -217,7 +217,7 @@
 !! =============================================
         print *,"I am here!"
 !
-        write(102, *) '  =========== before rludcmp =============='
+        !write(102, *) '  =========== before rludcmp =============='
 
         !do i = 1,nnode
             !do j = 1,nnode

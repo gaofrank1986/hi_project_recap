@@ -112,7 +112,6 @@ C C
 C
 !	   DPOT=RAMPF*DPOT
 C         DPOT = DCOS(X)*DSIN(Y)*DEXP(DSQRT(2.0D0)*Z)*DCOS(-W1*TimeRK)*-W1
-          dpot=rampf*dpot
         RETURN
         END FUNCTION DPOT
 
