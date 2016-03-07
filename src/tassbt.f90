@@ -152,9 +152,9 @@
          200     continue   
         
 
-          !do 300 is=1, nsys   
-            !call rlubksb(is,amata,nnode,nnode, 1,nsys, 1,indx,bmata)
-!300       continue
+          do 300 is=1, nsys   
+            call rlubksb(is,amata,nnode,nnode, 1,nsys, 1,indx,bmata)
+300       continue
 
 
         do i = 1,nnode
