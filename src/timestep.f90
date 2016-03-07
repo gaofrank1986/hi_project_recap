@@ -8,6 +8,7 @@
          SUBROUTINE Time_intg_RK4 
          USE MVAR_MOD 
          USE PVAR_MOD 
+         use time_mod
          use wave_func,only:eti2
 ! 
          IMPLICIT NONE 
@@ -164,6 +165,7 @@
          SUBROUTINE Runge_Kutta(N) 
          USE MVAR_MOD 
          USE PVar_mod 
+         use time_mod
          use mfunc_mod,only:rlubksb
  
 ! 
@@ -393,6 +395,7 @@
 ! 
          SUBROUTINE PLOTOUT8 
           USE MVAR_MOD 
+          use time_mod
          use wave_func,only:eti2
         IMPLICIT   NONE   
  
