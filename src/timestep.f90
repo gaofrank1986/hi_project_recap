@@ -31,23 +31,23 @@
  
          TimeRK=TIME 
 !       
-         !if ((timerk)<1e-6) then
+        if ((timerk)<1e-6) then
           rampf=1
           do inode =1,nnf
                   xp = xyz(1,inode)
                   yp = xyz(2,inode)
                   zp = xyz(3,inode)
-                print *,"generating time 0 for node",inode
-                print *,xp,yp,zp
                 
                   bkn_o(inode,1) = poxy(xp,yp,zp)
                   et_o(inode,1)= eti(xp,yp)
-                  print *,"here",poxy(xp,yp,zp),eti(xp,yp)
+                  bkn(inode,1) = poxy(xp,yp,zp)
+                  et(inode,1) = eti(xp,yp)
+
                   !pause
          end do
-          !end if
+         end if
+         !FIXME need to set unkn_o if moving body
           
-          print *,bkn_o(1,1),et_o(1,1) 
          x1=xyz(1,1) 
          y1=xyz(2,1) 
          z1=xyz(3,1) 
@@ -60,17 +60,6 @@
          p(1)=poxy(x1,y1,z1)
          p2(1)=bkn(1,1)
          e2(1)=et(1,1)
-         print *,e(1),p(1)
-         pause
-                   !do inode =1,nnf
-                  !xp = xyz(1,inode)
-                  !yp = xyz(2,inode)
-                  !zp = xyz(3,inode)
-                  !call dinp(xp,yp,zp,dpox,dpoy,dpoz)
-                  !write (4011,450) unkn(inode,1),dpoz
-                  !end do
-         450 format(2f14.8)
-         pause
  
         WRITE(*,*) 'RK1 COMPLETED' 
 ! 
@@ -80,7 +69,6 @@
          TimeRK=TIME+Tstep/2.0d0 
 !  
  
-          print *,bkn_o(1,1),et_o(1,1) 
          call runge_kutta(2) 
  
          dp_comp(2)=dpot(x1,y1,z1)
@@ -238,16 +226,6 @@
 !         
           DISP(:)= DISP_O(:) 
           DSDT(:)= DSDT_O(:) 
-          if ((timerk)<1e-6) then
-                   do inode =1,nnf
-                  xp = xyz(1,inode)
-                  yp = xyz(2,inode)
-                  zp = xyz(3,inode)
-                  bkn(inode,1) = poxy(xp,yp,zp)
-                  et(inode,1) = eti(xp,yp)
-
-                 end do
-          end if
 !        
           CALL TASSBT 
           !solve for unkn
@@ -259,16 +237,6 @@
                !{d \phi}/dt
           ENDDO   
           ENDDO 
-          !if ((timerk)<1e-6) then!first time running initial value given
-                  !do inode =1,nnf
-                  !xp = xyz(1,inode)
-                  !yp = xyz(2,inode)
-                  !zp = xyz(1,inode)
-                 !dp=dpot(xp,yp,zp) 
-                 !end do
-          !end if
-          !print *,"after dh,dp"
-!        print 
 !  Compute wave force, and body response 
 !  dpdt is d_phi/dt potential deritive over time??  
           !dsdt is velocity
