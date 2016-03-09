@@ -12,7 +12,7 @@
       USE MVAR_MOD
       USE PVAR_MOD
       use wave_func,only:dpoxyz,poxy2
-      use mfunc_mod,only:rlubksb,poxy
+      use mfunc_mod,only:rlubksb,poxy,dinp
       use gradient,only:eval_gradient
 
       implicit none  
@@ -48,16 +48,20 @@
       cmat(:,:)=0.0
       dpoxyz_save = 0.0
       !bkn=0
-      !do inode =1,nnf
-          !xp=ex(ip)*xyz(1,inode)
-          !yp=ey(ip)*xyz(2,inode)
-          !zp=       xyz(3,inode)
+      do inode =1,nnf
+          xp=ex(ip)*xyz(1,inode)
+          yp=ey(ip)*xyz(2,inode)
+          zp=       xyz(3,inode)
 
-          !bkn(inode,1) =poxy(xp,yp,zp) 
-          !!call dinp(xp,yp,zp,dpox,dpoy,dpoz)
-          !!dpoxyz_save(1,1,inode) = dpox 
-          !!dpoxyz_save(2,1,inode) = dpoy 
-      !end do
+          call dinp(xp,yp,zp,dpox,dpoy,dpoz)
+          write(4001,502) poxy(xp,yp,zp),dpoz
+          502 format(2f14.8)
+          
+          !call dinp(xp,yp,zp,dpox,dpoy,dpoz)
+          !dpoxyz_save(1,1,inode) = dpox 
+          !dpoxyz_save(2,1,inode) = dpoy 
+      end do
+      pause
 
         ! assign boundary value has potentials--------
         ! bkn is the potential from time stepping----on surface node
@@ -121,7 +125,7 @@
         call dpoxyz(h,g,ampn,phi_w,beta,wkn,freq,timerk,rampf,xp,yp,zp,&
      &              nfreq,nwave,iorder,dpox,dpoy,dpoz)
 
-        dpdn=(dpox*ex(ip)*dxyz(1,inode)+&
+        dpdn=-(dpox*ex(ip)*dxyz(1,inode)+&
     &           dpoy*ey(ip)*dxyz(2,inode)+&
     &           dpoz       *dxyz(3,inode) )
 !       
