@@ -6,9 +6,11 @@ program hi_project
     !use body_property
     use hi_intg
     use gradient,only:init_gradient
+    use mfunc_mod,only:poxy,eti
 
     implicit  none  
     integer inode
+    real(8) ::xp,yp,zp
 
     open(9,  file='output/output1.txt',    status='unknown')
     open(10, file='output/output.txt' ,    status='unknown')
@@ -53,6 +55,7 @@ program hi_project
     call get_gaussian_data(xc,yc,zc)                  
     call init_hi_var() 
     call get_free_term()
+    print *,"before tassb0"
     !call tassb0_freq
     call tassb0
     call init_gradient(nnf,nelemf,xyze(1:2,:,1:nelemf),nodele(1:nnf,1),nodelj(1:nnf,1))
@@ -69,11 +72,24 @@ program hi_project
     disp(:)  =0.0
     dsdt(:)  =0.0
 
+    !do inode=1,nnf
+        !read(103,*) bkn(inode,1),et(inode,1)
+        !bkn(inode,1)=bkn(inode,1)*(1-dampf(inode)/w1)
+        !et(inode,1)=et(inode,1)*(1-dampf(inode)/w1)
+    !end do
+    
+    rampf=1.0d0 
     do inode=1,nnf
-        read(103,*) bkn(inode,1),et(inode,1)
-        bkn(inode,1)=bkn(inode,1)*(1-dampf(inode)/w1)
-        et(inode,1)=et(inode,1)*(1-dampf(inode)/w1)
+     xp=xyz(1,inode)
+     yp=xyz(2,inode)
+     zp=xyz(3,inode)
+     bkn(inode,1) = poxy(xp,yp,zp)*(1-dampf(inode)/w1)
+     et(inode,1) = eti(xp,yp)*(1-dampf(inode)/w1)
     end do
+
+
+
+
     tstep=0.05 
     print *,"before time step"
     do 500 itime=0,0! endtime!0!ntime

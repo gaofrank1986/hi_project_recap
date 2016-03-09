@@ -93,7 +93,9 @@
         pause
         print *,"finished fterm output"
         do  500   inode=1,  nnf
-                print *,inode
+            if (mod(inode,100).eq.0) then
+                    print *,inode
+            end if
             xp=xyz(1,inode)
             yp=xyz(2,inode)
             zp=xyz(3,inode)
@@ -154,6 +156,10 @@
 !    Source point is on the body surface
 !
         do  1000   inode=nnf+1, nnode   
+            if (mod(inode,100).eq.0) then
+                    print *,inode
+            end if
+
 
             xp=xyz(1,inode)
             yp=xyz(2,inode)

@@ -18,7 +18,7 @@
          real(8)  AMPF(6),RAL 
  
 ! 
-         test_node=1
+         test_node=490!1!939
 !  ============================================ 
 !  RK1 
  
@@ -92,16 +92,17 @@
  
        enddo 
        enddo 
+       print *,"testing node:",test_node
        print *,"dh"
-       write(*,5001) dh(1:4,1,1)
+       write(*,5001) dh(1:4,test_node,1)
        print *,"dp"
-       write(*,5001) dp(1:4,1,1)
+       write(*,5001) dp(1:4,test_node,1)
        print *,"p"
        write(*,5001) p(1:4)
        print *,"eti"
        write(*,5001) e(1:4)
-       print *,"et=",et(1,1)
-       print *,"bkn=",bkn(1,1)
+       print *,"et=",et(test_node,1)
+       print *,"bkn=",bkn(test_node,1)
        5001 format(4f14.8)
 
         if (itime.eq.endtime) then

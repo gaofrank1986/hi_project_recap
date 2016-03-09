@@ -119,13 +119,13 @@
         xp=ex(ip)*xyz(1,n2)
         yp=ey(ip)*xyz(2,n2)
         zp=       xyz(3,n2)
-        !call dinp(xp,yp,zp,dpox,dpoy,dpoz)   !get initial condition    
+        call dinp(xp,yp,zp,dpox,dpoy,dpoz)   !get initial condition    
         !================================================================
         !timerk at each rugga kutta time step
-        call dpoxyz(h,g,ampn,phi_w,beta,wkn,freq,timerk,rampf,xp,yp,zp,&
-     &              nfreq,nwave,iorder,dpox,dpoy,dpoz)
+        !call dpoxyz(h,g,ampn,phi_w,beta,wkn,freq,timerk,rampf,xp,yp,zp,&
+     !&              nfreq,nwave,iorder,dpox,dpoy,dpoz)
 
-        dpdn=-(dpox*ex(ip)*dxyz(1,inode)+&
+        dpdn=(dpox*ex(ip)*dxyz(1,inode)+&
     &           dpoy*ey(ip)*dxyz(2,inode)+&
     &           dpoz       *dxyz(3,inode) )
 !       
