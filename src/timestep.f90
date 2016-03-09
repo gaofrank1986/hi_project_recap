@@ -13,11 +13,12 @@
          IMPLICIT NONE 
 !         
          Integer INODE,JNODE,N0,NELE,NLOC,MOD,IP,IPLOT 
-         Integer K 
-         real(8)  VECT(3) 
+         Integer K,test_node 
+         real(8)  VECT(3) ,p(4),e(4)
          real(8)  AMPF(6),RAL 
  
 ! 
+         test_node=1
 !  ============================================ 
 !  RK1 
  
@@ -27,6 +28,13 @@
 !  Computing velocity on the body surface, and normal velocity of free surface by BEM 
 !       
          CALL Runge_Kutta(1) 
+         p(1) = bkn(test_node,1)
+         e(1) = et(test_node,1)
+         do inode =1,nnf
+         
+                write(4002,*) unkn(inode,1)
+
+         end do
  
         WRITE(*,*) 'RK1 COMPLETED' 
 ! 
@@ -40,6 +48,8 @@
  
          call runge_kutta(2) 
  
+         p(2) = bkn(test_node,1)
+         e(2) = et(test_node,1)
         WRITE(*,*) 'RK2 COMPLETED'  
 ! 
 !  ============================================= 
@@ -50,6 +60,8 @@
 ! 
           CALL Runge_Kutta(3) 
  
+         p(3) = bkn(test_node,1)
+         e(3) = et(test_node,1)
          WRITE(*,*) 'RK3 COMPLETED'  
 ! 
 !  ============================================= 
@@ -59,6 +71,8 @@
 !  
          CALL Runge_Kutta(4) 
  
+         p(4) = bkn(test_node,1)
+         e(4) = et(test_node,1)
         WRITE(*,*) 'RK4 COMPLETED' 
 ! 
 ! 
@@ -78,8 +92,14 @@
  
        enddo 
        enddo 
+       print *,"dh"
        write(*,5001) dh(1:4,1,1)
+       print *,"dp"
        write(*,5001) dp(1:4,1,1)
+       print *,"p"
+       write(*,5001) p(1:4)
+       print *,"eti"
+       write(*,5001) e(1:4)
        print *,"et=",et(1,1)
        print *,"bkn=",bkn(1,1)
        5001 format(4f14.8)
@@ -88,7 +108,7 @@
         write (3000,*) et
         write (3001,*) bkn
         end if
- 
+
          !IF (NPLOUT.EQ.1) THEN 
            !IPLOT=MOD(ITIME, 1) 
            !IF (IPLOT .EQ. 0  )  CALL PLOTOUT8 
@@ -187,12 +207,12 @@
         WRITE(11,*)  
         WRITE(11,*) ' Inside  Runge_Kutta        N=',N 
  
-        IF(TimeRK .LT. 2.0d0*TPER) THEN 
-                RAMPF=0.5d0*(1.0d0-COS(PI*TimeRK/2.0d0/TPER)) 
-        ELSE 
-                RAMPF=1.0D0 
-        END IF 
-        !rampf=1.0d0
+!        IF(TimeRK .LT. 2.0d0*TPER) THEN 
+                !RAMPF=0.5d0*(1.0d0-COS(PI*TimeRK/2.0d0/TPER)) 
+        !ELSE 
+                !RAMPF=1.0D0 
+        !END IF 
+        rampf=1.0d0
  
         IF(TimeRk .LT. 6.0d0*TPER) THEN 
                 RAMPV=0.5d0*(3.0D0+Cos(PI*TimeRK/6.0d0/TPER)) 

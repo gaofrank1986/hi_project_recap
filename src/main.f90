@@ -8,11 +8,13 @@ program hi_project
     use gradient,only:init_gradient
 
     implicit  none  
+    integer inode
 
     open(9,  file='output/output1.txt',    status='unknown')
     open(10, file='output/output.txt' ,    status='unknown')
     open(101,file='output/outamt.txt' ,    status='unknown')          
     open(102,file='output/outbmt.txt' ,    status='unknown')
+    open(103,file='INPUT/init_cond.txt' ,    status='old')
 
          
     call read_wav_data()
@@ -66,9 +68,15 @@ program hi_project
     force(:) =0.0
     disp(:)  =0.0
     dsdt(:)  =0.0
-    
+
+    do inode=1,nnf
+        read(103,*) bkn(inode,1),et(inode,1)
+        bkn(inode,1)=bkn(inode,1)*(1-dampf(inode)/w1)
+        et(inode,1)=et(inode,1)*(1-dampf(inode)/w1)
+    end do
+    tstep=0.05 
     print *,"before time step"
-    do 500 itime=0, endtime!0!ntime
+    do 500 itime=0,0! endtime!0!ntime
     print *,"Calculating",itime,"/",endtime
     write(10,*)
     write(10,*) '  itime=',itime
