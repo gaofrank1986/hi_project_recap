@@ -21,8 +21,8 @@ contains
                do i=1,nsys
                     !read (1,*) (fterm(j,i,k) k=1,4)
                     !FIXME
-                    read(1001,*) (fterm(j,i,k),k=1,4),tmp
-                    print *,(fterm(j,i,k),k=1,4)
+                    read(1001,*) m,(fterm(m,i,k),k=1,4),tmp
+                    !print *,(fterm(j,i,k),k=1,4)
                     !pause
 
           enddo;enddo
