@@ -17,6 +17,7 @@
 	    INTEGER  IS,ND,J,NP,IELEM,NCNE
 	    REAL*8  XP,YP,ZP 
         REAL*8  AVAL(4,8),BVAL(4,8)
+        REAL*8  ATMP(4,8),BTMP(4,8)
 !   
 !            
 	      NCNE=NCN(IELEM)
@@ -28,6 +29,9 @@
 !
         DO 100   IS=1,   NSYS  
           CALL NORM_INT0(IS,IELEM,NCNE,XP,YP,ZP,AVAL,BVAL)
+          CALL NORM_INT0(IS,IELEM,NCNE,XP,YP,-(2*H+ZP),ATMP,BTMP)
+          aval=aval+atmp
+          bval=bval+btmp
 100     CONTINUE
 !
         RETURN
@@ -49,6 +53,7 @@
 	  INTEGER I,J,IS,IELEM,INODE,NODNUM,ND,NP,NUMQUA
         REAL*8  XP,YP,ZP,XYZT(3,8),DXYZT(3,8)
         REAL*8 AVAL(4,8),BVAL(4,8)
+        REAL*8 ATMP(4,8),BTMP(4,8)
 !
           AVAL= 0.0d0 
           BVAL= 0.0d0 
@@ -73,39 +78,43 @@
         !write(*,*) 'NUMQUA=',NUMQUA,'nsys=',nsys
         !write(*,*) 'NODNUM=',nodnum
         !pause
-        IF(NUMQUA.EQ.0)       THEN
+        !IF(NUMQUA.EQ.0)       THEN
          DO 100 IS=1,  NSYS
           IF(IS.EQ.1) THEN 
             CALL SING_INT0(IS,IELEM,XP,YP,ZP,AVAL,BVAL)
+            CALL sing_INT0(IS,IELEM,XP,YP,-(2*H+ZP),ATMP,BTMP)
+
+          aval=aval+atmp
+          bval=bval+btmp
           ELSE IF(IS.NE.1 ) THEN   
-            CALL NORM_INT0(IS,IELEM,NCN(IELEM),XP,YP,ZP,AVAL,BVAL)
+            !CALL NORM_INT0(IS,IELEM,NCN(IELEM),XP,YP,ZP,AVAL,BVAL)
           END IF
 100      CONTINUE
 !
-        ELSE IF(NUMQUA.EQ.2) THEN
-         DO 200 IS=1,NSYS     
-          IF(IS.EQ.1.OR.IS.EQ.2) THEN
-            CALL SING_INT0(IS,IELEM,XP,YP,ZP,AVAL,BVAL)
-          ELSE IF(IS.EQ.3.OR.IS.EQ.4) THEN  
-            CALL NORM_INT0(IS,IELEM,NCN(IELEM),XP,YP,ZP,AVAL,BVAL)
-          END IF
-!
-200      CONTINUE  
-!
-        ELSE IF(NUMQUA.EQ.4) THEN
-         DO 300  IS=1,  NSYS
-          IF(IS.EQ.1.OR.IS.EQ.4) THEN   
-            CALL SING_INT0(IS,IELEM,XP,YP,ZP,AVAL,BVAL)
-          ELSE IF(IS.EQ.2.OR.IS.EQ.3) THEN  
-            CALL NORM_INT0(IS,IELEM,NCN(IELEM),XP,YP,ZP,AVAL,BVAL)
-          END IF
-300      CONTINUE
-!
-        ELSE IF(NUMQUA.EQ.5) THEN
-         DO 400 IS=1, NSYS  
-            CALL SING_INT0(IS,IELEM,XP,YP,ZP,AVAL,BVAL)
-400      CONTINUE
-        ENDIF
+!        ELSE IF(NUMQUA.EQ.2) THEN
+         !DO 200 IS=1,NSYS     
+          !IF(IS.EQ.1.OR.IS.EQ.2) THEN
+            !CALL SING_INT0(IS,IELEM,XP,YP,ZP,AVAL,BVAL)
+          !ELSE IF(IS.EQ.3.OR.IS.EQ.4) THEN  
+            !CALL NORM_INT0(IS,IELEM,NCN(IELEM),XP,YP,ZP,AVAL,BVAL)
+          !END IF
+!!
+!200      CONTINUE  
+!!
+        !ELSE IF(NUMQUA.EQ.4) THEN
+         !DO 300  IS=1,  NSYS
+          !IF(IS.EQ.1.OR.IS.EQ.4) THEN   
+            !CALL SING_INT0(IS,IELEM,XP,YP,ZP,AVAL,BVAL)
+          !ELSE IF(IS.EQ.2.OR.IS.EQ.3) THEN  
+            !CALL NORM_INT0(IS,IELEM,NCN(IELEM),XP,YP,ZP,AVAL,BVAL)
+          !END IF
+!300      CONTINUE
+!!
+        !ELSE IF(NUMQUA.EQ.5) THEN
+         !DO 400 IS=1, NSYS  
+            !CALL SING_INT0(IS,IELEM,XP,YP,ZP,AVAL,BVAL)
+!400      CONTINUE
+        !ENDIF
 !
         RETURN
         END
@@ -155,7 +164,8 @@
 	   Y =SAMBXY(IELEM,N,2)
 	   Z =SAMBXY(IELEM,N,3)
 
-	   CALL	TGRN (H,X,X0,Y,Y0,Z,Z0,GXF) 
+	   !CALL	TGRN (H,X,X0,Y,Y0,Z,Z0,GXF) 
+           CALL	TGRN2 (H,X,X0,Y,Y0,Z,Z0,GXF) 
 ! 
          NX=DSAMB(IELEM,N,1)
          NY=DSAMB(IELEM,N,2)
@@ -213,7 +223,8 @@
 	  Y =XYNOD(2,N)
 	  Z =XYNOD(3,N)
 
-	  CALL	TGRN (H,X,X0,Y,Y0,Z,Z0,GXF) 
+	  !CALL	TGRN (H,X,X0,Y,Y0,Z,Z0,GXF) 
+	  CALL	TGRN2 (H,X,X0,Y,Y0,Z,Z0,GXF) 
 !
         DGN=GXF(2)*DXYNOD(1,N)+GXF(3)*DXYNOD(2,N)+   &
               GXF(4)*DXYNOD(3,N)             
