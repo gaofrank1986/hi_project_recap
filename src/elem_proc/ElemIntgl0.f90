@@ -27,7 +27,7 @@
           BVAL=0.0D0
 !
         DO 100   IS=1,   NSYS  
-          CALL NORM_INT0(IS,IELEM,NCNE,XP,YP,ZP,AVAL,BVAL)
+          CALL NORM_INT0(IS,IELEM,NCNE,XP,YP,ZP,AVAL,BVAL,1)
 100     CONTINUE
 !
         RETURN
@@ -116,119 +116,85 @@
 !C 
 !C ======================================================
 !C                      
-      SUBROUTINE NORM_INT0(IS,IELEM,NCNE,XP,YP,ZP,AVAL,BVAL)
-	  USE MVAR_MOD
-	    USE MFUNC_mod
-      IMPLICIT   NONE  
- 
-	  INTEGER IS,IELEM,N,NSAMB,NCNE,J,IP
-      REAL*8  XP,YP,ZP,EX(4,4),EY(4,4)
-	  REAL*8  X,Y,Z,X0,Y0,Z0   
 
-      REAL*8  NX,NY,NZ,DGN
-      REAL*8  AVAL(4,8),BVAL(4,8),GXF(4)
-!   
-	  DATA EX/  1.0d0,  1.0d0, -1.0d0, -1.0d0,    &
-                1.0d0,  1.0d0, -1.0d0, -1.0d0,    &
-               -1.0d0, -1.0d0,  1.0d0,  1.0d0,    &
-               -1.0d0, -1.0d0,  1.0d0,  1.0d0/
-!                                                  
-	  DATA EY/  1.0d0, -1.0d0, -1.0d0,  1.0d0,    &
-               -1.0d0,  1.0d0,  1.0d0, -1.0d0,    &
-               -1.0d0,  1.0d0,  1.0d0, -1.0d0,    &
-                1.0d0, -1.0d0, -1.0d0,  1.0d0/
-!
-!
-!	 PRINT *,' IN  NORM_INT0'
-!
 
-	   X0=EX(IS,1)*XP
-	   Y0=EY(IS,1)*YP
-	   Z0= ZP
+      subroutine norm_int0(is,ielem,ncne,xp,yp,zp,aval,bval,kind)
 
-        NSAMB=16
-        IF(NCNE.EQ.6)   NSAMB=4
 
-        DO 100    N=1,   NSAMB     
+      use mvar_mod
+      use green_funcs,only : GFunc,DGFunc,mirror
+      use proj_cnst,only:ex,ey
+      !use mfunc_mod
+      implicit   none  
 
-	   X =SAMBXY(IELEM,N,1)
-	   Y =SAMBXY(IELEM,N,2)
-	   Z =SAMBXY(IELEM,N,3)
+      integer is,ielem,n,nsamb,ncne,j,kind
 
-	   CALL	TGRN (H,X,X0,Y,Y0,Z,Z0,GXF) 
-! 
-         NX=DSAMB(IELEM,N,1)
-         NY=DSAMB(IELEM,N,2)
-         NZ=DSAMB(IELEM,N,3)
-                                           
-         DGN=GXF(2)*Nx+GXF(3)*Ny+GXF(4)*Nz           
-!
-        DO  J=1,   NCNE
-         BVAL(IS,J)=BVAL(IS,J)+GXF(1)*SAMB(IELEM,N,J)
-         AVAL(IS,J)=AVAL(IS,J)+DGN*SAMB(IELEM,N,J)
-        ENDDO
-!
-!
-100     CONTINUE
-!
-        RETURN
-        END
-!
+      real*8  xp,yp,zp
+      real(8) :: p(3),p0(3),np(3)
+      !integer,optional,intent(in) :: debug
+
+      real*8  v1,v2
+      real*8  aval(4,8),bval(4,8)
+      
+      p0 = (/ex(is)*xp,ey(is)*yp,zp/)
+      !if (present(debug).and.(debug)) print *,x0,y0,z0
+      nsamb=16
+      if(ncne.eq.6)   nsamb=4
+
+      do 100    n=1,   nsamb     
+
+      p =sambxy(ielem,n,1:3)
+      np = dsamb(ielem,n,1:3)
+      v1 = GFunc(p,p0)+GFunc(p,mirror(h,p0))
+      v2 = dot_product(np,DGFunc(p,p0)+DGFunc(p,mirror(h,p0)))
+      if (kind .eq.1) then
+            do  j=1,   ncne
+            bval(is,j)=bval(is,j)+v1*samb(ielem,n,j)
+            aval(is,j)=aval(is,j)+v2*samb(ielem,n,j)
+            enddo
+      else
+
+            do  j=1,   ncne
+            bval(is,j)=bval(is,j)+v2*samb(ielem,n,j)
+            aval(is,j)=aval(is,j)+v1*samb(ielem,n,j)
+            enddo
+      end if
+      100     continue
+
+      end subroutine
 ! ===========================================================
 ! Integration on an element with source point
 !
-       SUBROUTINE SING_INT0(IS,IELEM,XP,YP,ZP,AVAL,BVAL)
-	   USE MVAR_MOD
-	    USE MFUNC_mod
-	   USE TRVAR_MOD
-       IMPLICIT   NONE  
-!
-	   INTEGER IS,IELEM,N,J,IP       
-	   REAL*8  XP,YP,ZP,EX(4,4),EY(4,4)
-	   REAL*8  X,Y,Z,X0,Y0,Z0      
-	   REAL*8  NX,NY,NZ,DGN
-       REAL*8  AVAL(4,8),BVAL(4,8),GXF(4)
-!
-	  DATA EX/  1.0d0,  1.0d0, -1.0d0, -1.0d0,    &
-                1.0d0,  1.0d0, -1.0d0, -1.0d0,    &
-               -1.0d0, -1.0d0,  1.0d0,  1.0d0,    &
-               -1.0d0, -1.0d0,  1.0d0,  1.0d0/
-!                                                  
-	  DATA EY/  1.0d0, -1.0d0, -1.0d0,  1.0d0,    &
-               -1.0d0,  1.0d0,  1.0d0, -1.0d0,    &
-               -1.0d0,  1.0d0,  1.0d0, -1.0d0,    &
-                1.0d0, -1.0d0, -1.0d0,  1.0d0/
-!
-!   
-201	  FORMAT(' In SING_INT0    XP, YP, ZP=',3F12.4)
-!
- 
-	  X0=EX(IS,1)*XP
-	  Y0=EY(IS,1)*YP
-	  Z0= ZP
+      subroutine sing_int0(is,ielem,xp,yp,zp,aval,bval)
 
-      DO 130 N=1, NOSAMP
-	
-	  X =XYNOD(1,N)
-	  Y =XYNOD(2,N)
-	  Z =XYNOD(3,N)
+            use mvar_mod
+            use trvar_mod
+      use green_funcs,only : GFunc,DGFunc,mirror
+      use proj_cnst,only:ex,ey
+            implicit   none  
 
-	  CALL	TGRN (H,X,X0,Y,Y0,Z,Z0,GXF) 
-!
-        DGN=GXF(2)*DXYNOD(1,N)+GXF(3)*DXYNOD(2,N)+   &
-              GXF(4)*DXYNOD(3,N)             
+      real(8) :: p(3),p0(3),np(3)
+      integer is,ielem,n,j,ip       
+      real*8  xp,yp,zp!,ex(4,4),ey(4,4)
+      real*8  v1,v2
+      real*8  aval(4,8),bval(4,8)
 
-!	  write(6,*) ' DGN=',DGN
+      p0 = (/ex(is)*xp,ey(is)*yp,zp/)
 
-        DO J=1, NCN(IELEM)
-         AVAL(IS,J)=AVAL(IS,J)+DGN*SAMNOD(N,J)
-         BVAL(IS,J)=BVAL(IS,J)+GXF(1)*SAMNOD(N,J)
-       ENDDO
-!
+      do 130 n=1, nosamp
 
-130     CONTINUE
-!
-        RETURN
-        END
+      p =xynod(1:3,n)
+      np = dxynod(1:3,n)
+      
+      v1 = gfunc(p,p0)+gfunc(p,mirror(h,p0))
+      v2 = dot_product(np,dgfunc(p,p0)+dgfunc(p,mirror(h,p0)))
 
+      do j=1, ncn(ielem)
+      aval(is,j)=aval(is,j)+v2*samnod(n,j)
+      bval(is,j)=bval(is,j)+v1*samnod(n,j)
+      enddo
+
+      130     continue
+      return
+      end
 

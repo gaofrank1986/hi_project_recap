@@ -102,45 +102,56 @@
 !                      
         SUBROUTINE NORM_INT1(IS,IELEM,NCNE,XP,YP,ZP,AMATRIX,BMATRIX)
         USE MVAR_MOD
+        use green_funcs,only : Dy3DGFunc,Dy3GFunc,mirror
+        use proj_cnst,only:ex,ey
         IMPLICIT   NONE  
  
-        INTEGER IS,IELEM,N,NSAMB,NCNE,J,IP
-        REAL*8  XP,YP,ZP,EX(4),EY(4)
-        REAL*8  X,X0,Y,Y0,Z,Z0 
-        REAL*8  NX,NY,NZ,DGN
-        REAL*8  DUM,WKX,PHi
-        REAL*8  BMATRIX(4,8),AMATRIX(4,8),GXF(4)
-!   
-        DATA EX/  1.0d0,  1.0d0, -1.0d0, -1.0d0/                                                  
-        DATA EY/  1.0d0, -1.0d0, -1.0d0,  1.0d0/
-!
-!    PRINT *,' IN  NSWP0'
-!
+        integer is,ielem,n,nsamb,ncne,j,ip
+        real*8  xp,yp,zp
+        real*8  bmatrix(4,8),amatrix(4,8)
+      real(8) :: p(3),p0(3),np(3)
+      real*8  v1,v2
+        
         NSAMB=16
         IF(NCNE.EQ.6)   NSAMB=4
 
-        X0=EX(IS)*XP
-        Y0=EY(IS)*YP
-        Z0= ZP
+      p0 = (/ex(is)*xp,ey(is)*yp,zp/)
 
 
         DO 100    N=1,   NSAMB     
 
-         X =SAMBXY(IELEM,N,1)! guassian point info
-         Y =SAMBXY(IELEM,N,2)
-         Z =SAMBXY(IELEM,N,3)
-       
-        CALL DTGRN(H,X,X0,Y,Y0,Z,Z0,GXF) 
-!                      
-          NX=EX(IS)*DSAMB(IELEM,N,1)
-          NY=EY(IS)*DSAMB(IELEM,N,2)
-          NZ=          DSAMB(IELEM,N,3)
-          DGN=GXF(2)*Nx+GXF(3)*Ny+GXF(4)*Nz
-                         
-        DO   J=1,   NCNE
-          BMATRIX(IS,J)=BMATRIX(IS,J)+GXF(1)*SAMB(IELEM,N,J)!line integration
-          AMATRIX(IS,J)=AMATRIX(IS,J)+DGN*SAMB(IELEM,N,J)!line integration
-        ENDDO
+    p =sambxy(ielem,n,1:3)
+      np = dsamb(ielem,n,1:3)
+      v1 = Dy3GFunc(p,p0)+Dy3GFunc(p,mirror(h,p0))
+      v2 = dot_product(np,Dy3DGFunc(p,p0)+Dy3DGFunc(p,mirror(h,p0)))
+      !if (kind .eq.1) then
+            do  j=1,   ncne
+            bmatrix(is,j)=bmatrix(is,j)+v1*samb(ielem,n,j)
+            amatrix(is,j)=amatrix(is,j)+v2*samb(ielem,n,j)
+            enddo
+      !else
+
+            !do  j=1,   ncne
+            !bmatrix(is,j)=bmatrix(is,j)+v2*samb(ielem,n,j)
+            !amatrix(is,j)=amatrix(is,j)+v1*samb(ielem,n,j)
+            !enddo
+      !end if
+
+         !X =SAMBXY(IELEM,N,1)! guassian point info
+         !Y =SAMBXY(IELEM,N,2)
+         !Z =SAMBXY(IELEM,N,3)
+       !
+        !CALL DTGRN(H,X,X0,Y,Y0,Z,Z0,GXF) 
+!!                      
+          !NX=EX(IS)*DSAMB(IELEM,N,1)
+          !NY=EY(IS)*DSAMB(IELEM,N,2)
+          !NZ=          DSAMB(IELEM,N,3)
+          !DGN=GXF(2)*Nx+GXF(3)*Ny+GXF(4)*Nz
+                         !
+        !DO   J=1,   NCNE
+          !BMATRIX(IS,J)=BMATRIX(IS,J)+GXF(1)*SAMB(IELEM,N,J)!line integration
+          !AMATRIX(IS,J)=AMATRIX(IS,J)+DGN*SAMB(IELEM,N,J)!line integration
+        !ENDDO
 
 100     CONTINUE
 !
