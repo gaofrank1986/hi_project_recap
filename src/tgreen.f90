@@ -58,6 +58,60 @@
         END 
 		    
 		    
+        SUBROUTINE TGRN2(H,X,X0,Y,Y0,Z,Z0,XHF) 
+! 
+        IMPLICIT NONE
+		INTEGER I
+
+	    REAL*8,INTENT(IN)::  H,X,Y,Z,X0,Y0,Z0
+		REAL*8,INTENT(OUT):: XHF(4)
+	    REAL*8 DX,DY,DZ,DZ1
+		REAL*8 RXY2,DZ02,DZ12,SR2,ST2,SR,SR1,PI,PI4
+!
+	    DATA PI/3.14159265358979/ 
+!C 
+!C H: water depth, negtive for infinity water depth 
+!C
+        PI4 = 4.0D0*PI
+
+        DX =X-X0
+        DY =Y-Y0
+        DZ =Z- Z0
+        DZ1=Z+ Z0 +2.0*H
+
+
+		RXY2=DX*DX+DY*DY
+	    DZ02=DZ*DZ
+		DZ12=DZ1*DZ1
+!
+	   IF(H .GT. 0) THEN
+        SR2=RXY2+DZ02                      
+        ST2=RXY2+DZ12           
+        SR =DSQRT(SR2) 
+        SR1=DSQRT(ST2)   
+! 
+        XHF(1)= 1.D0/SR! +  1.D0/SR1 
+        XHF(2)=-DX/SR**3 !-  DX /SR1**3 
+        XHF(3)=-DY/SR**3 !-  DY /SR1**3 
+        XHF(4)=-DZ/SR**3 !-  DZ1/SR1**3    
+! 
+	   ELSE
+        SR2=RXY2+DZ02                      
+        SR =DSQRT(SR2) 
+! 
+        XHF(1)= 1.D0/SR  
+        XHF(2)=-DX/SR**3  
+        XHF(3)=-DY/SR**3  
+        XHF(4)=-DZ/SR**3     
+! 
+	   ENDIF
+!
+       DO 120   I=1,  4
+         XHF(I)=-XHF(I)/PI4 
+120	   CONTINUE
+!
+        RETURN 
+        END 
 !  
 ! ==================================================================
 !
@@ -130,7 +184,71 @@
         END 
 		           
 
+        SUBROUTINE DTGRN2(H,X,X0,Y,Y0,Z,Z0,XHF) 
+! 
+        IMPLICIT NONE
+		INTEGER I
 
+	    REAL*8,INTENT(IN)::  H,X,Y,Z,X0,Y0,Z0
+		REAL*8,INTENT(OUT):: XHF(4)
+	    REAL*8 DX,DY,DZ,DZ1
+		REAL*8 RXY2,DZ02,DZ12,SR,SR2,SR3,SR5,ST,ST2,ST3,ST5
+		REAL*8 PI,PI4
+!
+	    DATA PI/3.14159265358979/ 
+! 
+! H: water depth, negtive for infinity water depth 
+!
+        PI4 = 4.0D0*PI
+
+        DX=X-X0
+        DY=Y-Y0
+        !DZ =Z- Z0
+        DZ1=Z+ Z0 +2.0*H
+
+		RXY2=DX*DX+DY*DY
+	    !DZ02=DZ*DZ
+		DZ12=DZ1*DZ1
+!
+	   IF(H .GT. 0) THEN
+        !SR2=RXY2+DZ02                      
+        !SR =DSQRT(SR2) 
+        !SR3=SR*SR2
+        !SR5=SR3*SR2
+
+        ST2=RXY2+DZ12           
+        ST=DSQRT(ST2)   
+        ST3=ST*ST2
+        ST5=ST3*ST2
+! 
+        !XHF(1)=DZ/SR3 -DZ1/ST3 
+        !XHF(2)=3.0d0*DX*(-DZ/SR5 + DZ1/ST5)
+        !XHF(3)=3.0d0*DY*(-DZ/SR5 + DZ1/ST5) 
+        !XHF(4)=-3.0d0*DZ02/SR5+1.0d0/SR3+3.0d0*DZ12/ST5-1.0d0/ST3    
+        XHF(1)= -DZ1/ST3 
+        XHF(2)=3.0d0*DX*(  DZ1/ST5)
+        XHF(3)=3.0d0*DY*(  DZ1/ST5) 
+        XHF(4)=3.0d0*DZ12/ST5-1.0d0/ST3    
+! 
+	   ELSE
+        !SR2=RXY2+DZ02                      
+        !SR =DSQRT(SR2) 
+        !SR3=SR*SR2
+        !SR5=SR3*SR2
+!! 
+        !XHF(1)=DZ/SR3 
+        !XHF(2)=-3.0d0*DX*DZ/SR5 
+        !XHF(3)=-3.0d0*DY*DZ/SR5  
+        !XHF(4)=-3.0d0*DZ02/SR5+1.0d0/SR3 
+! 
+	   ENDIF
+!
+       DO 120   I=1,  4
+         XHF(I)=-XHF(I)/PI4 
+120	   CONTINUE
+!
+        RETURN 
+        END 
 !  
 ! ==================================================================
 !
