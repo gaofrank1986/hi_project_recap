@@ -8,7 +8,7 @@
         integer,intent(in)  :: n_pwr_g,ndim,nf,npw,flag!flag control which kernel to use
         real(8),intent(out) :: hiresult(nf)
 
-        real(8)  :: cosn(ndim),ri(ndim),gcd(ndim,ndim-1)
+        !real(8)  :: cosn(ndim),ri(ndim),gcd(ndim,ndim-1)
         real(8)  :: coef_g(0:n_pwr_g),coef_h(0:npw),coef_b(0:11,nf)
 
         integer :: k

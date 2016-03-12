@@ -148,6 +148,52 @@
         END
 !
 !
+        SUBROUTINE NORM_INT2(IS,IELEM,NCNE,XP,YP,ZP,AMATRIX,BMATRIX)
+        USE MVAR_MOD
+        IMPLICIT   NONE  
+ 
+        INTEGER IS,IELEM,N,NSAMB,NCNE,J,IP
+        REAL*8  XP,YP,ZP,EX(4),EY(4)
+        REAL*8  X,X0,Y,Y0,Z,Z0 
+        REAL*8  NX,NY,NZ,DGN
+        REAL*8  DUM,WKX,PHi
+        REAL*8  BMATRIX(4,8),AMATRIX(4,8),GXF(4)
+!   
+        DATA EX/  1.0d0,  1.0d0, -1.0d0, -1.0d0/                                                  
+        DATA EY/  1.0d0, -1.0d0, -1.0d0,  1.0d0/
+!
+!    PRINT *,' IN  NSWP0'
+!
+        NSAMB=16
+        IF(NCNE.EQ.6)   NSAMB=4
+
+        X0=EX(IS)*XP
+        Y0=EY(IS)*YP
+        Z0= ZP
+
+
+        DO 100    N=1,   NSAMB     
+
+         X =SAMBXY(IELEM,N,1)! guassian point info
+         Y =SAMBXY(IELEM,N,2)
+         Z =SAMBXY(IELEM,N,3)
+       
+        CALL DTGRN2(H,X,X0,Y,Y0,Z,Z0,GXF) 
+!                      
+          NX=EX(IS)*DSAMB(IELEM,N,1)
+          NY=EY(IS)*DSAMB(IELEM,N,2)
+          NZ=          DSAMB(IELEM,N,3)
+          DGN=GXF(2)*Nx+GXF(3)*Ny+GXF(4)*Nz
+                         
+        DO   J=1,   NCNE
+          BMATRIX(IS,J)=BMATRIX(IS,J)+GXF(1)*SAMB(IELEM,N,J)!line integration
+          AMATRIX(IS,J)=AMATRIX(IS,J)+DGN*SAMB(IELEM,N,J)!line integration
+        ENDDO
+
+100     CONTINUE
+!
+        RETURN
+        END
 ! *************************************************************
 ! *                                                           *
 ! *  The source point is in the mesh, at the node NODJ        *
@@ -171,6 +217,7 @@
 
         real(8) :: src_lcl(2),src_glb(3),origin_offset(3)
         real(8) :: cnr_glb_mtx(3,8)
+        real(8) :: cnr_glb_nrml(3,8)
 
         real(8) :: result0(8),result1(8)
         real(8) ::  x0,y0,z0,si,eta
@@ -228,9 +275,17 @@
         cnr_glb_mtx(:,7) = xyz(:,ncon(ielem,6))
         cnr_glb_mtx(:,8) = xyz(:,ncon(ielem,8))
 
+      cnr_glb_nrml(:,1) = dxyz(:,ncond(ielem,1))
+        cnr_glb_nrml(:,2) = dxyz(:,ncond(ielem,3))
+        cnr_glb_nrml(:,3) = dxyz(:,ncond(ielem,5))
+        cnr_glb_nrml(:,4) = dxyz(:,ncond(ielem,7))
+        cnr_glb_nrml(:,5) = dxyz(:,ncond(ielem,2))
+        cnr_glb_nrml(:,6) = dxyz(:,ncond(ielem,4))
+        cnr_glb_nrml(:,7) = dxyz(:,ncond(ielem,6))
+        cnr_glb_nrml(:,8) = dxyz(:,ncond(ielem,8))
 
         call preset_src(si,eta,xyz(1:3,ncon(ielem,nodj)),origin_offset)
-        call eval_singular_elem(cnr_glb_mtx,result0,result1)
+        call eval_singular_elem(cnr_glb_mtx,cnr_glb_nrml,result0,result1)
 
         do j=1, ncn(ielem)
             amatrix(is,j) = result0(j)

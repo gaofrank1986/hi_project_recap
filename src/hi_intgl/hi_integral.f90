@@ -7,23 +7,25 @@ module hi_intg
     include './add_on/hi_const.f90'    
     integer,protected    ::  num_dim,num_node,num_nrml,num_elem
     integer,protected    ::  elem_type,num_intgd
+    integer,protected    ::  water_depth
 
     real(8),private    ::  hi_beta 
     real(8),allocatable,private ::  node_matrix(:,:),normal_matrix(:,:),src_local_list(:,:)
     !node_matrix(1:3,node_id),normal_matrix(1:3,nrml_id)
-    integer,allocatable,private ::  elem_matrix(:,:),src_flag(:)
+    !integer,allocatable,private ::  elem_matrix(:,:),src_flag(:)
     !elem_matrix(1:8,elem_id)
-    real(8),allocatable,private ::  full_mesh_matrix(:,:,:)
+    !real(8),allocatable,private ::  full_mesh_matrix(:,:,:)
     !full_mesh_matrix(1:3,1:8,elem_id)
 
     
-    integer,private :: model_readed_flag = 0 ! 0 for not readed
+    !integer,private :: model_readed_flag = 0 ! 0 for not readed
 
     integer,private,parameter :: NPW = 4
     real(8),private,allocatable :: value_list(:,:)
 
     integer,private :: n_pwr_g = -1
-    real(8),allocatable,private :: cnr_glb_mtx(:,:) !corner_global_matrix
+    real(8),allocatable,private :: cnr_glb_mtx(:,:) !corner nodes in _global coordinates
+    real(8),allocatable,private :: cnr_glb_nrml(:,:) !corner_global_matrix
     real(8),private :: src_lcl_pre(2),src_glb_pre(3)
    
     real(8),private ::  src_glb(3),src_ctr_glb(3)
@@ -46,75 +48,75 @@ contains
     end subroutine 
     
 
-    subroutine read_model_from_DAT()
+    !subroutine read_model_from_DAT()
 
-        implicit none
+        !implicit none
 
-        integer :: ip,ie,tmp,i,id        
+        !integer :: ip,ie,tmp,i,id        
 
-        if (model_readed_flag == 0) then
-            print *,"------------Start Reading Model-------------"
-            OPEN(5,FILE='SIEPPEM.DAT',STATUS='OLD')
+        !if (model_readed_flag == 0) then
+            !print *,"------------Start Reading Model-------------"
+            !OPEN(5,FILE='SIEPPEM.DAT',STATUS='OLD')
 
-            read (5,*) num_dim,num_node,num_elem,elem_type,hi_beta,num_intgd
-            ! number of node per element
-            ! beta is the power of r in target equation
-            ! number of target func components
-            allocate(node_matrix(num_dim,num_node))
-            allocate(elem_matrix(elem_type,num_elem))
-            allocate(src_flag(num_elem))
-            allocate(src_local_list(2,num_elem))
-            allocate(value_list(num_elem,num_intgd))
+            !read (5,*) num_dim,num_node,num_elem,elem_type,hi_beta,num_intgd
+            !! number of node per element
+            !! beta is the power of r in target equation
+            !! number of target func components
+            !allocate(node_matrix(num_dim,num_node))
+            !allocate(elem_matrix(elem_type,num_elem))
+            !allocate(src_flag(num_elem))
+            !allocate(src_local_list(2,num_elem))
+            !allocate(value_list(num_elem,num_intgd))
 
-            if (num_dim == 2) ngl = 1
+            !if (num_dim == 2) ngl = 1
     
-         !    Input nodal coordinates and element connectivity
+         !!    Input nodal coordinates and element connectivity
           
-            do ip = 1,num_node
-                read(5,*) tmp,(node_matrix(i,tmp),i=1,num_dim)                 ! card set 2
-            end do  
+            !do ip = 1,num_node
+                !read(5,*) tmp,(node_matrix(i,tmp),i=1,num_dim)                 ! card set 2
+            !end do  
 
-            do ie = 1,num_elem
-                read(5,*) tmp,(elem_matrix(id,tmp),id=1,elem_type),src_flag(tmp)    ! card set 3
-            end do
-            !====src_flag
-            ! if = 0 not valid
-            ! if > 0 src is given in global coordinate, use node with id (src_flag)
-            ! if < 0 src is given in local coordinate, use local src list given in card set 4
+            !do ie = 1,num_elem
+                !read(5,*) tmp,(elem_matrix(id,tmp),id=1,elem_type),src_flag(tmp)    ! card set 3
+            !end do
+            !!====src_flag
+            !! if = 0 not valid
+            !! if > 0 src is given in global coordinate, use node with id (src_flag)
+            !! if < 0 src is given in local coordinate, use local src list given in card set 4
 
-            read(5,*) (src_glb(i),i=1,num_dim)                       ! card set 4  
-             ! read src x,y,z coord
-             ! there seems a error, src_glb should be an array of global coordinate
-             ! since src_glb cannot remain unchanged for different element
+            !read(5,*) (src_glb(i),i=1,num_dim)                       ! card set 4  
+             !! read src x,y,z coord
+             !! there seems a error, src_glb should be an array of global coordinate
+             !! since src_glb cannot remain unchanged for different element
         
-            do ie=1,num_elem
-                if (src_flag(ie) < 0) then
-                    read(5,*) (src_local_list(i,ie),i=1,num_dim-1)
-                end if
-                ! src local position given in elements input order
-            end do
+            !do ie=1,num_elem
+                !if (src_flag(ie) < 0) then
+                    !read(5,*) (src_local_list(i,ie),i=1,num_dim-1)
+                !end if
+                !! src local position given in elements input order
+            !end do
 
-            close(5)
+            !close(5)
 
-            print *,"------------Finish Reading Model-------------"
-            !------------Some initialisation of data
+            !print *,"------------Finish Reading Model-------------"
+            !!------------Some initialisation of data
 
-            allocate(full_mesh_matrix(num_dim,elem_type,num_elem))
+            !allocate(full_mesh_matrix(num_dim,elem_type,num_elem))
             
-            forall (ie = 1:num_elem,id = 1:elem_type)
+            !forall (ie = 1:num_elem,id = 1:elem_type)
 
-                    full_mesh_matrix(1:num_dim,id,ie)=node_matrix(1:num_dim,elem_matrix(id,ie))
-                    ! reorganize nodes coordinate by element node order
-            end forall
+                    !full_mesh_matrix(1:num_dim,id,ie)=node_matrix(1:num_dim,elem_matrix(id,ie))
+                    !! reorganize nodes coordinate by element node order
+            !end forall
 
-            model_readed_flag = 1 
-            value_list = 0
+            !model_readed_flag = 1 
+            !value_list = 0
 
-        else
-            print *,"--Attention! Reading process skipped,model already loaded---"
-        end if
+        !else
+            !print *,"--Attention! Reading process skipped,model already loaded---"
+        !end if
 
-    end subroutine read_model_from_DAT
+    !end subroutine read_model_from_DAT
 
     subroutine init_hi_var()
         !use mesh
@@ -132,6 +134,7 @@ contains
         hi_beta = 3.
         !num_intgd = 8
         allocate(cnr_glb_mtx(num_dim,elem_type))
+        allocate(cnr_glb_nrml(num_dim,elem_type))
         if (elem_type.eq.8) n_pwr_g = 4
         !pwr_g = elem_type/2+(elem_type/9)*2 
         !model_readed_flag = 1
