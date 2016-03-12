@@ -130,6 +130,7 @@ contains
         num_node = NNODE
         num_elem = NELEM
         num_nrml = NNODED
+        water_depth = H
         elem_type = 8 !NCN(IELEM)!! to be changed
         hi_beta = 3.
         !num_intgd = 8

@@ -22,7 +22,7 @@ contains
                     !read (1,*) (fterm(j,i,k) k=1,4)
                     !FIXME
                     read(1001,*) (fterm(j,i,k),k=1,4),tmp
-                    print *,(fterm(j,i,k),k=1,4)
+                    !print *,(fterm(j,i,k),k=1,4)
                     !pause
 
           enddo;enddo
