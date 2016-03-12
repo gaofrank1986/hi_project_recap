@@ -161,8 +161,10 @@ subroutine dshape(ndim,node,c,ck,x,cosn,fjcb,gd)
 
     ! C is cnr_lcl_mtx,CK is cnr_glb_mtx
     ! X is local node
-    ! FJCB is ...........
-    ! GD is ........cross product.tangent vector on two local direction.
+    ! FJCB is .......determianat of jabobian matrix
+    ! GD is ........jacobian matrix      
+    !! cosn is normal vector to the plane 2d surface
+
     
     IMPLICIT REAL*8 (A-H,O-Z)
     DIMENSION X(*),CK(3,*),DN(2,NODE),GD(3,*),COSN(*),C(*),GR(3)
@@ -205,6 +207,7 @@ subroutine dshape(ndim,node,c,ck,x,cosn,fjcb,gd)
 
 30  DO 50 I=1,NDIM; DO 50 J=1,NBDM; GD(I,J)=0.; DO 50 ID=1,NODE
 50    GD(I,J)=GD(I,J)+DN(J,ID)*CK(I,ID) ! partial shape over partial ksi/eta
+                !jacobian matrix
 
     IF(NDIM.EQ.NBDM) THEN
      GOTO (51,52,53),NDIM

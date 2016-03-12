@@ -1,9 +1,10 @@
 
-    subroutine eval_singular_elem(passed_mtx,hiresult,str_result)
+    subroutine eval_singular_elem(passed_mtx,passed_nrml,hiresult,str_result)
         implicit none
         integer,parameter :: nf = 8 
         integer,parameter :: ndim = 3
-        real(8),intent(in) :: passed_mtx(ndim,nf)
+        real(8),intent(in) :: passed_mtx(ndim,nf),passed_nrml(ndim,nf)
+
         real(8),intent(out) :: hiresult(nf),str_result(nf)
         ! nf : num of kernel funcs
 
@@ -28,6 +29,7 @@
         integer :: debug_flag,debug_file_id
 
         cnr_glb_mtx = passed_mtx
+        cnr_glb_nrml = passed_nrml
 
         allocate(coef_g(0:n_pwr_g),coef_h(0:npw))
         allocate(gpl(iabs(ngl)),gwl(iabs(ngl)))

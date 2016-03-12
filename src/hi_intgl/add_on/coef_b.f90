@@ -53,6 +53,13 @@
             ! GCD gives the two tangent vector
             ! cosn gives a normalized normal vector
             ! dshape based on xi
+                
+            cosn = 0.
+            do i=1,nf
+                cosn=cosn+sf_iter(i)*cnr_glb_nrml(:,i)
+            enddo
+            cosn(:)=cosn(:)/norm2(cosn)
+
 
             if(rho.gt.1.0d-10)then    
                 drdx=ri/r
