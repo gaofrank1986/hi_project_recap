@@ -6,6 +6,8 @@ module proj_cnst
 !
      real(8),parameter :: ex(4) =  (/  1.0d0,  1.0d0, -1.0d0, -1.0d0/)
      real(8),parameter :: ey(4) =  (/  1.0d0, -1.0d0, -1.0d0,  1.0d0/)
+     real(8),parameter :: xiqsi(8) = (/-1.0d0, 0.0d0, 1.0d0, 1.0d0, 1.0d0, 0.0d0,-1.0d0,-1.0d0/)
+     real(8),parameter :: xiqet(8) = (/-1.0d0,-1.0d0,-1.0d0, 0.0d0, 1.0d0, 1.0d0, 1.0d0, 0.0d0/)    
 contains 
      subroutine print_rsn()
           implicit none

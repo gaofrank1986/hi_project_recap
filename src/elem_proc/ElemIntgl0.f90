@@ -27,7 +27,7 @@
           BVAL=0.0D0
 !
         DO 100   IS=1,   NSYS  
-          CALL NORM_INT0(IS,IELEM,NCNE,XP,YP,ZP,AVAL,BVAL,1)
+          CALL NORM_INT0(IS,IELEM,NCNE,XP,YP,ZP,AVAL,BVAL)
 100     CONTINUE
 !
         RETURN
@@ -118,16 +118,15 @@
 !C                      
 
 
-      subroutine norm_int0(is,ielem,ncne,xp,yp,zp,aval,bval,kind)
+      subroutine norm_int0(is,ielem,ncne,xp,yp,zp,aval,bval)
 
 
       use mvar_mod
       use green_funcs,only : GFunc,DGFunc,mirror
       use proj_cnst,only:ex,ey
-      !use mfunc_mod
       implicit   none  
 
-      integer is,ielem,n,nsamb,ncne,j,kind
+      integer is,ielem,n,nsamb,ncne,j
 
       real*8  xp,yp,zp
       real(8) :: p(3),p0(3),np(3)
@@ -135,6 +134,9 @@
 
       real*8  v1,v2
       real*8  aval(4,8),bval(4,8)
+      
+      aval=0.0d0
+      bval=0.0d0
       
       p0 = (/ex(is)*xp,ey(is)*yp,zp/)
       !if (present(debug).and.(debug)) print *,x0,y0,z0
@@ -147,31 +149,25 @@
       np = dsamb(ielem,n,1:3)
       v1 = GFunc(p,p0)+GFunc(p,mirror(h,p0))
       v2 = dot_product(np,DGFunc(p,p0)+DGFunc(p,mirror(h,p0)))
-      if (kind .eq.1) then
-            do  j=1,   ncne
-            bval(is,j)=bval(is,j)+v1*samb(ielem,n,j)
-            aval(is,j)=aval(is,j)+v2*samb(ielem,n,j)
-            enddo
-      else
-
-            do  j=1,   ncne
-            bval(is,j)=bval(is,j)+v2*samb(ielem,n,j)
-            aval(is,j)=aval(is,j)+v1*samb(ielem,n,j)
-            enddo
-      end if
+      do  j=1,   ncne
+      bval(is,j)=bval(is,j)+v1*samb(ielem,n,j)
+      aval(is,j)=aval(is,j)+v2*samb(ielem,n,j)
+      enddo
       100     continue
 
       end subroutine
+
 ! ===========================================================
 ! Integration on an element with source point
 !
       subroutine sing_int0(is,ielem,xp,yp,zp,aval,bval)
 
-            use mvar_mod
-            use trvar_mod
-      use green_funcs,only : GFunc,DGFunc,mirror
-      use proj_cnst,only:ex,ey
-            implicit   none  
+            
+        use trvar_mod
+        use mvar_mod
+        use green_funcs,only : GFunc,DGFunc,mirror
+        use proj_cnst,only:ex,ey
+        implicit   none  
 
       real(8) :: p(3),p0(3),np(3)
       integer is,ielem,n,j,ip       

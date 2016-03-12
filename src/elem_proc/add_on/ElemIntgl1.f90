@@ -100,63 +100,39 @@
 ! 
 ! ======================================================
 !                      
-        SUBROUTINE NORM_INT1(IS,IELEM,NCNE,XP,YP,ZP,AMATRIX,BMATRIX)
-        USE MVAR_MOD
-        use green_funcs,only : Dy3DGFunc,Dy3GFunc,mirror
-        use proj_cnst,only:ex,ey
-        IMPLICIT   NONE  
- 
-        integer is,ielem,n,nsamb,ncne,j,ip
-        real*8  xp,yp,zp
-        real*8  bmatrix(4,8),amatrix(4,8)
+     SUBROUTINE NORM_INT1(IS,IELEM,NCNE,XP,YP,ZP,AMATRIX,BMATRIX)
+      USE MVAR_MOD
+      use green_funcs,only : Dy3DGFunc,Dy3GFunc,mirror
+      use proj_cnst,only:ex,ey
+      IMPLICIT   NONE  
+      
+      integer is,ielem,n,nsamb,ncne,j,ip
+      real*8  xp,yp,zp
+      real*8  bmatrix(4,8),amatrix(4,8)
       real(8) :: p(3),p0(3),np(3)
       real*8  v1,v2
-        
-        NSAMB=16
-        IF(NCNE.EQ.6)   NSAMB=4
 
+      NSAMB=16
+      IF(NCNE.EQ.6)   NSAMB=4
+      
       p0 = (/ex(is)*xp,ey(is)*yp,zp/)
+      
+      
+      DO 100    N=1,   NSAMB     
 
-
-        DO 100    N=1,   NSAMB     
-
-    p =sambxy(ielem,n,1:3)
+          p =sambxy(ielem,n,1:3)
       np = dsamb(ielem,n,1:3)
       v1 = Dy3GFunc(p,p0)+Dy3GFunc(p,mirror(h,p0))
       v2 = dot_product(np,Dy3DGFunc(p,p0)+Dy3DGFunc(p,mirror(h,p0)))
-      !if (kind .eq.1) then
-            do  j=1,   ncne
-            bmatrix(is,j)=bmatrix(is,j)+v1*samb(ielem,n,j)
-            amatrix(is,j)=amatrix(is,j)+v2*samb(ielem,n,j)
-            enddo
-      !else
+      do  j=1,   ncne
+      bmatrix(is,j)=bmatrix(is,j)+v1*samb(ielem,n,j)
+      amatrix(is,j)=amatrix(is,j)+v2*samb(ielem,n,j)
+      enddo
 
-            !do  j=1,   ncne
-            !bmatrix(is,j)=bmatrix(is,j)+v2*samb(ielem,n,j)
-            !amatrix(is,j)=amatrix(is,j)+v1*samb(ielem,n,j)
-            !enddo
-      !end if
-
-         !X =SAMBXY(IELEM,N,1)! guassian point info
-         !Y =SAMBXY(IELEM,N,2)
-         !Z =SAMBXY(IELEM,N,3)
-       !
-        !CALL DTGRN(H,X,X0,Y,Y0,Z,Z0,GXF) 
-!!                      
-          !NX=EX(IS)*DSAMB(IELEM,N,1)
-          !NY=EY(IS)*DSAMB(IELEM,N,2)
-          !NZ=          DSAMB(IELEM,N,3)
-          !DGN=GXF(2)*Nx+GXF(3)*Ny+GXF(4)*Nz
-                         !
-        !DO   J=1,   NCNE
-          !BMATRIX(IS,J)=BMATRIX(IS,J)+GXF(1)*SAMB(IELEM,N,J)!line integration
-          !AMATRIX(IS,J)=AMATRIX(IS,J)+DGN*SAMB(IELEM,N,J)!line integration
-        !ENDDO
-
-100     CONTINUE
-!
-        RETURN
-        END
+      100     CONTINUE
+      !
+      RETURN
+      END
 !
 !
 ! *************************************************************
@@ -171,6 +147,7 @@
         use trvar_mod    
         use mfunc_mod
         use hi_intg
+        use proj_cnst,only :ex,ey,xiqsi,xiqet
 
         implicit none
 
@@ -184,22 +161,9 @@
         real(8) :: cnr_glb_mtx(3,8)
 
         real(8) :: result0(8),result1(8)
-        real(8) ::  x0,y0,z0,si,eta
-
-        real(8) ::  xiqsi(8),xiqet(8)
-        real(8) ::  ex(4),ey(4)
+        real(8) ::  si,eta,p0(3)
 
 
-        DATA EX/  1.0d0,  1.0d0, -1.0d0, -1.0d0/                                                  
-        DATA EY/  1.0d0, -1.0d0, -1.0d0,  1.0d0/
-
-        ! ** XIQSI AND XIQET: NODE COORDINATES FOR QUADRILATERAL ELEMENTS
-        data xiqsi/-1.0d0, 0.0d0, 1.0d0, 1.0d0, 1.0d0, 0.0d0,-1.0d0,-1.0d0/
-        data xiqet/-1.0d0,-1.0d0,-1.0d0, 0.0d0, 1.0d0, 1.0d0, 1.0d0, 0.0d0/    
-
-
-        inode=ncon(ielem,nodj) ! corresponding node id
-        inodd=ncond(ielem,nodj)!                 normal id
 
         if(ncn(ielem).eq.8)  then 
 
@@ -211,10 +175,8 @@
             !eta=xitet(nodj)
         endif
 
-        ! get src point in sysmetric mesh
-        x0=ex(is)*xp
-        y0=ey(is)*yp      
-        z0=zp
+
+        p0 = (/ex(is)*xp,ey(is)*yp,zp/)
 
         ! if mesh is created by using symmetrical information
         ! basically, we get the same local layout
@@ -242,12 +204,49 @@
 
         call preset_src(si,eta,xyz(1:3,ncon(ielem,nodj)),origin_offset)
         call eval_singular_elem(cnr_glb_mtx,result0,result1)
+       
+        call norm_sing2(is,ielem,8,xp,yp,zp,amatrix,bmatrix) 
 
-        do j=1, ncn(ielem)
-            amatrix(is,j) = result0(j)
-            bmatrix(is,j) = result1(j)
-        end do
+            amatrix(is,:) = amatrix(is,:)+result0(:)
+            bmatrix(is,:) = bmatrix(is,:)+result1(:)
 
 
     end subroutine 
-               
+
+
+
+
+
+    SUBROUTINE NORM_sing2(IS,IELEM,NCNE,XP,YP,ZP,AMATRIX,BMATRIX)
+     USE MVAR_MOD
+     use green_funcs,only : Dy3DGFunc,Dy3GFunc,mirror
+     use proj_cnst,only:ex,ey
+     IMPLICIT   NONE  
+     
+     integer is,ielem,n,nsamb,ncne,j,ip,kind
+     real*8  xp,yp,zp
+     real*8  bmatrix(4,8),amatrix(4,8)
+     real(8) :: p(3),p0(3),np(3)
+     real*8  v1,v2
+
+     NSAMB=16
+     IF(NCNE.EQ.6)   NSAMB=4
+     
+     p0 = (/ex(is)*xp,ey(is)*yp,zp/)
+     
+     
+     DO 100    N=1,   NSAMB     
+
+         p =sambxy(ielem,n,1:3)
+     np = dsamb(ielem,n,1:3)
+     v1 = Dy3GFunc(p,mirror(h,p0))
+     v2 = dot_product(np,Dy3DGFunc(p,mirror(h,p0)))
+     do  j=1,   ncne
+     bmatrix(is,j)=bmatrix(is,j)+v2*samb(ielem,n,j)
+     amatrix(is,j)=amatrix(is,j)+v1*samb(ielem,n,j)
+     enddo
+
+     100     CONTINUE
+     !
+     RETURN
+        END
