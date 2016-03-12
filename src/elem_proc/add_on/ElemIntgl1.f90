@@ -130,7 +130,7 @@
          Y =SAMBXY(IELEM,N,2)
          Z =SAMBXY(IELEM,N,3)
        
-        CALL DTGRN(H,X,X0,Y,Y0,Z,Z0,GXF) 
+        CALL DTGRN0(H,X,X0,Y,Y0,Z,Z0,GXF) 
 !                      
           NX=EX(IS)*DSAMB(IELEM,N,1)
           NY=EY(IS)*DSAMB(IELEM,N,2)
@@ -275,7 +275,7 @@
         cnr_glb_mtx(:,7) = xyz(:,ncon(ielem,6))
         cnr_glb_mtx(:,8) = xyz(:,ncon(ielem,8))
 
-      cnr_glb_nrml(:,1) = dxyz(:,ncond(ielem,1))
+      cnr_glb_nrml(:,1) = dxyz(:,ncond(ielem,1))
         cnr_glb_nrml(:,2) = dxyz(:,ncond(ielem,3))
         cnr_glb_nrml(:,3) = dxyz(:,ncond(ielem,5))
         cnr_glb_nrml(:,4) = dxyz(:,ncond(ielem,7))
