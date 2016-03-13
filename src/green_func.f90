@@ -1,3 +1,9 @@
+!> @file
+!! The green_funcs module provides several routines to calculate Green Functions 
+!! and their derivatives.
+!<
+!> @defgroup GreenFunc Lib
+!!
 module green_funcs 
       implicit none
       real(8),parameter :: pi = 3.14159265358979

@@ -158,7 +158,7 @@
         integer ::inode,inodd,j,pwr_g
 
         real(8) :: src_lcl(2),src_glb(3),origin_offset(3)
-        real(8) :: cnr_glb_mtx(3,8)
+        real(8) :: cnr_glb_mtx(3,8),cnr_glb_nrml(3,8)
 
         real(8) :: result0(8),result1(8)
         real(8) ::  si,eta,p0(3)
@@ -202,6 +202,15 @@
         cnr_glb_mtx(:,8) = xyz(:,ncon(ielem,8))
 
 
+        cnr_glb_nrml(:,1) = dxyz(:,ncond(ielem,1))
+        cnr_glb_nrml(:,2) = dxyz(:,ncond(ielem,3))
+        cnr_glb_nrml(:,3) = dxyz(:,ncond(ielem,5))
+        cnr_glb_nrml(:,4) = dxyz(:,ncond(ielem,7))
+        cnr_glb_nrml(:,5) = dxyz(:,ncond(ielem,2))
+        cnr_glb_nrml(:,6) = dxyz(:,ncond(ielem,4))
+        cnr_glb_nrml(:,7) = dxyz(:,ncond(ielem,6))
+        cnr_glb_nrml(:,8) = dxyz(:,ncond(ielem,8))
+        
         call preset_src(si,eta,xyz(1:3,ncon(ielem,nodj)),origin_offset)
         call eval_singular_elem(cnr_glb_mtx,result0,result1)
        
