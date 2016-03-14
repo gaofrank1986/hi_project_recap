@@ -31,7 +31,7 @@
  
          TimeRK=TIME 
 !       
-        if ((timerk)<1e-6) then
+        if (timerk - 0*tstep <1e-5) then
           rampf=1
           do inode =1,nnf
                   xp = xyz(1,inode)
@@ -127,6 +127,9 @@
  
        enddo 
        enddo 
+       bkn_o=bkn
+       et_o=et
+
        print *,"dh"
        write(*,5001) dh(1:4,1,1)
        write(*,5001) dh_comp(1:4)

@@ -48,16 +48,16 @@
       cmat(:,:)=0.0
       dpoxyz_save = 0.0
       !bkn=0
-      !do inode =1,nnf
-          !xp=ex(ip)*xyz(1,inode)
-          !yp=ey(ip)*xyz(2,inode)
-          !zp=       xyz(3,inode)
+      do inode =1,nnf
+          xp=ex(ip)*xyz(1,inode)
+          yp=ey(ip)*xyz(2,inode)
+          zp=       xyz(3,inode)
 
           !bkn(inode,1) =poxy(xp,yp,zp) 
-          !call dinp(xp,yp,zp,dpox,dpoy,dpoz)
-          !dpoxyz_save(1,1,inode) = dpox 
-          !dpoxyz_save(2,1,inode) = dpoy 
-      !end do
+          call dinp(xp,yp,zp,dpox,dpoy,dpoz)
+          dpoxyz_save(1,1,inode) = dpox 
+          dpoxyz_save(2,1,inode) = dpoy 
+      end do
 
         ! assign boundary value has potentials--------
         ! bkn is the potential from time stepping----on surface node
@@ -67,12 +67,12 @@
                   cmat(inode,is)=cmat(inode,is)+rsn(is,ip)*bkn(inode,ip)
             enddo;enddo
             
-            do j=1,ncn(nodele(inode,1))
-                 tmp(j) = bkn(ncon(nodele(inode,1),j),1)!get surface value
-            end do
-            call eval_gradient(inode,tmp,tmp2)
-            dpoxyz_save(1,1,inode) = tmp2(1,1)
-            dpoxyz_save(2,1,inode) = tmp2(2,1)
+            !do j=1,ncn(nodele(inode,1))
+                 !tmp(j) = bkn(ncon(nodele(inode,1),j),1)!get surface value
+            !end do
+            !call eval_gradient(inode,tmp,tmp2)
+            !dpoxyz_save(1,1,inode) = tmp2(1,1)
+            !dpoxyz_save(2,1,inode) = tmp2(2,1)
         
  
         20   continue

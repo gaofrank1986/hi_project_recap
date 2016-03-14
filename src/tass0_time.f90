@@ -93,7 +93,7 @@
         pause
         print *,"finished fterm output"
         do  500   inode=1,  nnf
-                print *,inode
+                !print *,inode
             xp=xyz(1,inode)
             yp=xyz(2,inode)
             zp=xyz(3,inode)
@@ -108,13 +108,14 @@
             !  Integration on the free surface
                 
             do   ielem=1,  nelemf
+                !print *,ielem
                 call comp_link(ielem,inode,ii)
                 if (ii .eq. 0)   then! if src node not on element 
-                    call norm_ele1(ielem,xp,yp,zp,amatrix,bmatrix)
+                    call norm_elem_wrapper(ielem,xp,yp,zp,amatrix,bmatrix,2)
 
                 else if (ii .ne. 0)   then 
-                    call sing_ele1(inode,ielem,nodqua(inode),xp,yp,zp,&
-                        &                   amatrix,bmatrix)
+                    call sing_elem_wrapper(inode,ielem,nodqua(inode),xp,yp,zp,&
+                        &                   amatrix,bmatrix,2)
                 end if 
                 call common_block(0,0,ielem,inode,amatrix,bmatrix)!,fterm_coef)
             end do
@@ -123,10 +124,10 @@
 
                 call comp_link(ielem,inode,ii)
                 if (ii .eq. 0)   then 
-                    call norm_ele1(ielem,xp,yp,zp,amatrix,bmatrix)
+                    call norm_elem_wrapper(ielem,xp,yp,zp,amatrix,bmatrix,2)
                 else if (ii .ne. 0)   then 
-                    call sing_ele1(inode,ielem,nodqua(inode),xp,yp,zp,&
-                     &                   amatrix,bmatrix)
+                    call sing_elem_wrapper(inode,ielem,nodqua(inode),xp,yp,zp,&
+                     &                   amatrix,bmatrix,2)
                 end if
                 call common_block(1,0,ielem,inode,amatrix,bmatrix)
 
@@ -140,7 +141,7 @@
             end do
 
             !TODO only works for ip=1
-            write(404,5001) xp,yp,fterm(inode,1,1:4),angle(inode)
+            write(404,'(f14.8)') xp,yp,fterm(inode,1,1:4),angle(inode)
             write(405,5000) inode,fra3(inode,1),frc31(inode,1),frc32(inode,1)
             5000 format(I6,3f14.6)
             5001 format(7f14.8)
@@ -170,7 +171,7 @@
             do   ielem=1,  nelemf
 
                 ii=0   
-                call norm_ele0(ielem,xp,yp,zp,amatrix,bmatrix)
+                call norm_elem_wrapper(ielem,xp,yp,zp,amatrix,bmatrix,1)
                 call common_block(0,1,ielem,inode,amatrix,bmatrix)
 
             end do
@@ -179,10 +180,10 @@
 
                 call comp_link(ielem,inode,ii)!
                 if (ii .eq. 0)   then 
-                    call norm_ele0(ielem,xp,yp,zp,amatrix,bmatrix)
+                    call norm_elem_wrapper(ielem,xp,yp,zp,amatrix,bmatrix,1)
                 else if (ii .ne. 0)   then 
-                    call sing_ele0(inode,ielem,nodqua(inode),xp,yp,zp,&
-                     &                   amatrix,bmatrix)
+                    call sing_elem_wrapper(inode,ielem,nodqua(inode),xp,yp,zp,&
+                     &                   amatrix,bmatrix,1)
                 end if
 
                 call common_block(1,1,ielem,inode,amatrix,bmatrix)
@@ -221,10 +222,11 @@
 
         !do i = 1,nnode
             !do j = 1,nnode
-                !write(400,*) amata(i,j,1:nsys)
+                !write(600,*) amata(i,j,1:nsys)
         !end do;end do
+        !stop
 
-  !      do i = 1,nnode
+        !do i = 1,nnode
                 !write(401,*) amata(i,i,1:nsys)
         !end do
         write(*,*) "Begin inversing LHS matrix............"

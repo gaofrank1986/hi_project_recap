@@ -42,7 +42,7 @@
         if(ncne.eq.6)   nsamb=4
 
         do n=1,   nsamb     
-
+            !todo consider h<0,namely,infinite depth
             p =sambxy(ielem,n,1:3)
             np = dsamb(ielem,n,1:3)
             if (hi.eq.1) then
