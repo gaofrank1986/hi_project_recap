@@ -66,6 +66,9 @@
                 gm=dsqrt(dot_product(a,a))
                 drdx=a/gm                 ! eq.(3-6-74)
             endif 
+            if ((step_n.eq.0).and.(mark.eq.0)) then
+            write (9001,'(3f14.8)') cosn
+            end if
 
             ! dr/dx is defined above
             drdn = dot_product(cosn,drdx)  !!!!  notice dr/dn is defined  here

@@ -18,6 +18,7 @@ module hi_intg
 
     
     integer,private :: model_readed_flag = 0 ! 0 for not readed
+    integer,private :: mark=0
 
     integer,private,parameter :: NPW = 4
     real(8),private,allocatable :: value_list(:,:)
@@ -139,9 +140,9 @@ contains
         print *,"------------Finished initialization-------------"
     end subroutine 
 
-    subroutine swap_result(result)
+    subroutine swap_result(res)
         implicit none
-        real(8) :: result(*),tmp,tmp1
+        real(8) :: res(*),tmp,tmp1
 
                 !       4----7----3
                 !       |         |
@@ -155,15 +156,15 @@ contains
 
                 !         1     2     3
 
-        tmp = result(2)
-        result(2) = result(5)
-        tmp1 = result(3)
-        result(3) = tmp
-        tmp = result(4)
-        result(4) = result(6)
-        result(5) = tmp1
-        result(6) = result(7)
-        result(7) = tmp
+        tmp = res(2)
+        res(2) = res(5)
+        tmp1 = res(3)
+        res(3) = tmp
+        tmp = res(4)
+        res(4) = res(6)
+        res(5) = tmp1
+        res(6) = res(7)
+        res(7) = tmp
     end subroutine
 
 
