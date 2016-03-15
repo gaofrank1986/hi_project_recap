@@ -21,7 +21,7 @@
         real(8) :: x(ndim),tmp
         integer :: id
       
-        tmp =(3.*DRDX(3)*DRDN-COSN(3))/(4.*hi_PI)    ! GUIG 4.2
+        tmp =-(3.*DRDX(3)*DRDN-COSN(3))/(4.*hi_PI)    ! GUIG 4.2
         !attention neg sign removed in tmp to match teng's result
         do id =1,8
             FB(id) = tmp*shap(id)
