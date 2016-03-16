@@ -1,3 +1,9 @@
+    !> @file
+    !!
+    !!
+    !<
+    !> todo  find where the sign is missing Mar.16.2016
+    !
     subroutine guig_sing(is,ielem,nodj,xp,yp,zp,valdg)
         use mvar_mod
         use proj_cnst,only:ex,ey,xiqet,xiqsi,cross_product
@@ -15,44 +21,43 @@
         real(8) :: sf(8),dsf(2,8),ddsf(3,8)
         real(8) :: jk0(3,3),n0(3),xj(2,3),xxj(3,3)
         real(8) :: v1,xjp(2,3),p(3),np(3)
-        real(8) :: total(8),fitg,si,eta
+        real(8) :: fitg,si,eta
         real(8) :: Xiq(8),Wiq(8),rho1,csst,snst,p0(3)
         real(8) :: det,f1,f2,param(2),f
         
         integer :: nsamb,loop1,loop2,j,i
 
-        DATA XIQ/ 0.960289856497536D+00, 0.796666477413626D+00, &
-            0.525532409916329D+00, 0.183434642495650D+00, &
-            -0.183434642495650D+00,-0.525532409916329D+00, &
-            -0.796666477413626D+00,-0.960289856497536D+00/
+        data xiq/ 0.960289856497536d+00, 0.796666477413626d+00, &
+            0.525532409916329d+00, 0.183434642495650d+00, &
+            -0.183434642495650d+00,-0.525532409916329d+00, &
+            -0.796666477413626d+00,-0.960289856497536d+00/
 
-        DATA WIQ/ 0.101228536290376D+00, 0.222381034453374D+00, &
-            0.313706645877887D+00, 0.362683783378362D+00, &
-            0.362683783378362D+00, 0.313706645877887D+00, &
-            0.222381034453374D+00, 0.101228536290376D+00/     
-        !nrml_id = ncond(ielem,nodj)
-
-        do i =1,ncn(ielem)
-            nodes(i,:)=xyz(:,ncon(ielem,i))
-            nrmls(i,:)=dxyz(:,ncond(ielem,i))
-        end do
-        
-   
+        data wiq/ 0.101228536290376d+00, 0.222381034453374d+00, &
+            0.313706645877887d+00, 0.362683783378362d+00, &
+            0.362683783378362d+00, 0.313706645877887d+00, &
+            0.222381034453374d+00, 0.101228536290376d+00/     
 
         si0=xiqsi(nodj)
         eta0=xiqet(nodj)
         p0=(/xp,yp,zp/)
+        np=(/0.0d0,0.0d0,1.d0/)
+        !Tesing the impact of surface normal vector ,here set to [0,0,-1]
+
+        do i =1,ncn(ielem)
+            nodes(i,:)=xyz(:,ncon(ielem,i))
+            nrmls(i,:)=dxyz(:,ncond(ielem,i))
+            !print *,i,dot_product(Dy3DGFunc(nodes(i,:),p0),np)
+        end do
+
+   
+
         call spfunc8_1(si0,eta0,sf0,dsf0,ddsf0)
-        xj = matmul(dsf0,nodes)
+        xj = matmul(dsf0,nodes)  !@vars first derivative $\dfrac{\x_i}{\ksi}  \dfrac{\x_i}{\ksi}$
         xxj = matmul(ddsf0,nodes)
 
         jk0(1,:)=cross_product(xj(1,:),xj(2,:))
         jk0(2,:) = cross_product(xxj(1,:),xj(2,:))+cross_product(xj(1,:),xxj(3,:))
         jk0(3,:) = cross_product(xxj(3,:),xj(2,:))+cross_product(xj(1,:),xxj(2,:))
-  !      do i=1,3
-        !write(*,'(3f14.8)') jk0(i,:) 
-        !enddo
-        !pause
 
 
         do j=1,ncn(ielem)
@@ -60,9 +65,9 @@
             call line_part(nodj,ncn(ielem),si0,eta0,xj,xxj,jk0,n0,fitg)!jk0,jk1c,jk1s,n0,n1c,n1s,xj,xxj)
             valdg(j)=fitg
         end do
-        write (*,'(8f14.8)') valdg
+    !    write (*,'(8f14.8)') valdg
         
-        pause
+        !pause
         nsamb=0
 
         do loop1=1,8
@@ -79,37 +84,42 @@
                 call spfunc8_1(si,eta,sf,dsf,ddsf)
 
                 p=matmul(sf,nodes)
-                np=matmul(sf,nrmls)
+                !np=matmul(sf,nrmls)
                 v1=dot_product(np,Dy3DGFunc(p,p0))
 
                 xjp = matmul(dsf,nodes)
                 det = norm2(cross_product(xjp(1,:),xjp(2,:)))
 
-                !jkt1:3) = jk0(1:3)+rho*(jk1c(1:3)*csst+jk1s(1:3)*snst)
                 do j =1,ncn(ielem) ! 8
-                    !n0=sf0(j)
-                    !n1c=dsf0(1,j)
-                    !n1s=dsf0(2,j)
+
                     n0=(/sf0(j),dsf0(1,j),dsf0(2,j)/)
 
                     call comp_coef(csst,snst,xj,xxj,jk0,n0,f1,f2,param)
 
 
                     f=f2/rho1**2+f1/rho1
-                    !fixme
+                    !fixme sign reversed here -v1 !!!!!!!
+                    valdg(j)=valdg(j)+(-v1*det*sf(j)-f/rho1)*wiq(loop1)*wiq(loop2) !/rho to change back to xi coordinate
+                    !valdg(j)=valdg(j)+(-f/rho1)*wiq(loop1)*wiq(loop2) !/rho to change back to xi coordinate
                     !valdg(j)=(v1*det*sf(j))*wiq(loop1)*wiq(loop2) !/rho to change back to xi coordinate
-                    !valdg(j)=valdg(j)+(v1*det*sf(j)-f/rho1)*wiq(loop1)*wiq(loop2) !/rho to change back to xi coordinate
-                    valdg(j)=(v1*det*sf(j))*wiq(loop1)*wiq(loop2) !/rho to change back to xi coordinate
                 end do
             end do
         end do
-
-        write (*,'(8f14.8)') valdg
-        pause
-        !valdg=total
+        !fixme sign reversed here
+        valdg=-valdg
+     !   write (*,'(8f14.8)') valdg
+        !pause
 
         end subroutine
 
+        !> Compute the line integral parts of the hyper-singular integral
+        !!
+        !!
+        !   @param nodj position of node in elem
+        !   @param ncne elem type
+        !   @param si0,eta0 src node local positon
+        !   @param jk0,n0
+        !   @return
         subroutine line_part(nodj,ncne,si0,eta0,xj,xxj,jk0,n0,fitg) 
 
             use proj_cnst,only: new8
@@ -166,23 +176,14 @@
                     csst=(si-si0)/rho1
                     snst=(eta-eta0)/rho1
                     
-
-                 !   print *,si,eta,si0,eta0
-                    !print *,rho1
-                    !print *,csst,snst
-
                     call comp_coef(csst,snst,xj,xxj,jk0,n0,f1,f2,param)
-                   ! print *,"checking"
-                    !print *,f1,f2
-                    !print *, param
-                    !pause
+                    
                     gammas=param(1)
                     betas=param(2)
 
                     fitg2=fitg2-f2*(gammas/betas**2+1.0/rho1)*wiq1(i)
                     fitg1=fitg1+f1*dlog(rho1/betas)*wiq1(i)
-                    !sum1=sum1+ f1*wiq1(i)
-                    !sum2=sum2+f2/betas*wiq1(i)
+
                 end do
             case (2,4,6,8)!180 deg
                 do i =1,25
@@ -205,15 +206,14 @@
             end select
             fitg =fitg1+fitg2
 
-            !!!no negtive sign
         end subroutine
 
-        !   @param csst
-        !   @param snst
-        !   @param xj
-        !   @param xxj
-        !   @param jk0
-        !   @param n0
+        !>  Compute f1,f2 and gamma,beta for integration formula
+        !   @param csst,snst  cosine and sine value
+        !   @param xj  first derivative of shape functions
+        !   @param xxj second derivate of shape functions
+        !   @param jk0  jacobian determinant 0 and first derivative
+        !   @param n0   shape function 0 and first derivative
         !   @return f1,f2
         !   @return param
         subroutine comp_coef(csst,snst,xj,xxj,jk0,n0,f1,f2,param) 
@@ -250,9 +250,6 @@
 
             f1=-(as_2*a30+as_3*a31)/pi4
             f2=-(as_3*a30)/pi4
-
-            !gammas = -dot_product(a,b)/ast**4
-            !betas=1.0d0/ast
 
             param(1) = -dot_product(a,b)/ast**4
             param(2) = 1.0d0/ast
