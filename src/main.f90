@@ -61,7 +61,7 @@ program hi_project
     
 
     call get_gaussian_data(xc,yc,zc)                  
-    call init_hi_var() 
+    !call init_hi_var() 
     call get_free_term()
 
     !call tassb0_freq

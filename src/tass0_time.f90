@@ -105,8 +105,8 @@
             call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,&
              &                        h,xyz,dxyze,s_angle)    
             angle(inode)=1.0d0- s_angle
-            amata(inode,inode,1:nsys)= 1.0d0-s_angle!angle(inode)
-            !cmata(inode,inode,1:nsys)= -1.0d0+s_angle!angle(inode)
+            !amata(inode,inode,1:nsys)= 1.0d0-s_angle!angle(inode)
+            cmata(inode,inode,1:nsys)= -1.0d0+s_angle!angle(inode)
             !  ---------------------------
             !  Integration on the free surface
                 
@@ -116,12 +116,12 @@
                 
                 call comp_link(ielem,inode,ii)
                 if (ii .eq. 0)   then! if src node not on element 
-                    call norm_elem_wrapper(inode,ielem,xp,yp,zp,amatrix,bmatrix,2)
+                    call norm_elem_wrapper(inode,ielem,xp,yp,zp,amatrix,bmatrix,1)
 
                 else if (ii .ne. 0)   then 
                     !write(9001,*) "ielem=",ielem
                     call sing_elem_wrapper(inode,ielem,nodqua(inode),xp,yp,zp,&
-                        &                   amatrix,bmatrix,2)
+                        &                   amatrix,bmatrix,1)
                 end if 
                 call common_block(0,0,ielem,inode,amatrix,bmatrix)!,fterm_coef)
                 !print *,"finished",ielem
@@ -134,11 +134,11 @@
 
                 call comp_link(ielem,inode,ii)
                 if (ii .eq. 0)   then 
-                    call norm_elem_wrapper(inode,ielem,xp,yp,zp,amatrix,bmatrix,2)
+                    call norm_elem_wrapper(inode,ielem,xp,yp,zp,amatrix,bmatrix,1)
                 else if (ii .ne. 0)   then 
                      write(9001,*) "ielem=",ielem
                     call sing_elem_wrapper(inode,ielem,nodqua(inode),xp,yp,zp,&
-                     &                   amatrix,bmatrix,2)
+                     &                   amatrix,bmatrix,1)
                 end if
                 call common_block(1,0,ielem,inode,amatrix,bmatrix)
 

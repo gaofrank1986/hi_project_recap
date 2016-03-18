@@ -147,7 +147,7 @@
             np = dsamb(ielem,n,1:3)
             if (hi.eq.1) then
                 v1 = GFunc(p,p0)!+GFunc(p,mirror(h,p0))
-                v2 = dot_product(np,DGFunc(p,p0)!+DGFunc(p,mirror(h,p0)))
+                v2 = dot_product(np,DGFunc(p,p0))!+DGFunc(p,mirror(h,p0)))
             elseif (hi.eq.2) then
                 ! add src point at mirror position about bottom plane
                 !v1 = Dy3GFunc(p,p0)+Dy3GFunc(p,mirror(h,p0))
@@ -155,7 +155,7 @@
                 
                 ! add sink point at mirror positon about bottom plane
                 v1 = Dy3GFunc(p,p0)!-Dy3GFunc(p,mirror(h,p0))
-                v2 = dot_product(np,Dy3DGFunc(p,p0)!-Dy3DGFunc(p,mirror(h,p0)))
+                v2 = dot_product(np,Dy3DGFunc(p,p0))!-Dy3DGFunc(p,mirror(h,p0)))
 
             elseif (hi.eq.7) then
 
@@ -222,8 +222,8 @@
             p =xynod(1:3,n)
             np = dxynod(1:3,n)
 
-            v1 = gfunc(p,p0)+gfunc(p,mirror(h,p0))
-            v2 = dot_product(np,dgfunc(p,p0)+dgfunc(p,mirror(h,p0)))
+            v1 = gfunc(p,p0)!+gfunc(p,mirror(h,p0))
+            v2 = dot_product(np,dgfunc(p,p0))!+dgfunc(p,mirror(h,p0)))
 
             do j=1, ncn(ielem)
                 aval(j)=aval(j)+v2*samnod(n,j)
