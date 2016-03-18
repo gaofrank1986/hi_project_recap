@@ -472,6 +472,17 @@
 !	
 !
 !       WRITE(10, *) ' Inside DOMAINFAS   MCEL=',MCELE
+          ncont=0
+          nside=0
+          !block
+                  !integer ::flag
+          !flag=1
+          !if (any(shape(dxyzn).ne.(/100,3/))) flag=0
+          !if (any(shape(txyzn).ne.(/100,2,3/))) flag=0
+          !if (any(shape(ncont).ne.(/100/))) flag=0
+          !if (any(shape(nside).ne.(/100,2/))) flag=0
+          !if (flag.eq.0) print *,"shape info doesn't conform"
+          !end block
        
 ! 从第一个单元开始
 !
@@ -514,6 +525,7 @@
 
 	     NA=NA+1
 !
+          !print *,"txyzn",j,k,"->txyzn",ncont(i-1),nside(i-1,2)
 	     DN(NA)=SQRT((TXYZN(J,K,1)-TXYZN(NCONT(I-1),NSIDE(I-1,2),1))**2+ 
      1         (TXYZN(J,K,2)-TXYZN(NCONT(I-1),NSIDE(I-1,2),2))**2+  
      2	         (TXYZN(J,K,3)-TXYZN(NCONT(I-1),NSIDE(I-1,2),3))**2 )	  

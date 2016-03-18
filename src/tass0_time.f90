@@ -24,23 +24,23 @@
     end subroutine 
 
     subroutine tassb0
-        use mvar_mod
-        use pvar_mod
-                use body_property
-                use free_term,only:fterm,output_fterms
-                use mfunc_mod
-                use sebsm_mod
+            use mvar_mod
+            use pvar_mod
+            use body_property
+            use free_term,only:fterm,output_fterms
+            use mfunc_mod
+            !use sebsm_mod
 
-                implicit   none  
-                integer  inode,ielem,j,jnode,ind,indd,ip
-                integer ::    i,ii,is,l
-                real(8)  xp,yp,zp,dpox,dpoy,dpoz,phi2
-                real(8)  rsn(4,4)
-                real(8)  bmatrix(4,8),amatrix(4,8),bmat(4)
+            implicit   none  
+            integer  inode,ielem,j,jnode,ind,indd,ip
+            integer ::    i,ii,is,l
+            real(8)  xp,yp,zp,dpox,dpoy,dpoz,phi2
+            real(8)  rsn(4,4)
+            real(8)  bmatrix(4,8),amatrix(4,8),bmat(4)
 
-                real(8)  s_angle
-                !real(8) :: fterm_coef(0:3,4)
-                real(8) :: dsign
+            real(8)  s_angle
+            !real(8) :: fterm_coef(0:3,4)
+            real(8) :: dsign
 
                 DATA RSN /1.,  1.,  1.,  1., &
              &            1., -1.,  1., -1., &
@@ -104,7 +104,6 @@
             !fterm_coef = 0
             call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,&
              &                        h,xyz,dxyze,s_angle)    
-
             angle(inode)=1.0d0- s_angle
             amata(inode,inode,1:nsys)= 1.0d0-s_angle!angle(inode)
             !cmata(inode,inode,1:nsys)= -1.0d0+s_angle!angle(inode)
@@ -153,7 +152,7 @@
             end do
 
             !TODO only works for ip=1
-            write(404,'(f14.8)') xp,yp,fterm(inode,1,1:4),angle(inode)
+            write(404,'(7f14.8)') xp,yp,fterm(inode,1,1:4),angle(inode)
             write(405,5000) inode,fra3(inode,1),frc31(inode,1),frc32(inode,1)
             5000 format(I6,3f14.6)
             5001 format(7f14.8)
@@ -233,11 +232,11 @@
 !
         !write(102, *) '  =========== before rludcmp =============='
 
-        do i = 1,nnode
-            do j = 1,nnode
-                write(600,*) amata(i,j,1:nsys)
-        end do;end do
-        stop
+        !do i = 1,nnode
+            !do j = 1,nnode
+                !write(600,*) amata(i,j,1:nsys)
+        !end do;end do
+        !stop
 
         !do i = 1,nnode
                 !write(401,*) amata(i,i,1:nsys)

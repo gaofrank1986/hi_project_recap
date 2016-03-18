@@ -11,43 +11,42 @@
         real(8) :: p0(3),aval(4,8),bval(4,8),xp,yp,zp,tmp(8),tmp1(8)
         real(8) :: cd(3,8),xis(2,1)
 
-        xp=xyz(1,117)
-        yp=xyz(2,117)
-        zp=xyz(3,117)
-        ielem=401
-        !xis(:,1)=(/-1.0d0,-1.0d0/)
+        !xp=xyz(1,117)
+        !yp=xyz(2,117)
+        !zp=xyz(3,117)
+        !ielem=401
+        !!xis(:,1)=(/-1.0d0,-1.0d0/)
+        !!do i=1,8
+            !!cd(:,i) = xyz(1:3,ncon(ielem,i))
+        !!end do
+            !cd(:,1) = xyz(:,ncon(ielem,1))
+            !cd(:,2) = xyz(:,ncon(ielem,3))
+            !cd(:,3) = xyz(:,ncon(ielem,5))
+            !cd(:,4) = xyz(:,ncon(ielem,7))
+            !cd(:,5) = xyz(:,ncon(ielem,2))
+            !cd(:,6) = xyz(:,ncon(ielem,4))
+            !cd(:,7) = xyz(:,ncon(ielem,6))
+            !cd(:,8) = xyz(:,ncon(ielem,8))
+        !p0=(/xp,yp,zp/)
         !do i=1,8
-            !cd(:,i) = xyz(1:3,ncon(ielem,i))
+            !write(*,'(3f14.8)') cd(:,i)
         !end do
-            cd(:,1) = xyz(:,ncon(ielem,1))
-            cd(:,2) = xyz(:,ncon(ielem,3))
-            cd(:,3) = xyz(:,ncon(ielem,5))
-            cd(:,4) = xyz(:,ncon(ielem,7))
-            cd(:,5) = xyz(:,ncon(ielem,2))
-            cd(:,6) = xyz(:,ncon(ielem,4))
-            cd(:,7) = xyz(:,ncon(ielem,6))
-            cd(:,8) = xyz(:,ncon(ielem,8))
-        p0=(/xp,yp,zp/)
-        do i=1,8
-            write(*,'(3f14.8)') cd(:,i)
-        end do
-        print *,p0
-        sel=0
+        !print *,p0
+        !sel=0
 
        
         
         do is=1,nsys
-           !call gauss_int(is,ielem,ncn(ielem),xp,yp,zp,aval(is,:),bval(is,:),hi)
-           call gauss_int(is,ielem,ncn(ielem),xp,yp,zp,aval(is,:),bval(is,:),1)
-           call sieppema(2.0d0,cd,p0,tmp,xis,sel)
-           call swap_result(tmp)
+           call gauss_int(is,ielem,ncn(ielem),xp,yp,zp,aval(is,:),bval(is,:),hi)
+           !call gauss_int(is,ielem,ncn(ielem),xp,yp,zp,aval(is,:),bval(is,:),1)
+           !call sieppema(2.0d0,cd,p0,tmp,xis,sel)
+           !call swap_result(tmp)
            
            !call direct_eval(is,ielem,ncn(ielem),xp,yp,zp,tmp,tmp1,hi)
-           write (*,'(3i5,8f16.8)') inode,ielem,1,aval(is,:)
-           write (*,'(3i5,8f16.8)') inode,ielem,2,bval(is,:)
-           write (*,'(3i5,8f16.8)') inode,ielem,1,tmp
-           write (*,'(3i5,8f16.8)') inode,ielem,2,tmp1
-           stop
+           !write (*,'(3i5,8f16.8)') inode,ielem,1,aval(is,:)
+           !write (*,'(3i5,8f16.8)') inode,ielem,2,bval(is,:)
+           !write (*,'(3i5,8f16.8)') inode,ielem,1,tmp
+           !write (*,'(3i5,8f16.8)') inode,ielem,2,tmp1
        end do 
     end subroutine
 
@@ -79,7 +78,7 @@
         if(numqua.eq.0)       then
             do 100 is=1,  nsys
                 if(is.eq.1) then 
-                    !call sing_int(is,ielem,nodnum,xp,yp,zp,aval(is,:),bval(is,:),hi)
+                    call sing_int(is,ielem,nodnum,xp,yp,zp,aval(is,:),bval(is,:),hi)
                     !call direct_eval(is,ielem,ncn(ielem),xp,yp,zp,tmp,tmp1,hi)
 
                     !write (8000,'(3i5,8f16.8)') inode,ielem,1,aval(is,:)
@@ -147,11 +146,16 @@
             p =sambxy(ielem,n,1:3)
             np = dsamb(ielem,n,1:3)
             if (hi.eq.1) then
-                v1 = GFunc(p,p0)+GFunc(p,mirror(h,p0))
-                v2 = dot_product(np,DGFunc(p,p0)+DGFunc(p,mirror(h,p0)))
+                v1 = GFunc(p,p0)!+GFunc(p,mirror(h,p0))
+                v2 = dot_product(np,DGFunc(p,p0)!+DGFunc(p,mirror(h,p0)))
             elseif (hi.eq.2) then
-                v1 = Dy3GFunc(p,p0)+Dy3GFunc(p,mirror(h,p0))
-                v2 = dot_product(np,Dy3DGFunc(p,p0)+Dy3DGFunc(p,mirror(h,p0)))
+                ! add src point at mirror position about bottom plane
+                !v1 = Dy3GFunc(p,p0)+Dy3GFunc(p,mirror(h,p0))
+                !v2 = dot_product(np,Dy3DGFunc(p,p0)+Dy3DGFunc(p,mirror(h,p0)))
+                
+                ! add sink point at mirror positon about bottom plane
+                v1 = Dy3GFunc(p,p0)!-Dy3GFunc(p,mirror(h,p0))
+                v2 = dot_product(np,Dy3DGFunc(p,p0)!-Dy3DGFunc(p,mirror(h,p0)))
 
             elseif (hi.eq.7) then
 
@@ -163,8 +167,8 @@
                 v2 = 0.
             elseif (hi.eq.9) then
                 !second part of sing_int1
-                v2 = Dy3GFunc(p,mirror(h,p0))
-                v1 = dot_product(np,Dy3DGFunc(p,mirror(h,p0)))
+                v2 = -Dy3GFunc(p,mirror(h,p0))
+                v1 = dot_product(np,-Dy3DGFunc(p,mirror(h,p0)))
             end if
 
             do  j=1,   ncne
@@ -198,7 +202,7 @@
 
 
         use trvar_mod
-        use mvar_mod,only:ncne
+        use mvar_mod,only:ncn,h
         use green_funcs,only : GFunc,DGFunc,mirror
         use proj_cnst,only:ex,ey
         implicit   none  
@@ -338,8 +342,8 @@
             write(9000,*) "bmatrix="
             write(9000,'(f14.8)') bmatrix(:)
 
-            amatrix(:) = amatrix(:)+tmp(:)
-            bmatrix(:) = bmatrix(:)+tmp1(:)
+            !amatrix(:) = amatrix(:)+tmp(:)
+            !bmatrix(:) = bmatrix(:)+tmp1(:)
             !print *,"Exiting"
             !print *,"H=",h
             !stop

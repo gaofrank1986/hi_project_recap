@@ -21,7 +21,7 @@ C
 C  Incident wave 
 C
         FUNCTION ETI(X,Y)
-        USE MVAR_MOD
+        USE wave
         IMPLICIT  NONE
 !
 	  REAL*8,INTENT(IN):: X,Y
@@ -35,7 +35,7 @@ C
 
 
         FUNCTION dETI(X,Y)
-        USE MVAR_MOD
+        USE wave
         IMPLICIT  NONE
 !
 	  REAL*8,INTENT(IN):: X,Y
@@ -50,7 +50,7 @@ C
 C  Incident potential 
 C
         FUNCTION POXY(X,Y,Z)
-        USE MVAR_MOD
+        USE wave
         
         IMPLICIT  NONE
 !
@@ -94,7 +94,7 @@ C Time Derivatives of incident wave potential
 C   
 C
         FUNCTION DPOT(X,Y,Z)
-        USE MVAR_MOD
+        USE wave
         IMPLICIT  NONE
 !
 	  REAL*8,INTENT(IN):: X,Y,Z
@@ -125,7 +125,7 @@ C IORDER=1: for the first order potential
 C IORDER=2: for the second order potential 
 C
         SUBROUTINE  DINP(X,Y,Z,DPOX,DPOY,DPOZ)
-        USE MVAR_MOD
+        USE wave
 	  IMPLICIT    NONE
 	  
 	  REAL*8,INTENT(IN)::   X,Y,Z
@@ -435,7 +435,7 @@ C  Tri-pole transformation for removing singularity
 C
 
 	SUBROUTINE TRIPOL(NODNUM,NCNE,XYZT,DXYZT)
-	USE MVAR_MOD
+	USE wave
 
 	!USE PVAR_MOD
         use body_property
