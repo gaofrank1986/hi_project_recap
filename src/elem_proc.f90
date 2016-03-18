@@ -4,79 +4,118 @@
     !!
     subroutine norm_elem_wrapper(inode,ielem,xp,yp,zp,aval,bval,hi) 
         use mvar_mod
+        !use sieppem,only:sieppema
+        use hi_intg,only:swap_result
         implicit none
-        integer :: is,ielem,hi,inode
+        integer :: is,ielem,hi,inode,i,sel
         real(8) :: p0(3),aval(4,8),bval(4,8),xp,yp,zp,tmp(8),tmp1(8)
+        real(8) :: cd(3,8),xis(2,1)
+
+        xp=xyz(1,117)
+        yp=xyz(2,117)
+        zp=xyz(3,117)
+        ielem=401
+        !xis(:,1)=(/-1.0d0,-1.0d0/)
+        !do i=1,8
+            !cd(:,i) = xyz(1:3,ncon(ielem,i))
+        !end do
+            cd(:,1) = xyz(:,ncon(ielem,1))
+            cd(:,2) = xyz(:,ncon(ielem,3))
+            cd(:,3) = xyz(:,ncon(ielem,5))
+            cd(:,4) = xyz(:,ncon(ielem,7))
+            cd(:,5) = xyz(:,ncon(ielem,2))
+            cd(:,6) = xyz(:,ncon(ielem,4))
+            cd(:,7) = xyz(:,ncon(ielem,6))
+            cd(:,8) = xyz(:,ncon(ielem,8))
+        p0=(/xp,yp,zp/)
+        do i=1,8
+            write(*,'(3f14.8)') cd(:,i)
+        end do
+        print *,p0
+        sel=0
+
+       
         
         do is=1,nsys
            !call gauss_int(is,ielem,ncn(ielem),xp,yp,zp,aval(is,:),bval(is,:),hi)
+           call gauss_int(is,ielem,ncn(ielem),xp,yp,zp,aval(is,:),bval(is,:),1)
+           call sieppema(2.0d0,cd,p0,tmp,xis,sel)
+           call swap_result(tmp)
+           
            !call direct_eval(is,ielem,ncn(ielem),xp,yp,zp,tmp,tmp1,hi)
-
-           !write (9002,'(i5,a,8f14.8)') ielem,"   norma",aval(is,:)
-        !   !write (9002,'(i5,a,8f14.8)') ielem,"   normb",bval(is,:)
-           !write (*,'(3i5,8f14.8)') inode,ielem,1,aval(is,:)
-           !write (*,'(3i5,8f14.8)') inode,ielem,1,tmp
-           !write (*,'(3i5,8f14.8)') inode,ielem,2,bval(is,:)
-           !write (*,'(3i5,8f14.8)') inode,ielem,2,tmp1
-           !stop
-           !print *,ielem,'norm'
-           !write (*,'(f14.8)') aval(1,8)
-           !write (*,'(f14.8)') bval(1,8)
+           write (*,'(3i5,8f16.8)') inode,ielem,1,aval(is,:)
+           write (*,'(3i5,8f16.8)') inode,ielem,2,bval(is,:)
+           write (*,'(3i5,8f16.8)') inode,ielem,1,tmp
+           write (*,'(3i5,8f16.8)') inode,ielem,2,tmp1
+           stop
        end do 
     end subroutine
 
-    subroutine direct_eval(is,ielem,ncne,xp,yp,zp,aval,bval,hi)
+
+    subroutine sing_elem_wrapper(inode,ielem,numqua,xp,yp,zp,aval,bval,hi)
         use mvar_mod
-        use green_funcs
-        use proj_cnst,only:ex,ey
+        use mfunc_mod,only:tripol
+        !use tripole_mod
         implicit   none  
+        integer i,j,is,ielem,inode,nodnum,nd,np,numqua,hi
+        real*8  xp,yp,zp,xyzt(3,8),dxyzt(3,8)
+        real*8 aval(4,8),bval(4,8),tmp(8),tmp1(8)
+        !print *,'sing',ielem
 
-        integer is,ielem,n,nsamb,ncne,j,hi,i
+        if (hi.eq.1) then
 
-        real*8  xp,yp,zp
-        real(8) :: p(3),p0(3),np(3)
+            do  i=1,  ncn(ielem)
+                xyzt(1:3, i)  =  xyze(1:3, i, ielem)  
+                dxyzt(1:3, i) = dxyze(1:3, i, ielem)  
+                if(inode.eq.ncon(ielem,i)) nodnum=i
+            end do
+            call tripol(nodnum,ncn(ielem),xyzt,dxyzt)
+        elseif (hi.eq.2) then
+            do  i=1,  ncn(ielem)
+                if(inode.eq.ncon(ielem,i)) nodnum=i
+            end do
+        end if
 
-        real*8  v1,v2
-        real*8  aval(8),bval(8)
+        if(numqua.eq.0)       then
+            do 100 is=1,  nsys
+                if(is.eq.1) then 
+                    !call sing_int(is,ielem,nodnum,xp,yp,zp,aval(is,:),bval(is,:),hi)
+                    !call direct_eval(is,ielem,ncn(ielem),xp,yp,zp,tmp,tmp1,hi)
 
-        aval=0.0d0
-        bval=0.0d0
+                    !write (8000,'(3i5,8f16.8)') inode,ielem,1,aval(is,:)
+                    !write (8000,'(3i5,8f16.8)') inode,ielem,2,bval(is,:)
+                    !write (8000,'(3i5,8f16.8)') inode,ielem,1,tmp
+                    !write (8000,'(3i5,8f16.8)') inode,ielem,2,tmp1
+                    !stop
+                else if(is.ne.1 ) then   
+                    call gauss_int(is,ielem,ncn(ielem),xp,yp,zp,aval(is,:),bval(is,:),hi)
+                end if
+            100      continue
 
-        p0 = (/ex(is)*xp,ey(is)*yp,zp/)
-        
+        else if(numqua.eq.2) then
+            do 200 is=1,nsys     
+                if(is.eq.1.or.is.eq.2) then
+                    call sing_int(is,ielem,nodnum,xp,yp,zp,aval(is,:),bval(is,:),hi)
+                else if(is.eq.3.or.is.eq.4) then  
+                    call gauss_int(is,ielem,ncn(ielem),xp,yp,zp,aval(is,:),bval(is,:),hi)
+                end if
+                200      continue  
 
-        do  i=1,ncn(ielem)
-            p =xyz(1:3,ncon(ielem,i))
-            np = dxyz(1:3,ncond(ielem,i))
-            
-            if (hi.eq.1) then
-                v1 = GFunc(p,p0)+GFunc(p,mirror(h,p0))
-                v2 = dot_product(np,DGFunc(p,p0)+DGFunc(p,mirror(h,p0)))
-            elseif (hi.eq.2) then
-                v1 = Dy3GFunc(p,p0)+Dy3GFunc(p,mirror(h,p0))
-                v2 = dot_product(np,Dy3DGFunc(p,p0)+Dy3DGFunc(p,mirror(h,p0)))
+        else if(numqua.eq.4) then
+            do 300  is=1,  nsys
+                if(is.eq.1.or.is.eq.4) then   
+                    call sing_int(is,ielem,nodnum,xp,yp,zp,aval(is,:),bval(is,:),hi)
+                else if(is.eq.2.or.is.eq.3) then  
+                    call gauss_int(is,ielem,ncn(ielem),xp,yp,zp,aval(is,:),bval(is,:),hi)
+                end if
+            300      continue
 
-            elseif (hi.eq.7) then
-
-                ! test sing1
-                v2 = dot_product(np,Dy3DGFunc(p,p0))
-                v1 = dot_product(np,Dy3DGFunc(p,p0))
-            elseif (hi.eq.8) then
-                v1 = Dy3GFunc(p,p0)+Dy3GFunc(p,mirror(h,p0))
-                v2 = 0.
-            elseif (hi.eq.9) then
-                !second part of sing_int1
-                v2 = Dy3GFunc(p,mirror(h,p0))
-                v1 = dot_product(np,Dy3DGFunc(p,mirror(h,p0)))
-            end if
-
-                bval(i)=v1
-                aval(i)=v2
-
-
-        end do
+        else if(numqua.eq.5) then
+            do 400 is=1, nsys  
+                call sing_int(is,ielem,nodnum,xp,yp,zp,aval(is,:),bval(is,:),hi)
+                400      continue
+        endif
     end subroutine
-
    
     subroutine gauss_int(is,ielem,ncne,xp,yp,zp,aval,bval,hi)
 
@@ -140,68 +179,6 @@
 
 
 
-        subroutine sing_elem_wrapper(inode,ielem,numqua,xp,yp,zp,aval,bval,hi)
-            use mvar_mod
-            use mfunc_mod,only:tripol
-            !use tripole_mod
-            implicit   none  
-            integer i,j,is,ielem,inode,nodnum,nd,np,numqua,hi
-            real*8  xp,yp,zp,xyzt(3,8),dxyzt(3,8)
-            real*8 aval(4,8),bval(4,8)
-            !print *,'sing',ielem
-
-            if (hi.eq.1) then
-
-                do  i=1,  ncn(ielem)
-                    xyzt(1:3, i)  =  xyze(1:3, i, ielem)  
-                    dxyzt(1:3, i) = dxyze(1:3, i, ielem)  
-                    if(inode.eq.ncon(ielem,i)) nodnum=i
-                end do
-                call tripol(nodnum,ncn(ielem),xyzt,dxyzt)
-            elseif (hi.eq.2) then
-                do  i=1,  ncn(ielem)
-                    if(inode.eq.ncon(ielem,i)) nodnum=i
-                end do
-            end if
-            
-
-
-         
-            if(numqua.eq.0)       then
-                do 100 is=1,  nsys
-                    if(is.eq.1) then 
-                        call sing_int(is,ielem,nodnum,xp,yp,zp,aval(is,:),bval(is,:),hi)
-                    else if(is.ne.1 ) then   
-                        call gauss_int(is,ielem,ncn(ielem),xp,yp,zp,aval(is,:),bval(is,:),hi)
-                    end if
-                100      continue
-
-            else if(numqua.eq.2) then
-                do 200 is=1,nsys     
-                    if(is.eq.1.or.is.eq.2) then
-                        call sing_int(is,ielem,nodnum,xp,yp,zp,aval(is,:),bval(is,:),hi)
-                    else if(is.eq.3.or.is.eq.4) then  
-                        call gauss_int(is,ielem,ncn(ielem),xp,yp,zp,aval(is,:),bval(is,:),hi)
-                    end if
-                200      continue  
-
-            else if(numqua.eq.4) then
-                do 300  is=1,  nsys
-                    if(is.eq.1.or.is.eq.4) then   
-                        call sing_int(is,ielem,nodnum,xp,yp,zp,aval(is,:),bval(is,:),hi)
-                    else if(is.eq.2.or.is.eq.3) then  
-                        call gauss_int(is,ielem,ncn(ielem),xp,yp,zp,aval(is,:),bval(is,:),hi)
-                    end if
-                300      continue
-
-            else if(numqua.eq.5) then
-                do 400 is=1, nsys  
-                    call sing_int(is,ielem,nodnum,xp,yp,zp,aval(is,:),bval(is,:),hi)
-                400      continue
-            endif
-                !
-            return
-        end
 
     subroutine sing_int(is,ielem,nodej,xp,yp,zp,aval,bval,hi)
         implicit none
@@ -221,7 +198,7 @@
 
 
         use trvar_mod
-        use mvar_mod
+        use mvar_mod,only:ncne
         use green_funcs,only : GFunc,DGFunc,mirror
         use proj_cnst,only:ex,ey
         implicit   none  
@@ -332,7 +309,7 @@
             !pause
 
             call SGBD0_1(IS,IELEM,NODj,XP,YP,ZP,result0,result1) 
-            write (*,'(a,8f14.8)') "sgbd0",result1
+            !write (*,'(a,8f14.8)') "sgbd0",result1
             amatrix=amatrix+result1
             
             !call gauss_int(is,ielem,8,xp,yp,zp,tmp,tmp1,7) 
@@ -343,17 +320,17 @@
             !todo change variable name
             !todo bmatrix is meaningful
             !tmp1=0.
-            call gauss_int(is,ielem,8,xp,yp,zp,tmp,tmp1,8) 
+            !call gauss_int(is,ielem,8,xp,yp,zp,tmp,tmp1,8) 
             !write (*,'(a,8f14.8)') "lower",tmp1(:)
-            bmatrix(:)=bmatrix(:)+tmp1(:)
+            !bmatrix(:)=bmatrix(:)+tmp1(:)
             
 
-            call gauss_int(is,ielem,8,xp,yp,zp,tmp,tmp1,9) 
-            write (*,'(a,8f14.8)') "mlowe",tmp1(:)
-            write (*,'(a,8f14.8)') "mhigh",tmp(:)
-            call direct_eval(is,ielem,8,xp,yp,zp,tmp,tmp1,9) 
-            write (*,'(a,8f14.8)') "mlowe",tmp1(:)
-            write (*,'(a,8f14.8)') "mhigh",tmp(:)
+            !call gauss_int(is,ielem,8,xp,yp,zp,tmp,tmp1,9) 
+!            write (*,'(a,8f14.8)') "mlowe",tmp1(:)
+            !write (*,'(a,8f14.8)') "mhigh",tmp(:)
+          !  call direct_eval(is,ielem,8,xp,yp,zp,tmp,tmp1,9) 
+            !write (*,'(a,8f14.8)') "mlowe",tmp1(:)
+            !write (*,'(a,8f14.8)') "mhigh",tmp(:)
             !stop
             write(9000,*) "ielem=", ielem
             write(9000,*) "amatrix="
@@ -363,9 +340,9 @@
 
             amatrix(:) = amatrix(:)+tmp(:)
             bmatrix(:) = bmatrix(:)+tmp1(:)
-            print *,"Exiting"
-            print *,"H=",h
-            stop
+            !print *,"Exiting"
+            !print *,"H=",h
+            !stop
 
 
         end subroutine 
@@ -375,3 +352,54 @@
 
 
 
+    subroutine direct_eval(is,ielem,ncne,xp,yp,zp,aval,bval,hi)
+        use mvar_mod
+        use green_funcs
+        use proj_cnst,only:ex,ey
+        implicit   none  
+
+        integer is,ielem,n,nsamb,ncne,j,hi,i
+
+        real*8  xp,yp,zp
+        real(8) :: p(3),p0(3),np(3)
+
+        real*8  v1,v2
+        real*8  aval(8),bval(8)
+
+        aval=0.0d0
+        bval=0.0d0
+
+        p0 = (/ex(is)*xp,ey(is)*yp,zp/)
+        
+
+        do  i=1,ncn(ielem)
+            p =xyz(1:3,ncon(ielem,i))
+            np = dxyz(1:3,ncond(ielem,i))
+            
+            if (hi.eq.1) then
+                v1 = GFunc(p,p0)+GFunc(p,mirror(h,p0))
+                v2 = dot_product(np,DGFunc(p,p0)+DGFunc(p,mirror(h,p0)))
+            elseif (hi.eq.2) then
+                v1 = Dy3GFunc(p,p0)+Dy3GFunc(p,mirror(h,p0))
+                v2 = dot_product(np,Dy3DGFunc(p,p0)+Dy3DGFunc(p,mirror(h,p0)))
+
+            elseif (hi.eq.7) then
+
+                ! test sing1
+                v2 = dot_product(np,Dy3DGFunc(p,p0))
+                v1 = dot_product(np,Dy3DGFunc(p,p0))
+            elseif (hi.eq.8) then
+                v1 = Dy3GFunc(p,p0)+Dy3GFunc(p,mirror(h,p0))
+                v2 = 0.
+            elseif (hi.eq.9) then
+                !second part of sing_int1
+                v2 = Dy3GFunc(p,mirror(h,p0))
+                v1 = dot_product(np,Dy3DGFunc(p,mirror(h,p0)))
+            end if
+
+                bval(i)=v1
+                aval(i)=v2
+
+
+        end do
+    end subroutine

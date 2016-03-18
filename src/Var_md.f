@@ -165,6 +165,8 @@ C
 !
          REAL*8,ALLOCATABLE:: BKN(:,:),BKN_O(:,:),UNKN(:,:),UNKN_O(:,:)
          REAL*8,ALLOCATABLE:: ET(:,:),ET_O(:,:),DPDT(:,:)
+
+         real(8) :: area1_sum,area2_sum,area0_sum,line_sum
 !        REAL*4,ALLOCATABLE:: BKN(:,:),UNKN(:,:),BKN_O(:,:),UNKN_O(:,:,:),
 !       1                                         ET(:,:),ET_O(:,:),DPDT(:,:)
 !

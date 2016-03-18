@@ -69,7 +69,7 @@ program hi_project
     !call tassbt
     !time=0.0d0
     tstep=0.05
-    do itime=0,10
+    do itime=0,200
         print *,itime,"/200"
         time=tstep*itime
         !bkn_o=bkn

@@ -94,6 +94,9 @@
         print *,"finished fterm output"
         do  500   inode=1,  nnf
                 !print *,inode
+                write(9000,*) "inode=",inode
+                write(9001,*) "inode=",inode
+                
             xp=xyz(1,inode)
             yp=xyz(2,inode)
             zp=xyz(3,inode)
@@ -104,28 +107,37 @@
 
             angle(inode)=1.0d0- s_angle
             amata(inode,inode,1:nsys)= 1.0d0-s_angle!angle(inode)
+            !cmata(inode,inode,1:nsys)= -1.0d0+s_angle!angle(inode)
             !  ---------------------------
             !  Integration on the free surface
                 
             do   ielem=1,  nelemf
                 !print *,ielem
+                
+                
                 call comp_link(ielem,inode,ii)
                 if (ii .eq. 0)   then! if src node not on element 
-                    call norm_elem_wrapper(ielem,xp,yp,zp,amatrix,bmatrix,2)
+                    call norm_elem_wrapper(inode,ielem,xp,yp,zp,amatrix,bmatrix,2)
 
                 else if (ii .ne. 0)   then 
+                    !write(9001,*) "ielem=",ielem
                     call sing_elem_wrapper(inode,ielem,nodqua(inode),xp,yp,zp,&
                         &                   amatrix,bmatrix,2)
                 end if 
                 call common_block(0,0,ielem,inode,amatrix,bmatrix)!,fterm_coef)
+                !print *,"finished",ielem
+
             end do
             !  Integration on the body surface
             do    ielem=nelemf+1,  nelem
+               
+                
 
                 call comp_link(ielem,inode,ii)
                 if (ii .eq. 0)   then 
-                    call norm_elem_wrapper(ielem,xp,yp,zp,amatrix,bmatrix,2)
+                    call norm_elem_wrapper(inode,ielem,xp,yp,zp,amatrix,bmatrix,2)
                 else if (ii .ne. 0)   then 
+                     write(9001,*) "ielem=",ielem
                     call sing_elem_wrapper(inode,ielem,nodqua(inode),xp,yp,zp,&
                      &                   amatrix,bmatrix,2)
                 end if
@@ -147,14 +159,15 @@
             5001 format(7f14.8)
             
 
-
         500     continue
+        !stop
 !
         
 ! =======================================================================
 !    Source point is on the body surface
 !
         do  1000   inode=nnf+1, nnode   
+                !write(9000,*) "inode=",inode
 
             xp=xyz(1,inode)
             yp=xyz(2,inode)
@@ -171,7 +184,7 @@
             do   ielem=1,  nelemf
 
                 ii=0   
-                call norm_elem_wrapper(ielem,xp,yp,zp,amatrix,bmatrix,1)
+                call norm_elem_wrapper(inode,ielem,xp,yp,zp,amatrix,bmatrix,1)
                 call common_block(0,1,ielem,inode,amatrix,bmatrix)
 
             end do
@@ -180,7 +193,7 @@
 
                 call comp_link(ielem,inode,ii)!
                 if (ii .eq. 0)   then 
-                    call norm_elem_wrapper(ielem,xp,yp,zp,amatrix,bmatrix,1)
+                    call norm_elem_wrapper(inode,ielem,xp,yp,zp,amatrix,bmatrix,1)
                 else if (ii .ne. 0)   then 
                     call sing_elem_wrapper(inode,ielem,nodqua(inode),xp,yp,zp,&
                      &                   amatrix,bmatrix,1)
@@ -220,11 +233,11 @@
 !
         !write(102, *) '  =========== before rludcmp =============='
 
-        !do i = 1,nnode
-            !do j = 1,nnode
-                !write(600,*) amata(i,j,1:nsys)
-        !end do;end do
-        !stop
+        do i = 1,nnode
+            do j = 1,nnode
+                write(600,*) amata(i,j,1:nsys)
+        end do;end do
+        stop
 
         !do i = 1,nnode
                 !write(401,*) amata(i,i,1:nsys)

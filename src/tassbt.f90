@@ -141,7 +141,7 @@
             do 200 ind=1,   nnode
                 !do inode=1, nnoded
         !---------------loop-body--------------------------
-        bmata(ind,is)=dot_product(cmata(ind,:,is),cmat(:,is))
+                bmata(ind,is)=dot_product(cmata(ind,:,is),cmat(:,is))
                 !end do
                 if (ind<=nnf) then!potential only
                         bmata(ind,is) = bmata(ind,is)-fra3(ind,is)*cmat(ind,is)&
