@@ -7,15 +7,20 @@
 !C *                                                                   *
 !C *********************************************************************
 !C
-        subroutine get_gaussian_data(xc,yc,zc)
-        use MFUNC_mod
-        IMPLICIT   NONE  
-        real(8),intent(in) :: xc,yc,zc
-	  INTEGER IE,K,J,LK,LI,LJ,ISI,IETA,NSAMB,IND 
-        REAL*8 XITSI(4),XITETA(4),WIT(4),XIQ(4),WIQ(4)
-        REAL*8 SF(8),DSF(2,8),XJ(3,3) 
+    subroutine get_gaussian_data(xc,yc,zc)
 
-        REAL*8 DET,DET1,DET2,DET3,DUM,SI,ETA 
+        use mfunc_mod,only:spfunc8,spfunc6
+        use proj_cnst,only:cross_product
+
+
+        implicit   none  
+        real(8),intent(in) :: xc,yc,zc
+        integer ie,k,j,lk,li,lj,isi,ieta,nsamb,ind 
+        real*8 xitsi(4),xiteta(4),wit(4),xiq(4),wiq(4)
+        real*8 sf(8),dsf(2,8),xj(3,3) 
+
+        real*8 det,det1,det2,det3,dum,si,eta 
+        real(8) :: p(3)
 
 !C                      
 !C
@@ -48,14 +53,14 @@
 !c
         DATA WIQ/0.347854845137454D0,0.652145154862546D0,&
      &         0.652145154862546D0,0.347854845137454D0/
-!c
-            allocate(samb(nelem,16,0:8),sambxy(nelem,16,3))
-            allocate(dsamb(nelem,16,6))
 
-        DO 500 IE=1, NELEM
-!c	Print *,' I=',I
-!C
-        NSAMB=0
+        allocate(samb(nelem,16,0:8),sambxy(nelem,16,3))
+        allocate(dsamb(nelem,16,6))
+        p=(/xc,yc,zc/)
+
+        do 500 ie=1, nelem
+
+            nsamb=0
 !c
 !c       NSAMB:  codes of sampling points inside an element
 !C
@@ -80,21 +85,24 @@
 !c       LI: 1--SI,  2--ETA
 !c       LJ: 1--X,   2--Y,   3--Z
 !c
-      DO 130 LI=1,2
-      DO 130 LJ=1,3
-      DUM=0.0D0
-      DO 140 LK=1, NCN(IE)
-      DUM=DUM+DSF(LI,LK)*XYZE(LJ,LK,IE)
-!      DUM=DUM+DSF(LI,LK)*XYZ(LJ,NCON(IE,LK))  XYZE(3,J,IE)
-140   CONTINUE
-130   XJ(LI,LJ)=DUM
+      !DO 130 LI=1,2
+      !DO 130 LJ=1,3
+      !DUM=0.0D0
+      !DO 140 LK=1, NCN(IE)
+      !DUM=DUM+DSF(LI,LK)*XYZE(LJ,LK,IE)
+!!      DUM=DUM+DSF(LI,LK)*XYZ(LJ,NCON(IE,LK))  XYZE(3,J,IE)
+!140   CONTINUE
+!130   XJ(LI,LJ)=DUM
+      xj(1:2,1:3) = matmul(dsf(1:2,1:ncn(ie)), &
+          & transpose(xyze(1:3,1:ncn(ie),ie)))
 !C
 !C ** compute the determinant of the Jacobian maxtix at (SI,ETA), DET
 !C
-      DET1=XJ(1,2)*XJ(2,3)-XJ(1,3)*XJ(2,2) 
-      DET2=XJ(1,1)*XJ(2,3)-XJ(1,3)*XJ(2,1) 
-      DET3=XJ(1,1)*XJ(2,2)-XJ(1,2)*XJ(2,1) 
-      DET=DSQRT(DET1*DET1+DET2*DET2+DET3*DET3)
+      !DET1=XJ(1,2)*XJ(2,3)-XJ(1,3)*XJ(2,2) 
+      !DET2=XJ(1,1)*XJ(2,3)-XJ(1,3)*XJ(2,1) 
+      !DET3=XJ(1,1)*XJ(2,2)-XJ(1,2)*XJ(2,1) 
+      !DET=DSQRT(DET1*DET1+DET2*DET2+DET3*DET3)
+      det=norm2(cross_product(xj(1,:),xj(2,:)))
 !C
 !C ** transform the local coordinates of the sampling points to 
 !C    global coordinates
@@ -105,31 +113,40 @@
 !c       NSAMB:   
 !c       SF: shape function              
 !c
-      DO 160 LI=1,3
-      SAMBXY(IE,NSAMB,LI)=0.0D0
-      DO 170 LK=1,NCN(IE)
-      SAMBXY(IE,NSAMB,LI)=SAMBXY(IE,NSAMB,LI)+SF(LK)*XYZE(LI,LK,IE)    
-170   CONTINUE
-160   CONTINUE
+      !DO 160 LI=1,3
+      !SAMBXY(IE,NSAMB,LI)=0.0D0
+      !DO 170 LK=1,NCN(IE)
+      !SAMBXY(IE,NSAMB,LI)=SAMBXY(IE,NSAMB,LI)+SF(LK)*XYZE(LI,LK,IE)    
+!170   CONTINUE
+!160   CONTINUE
+        sambxy(ie,nsamb,:)=0.0d0
+        dsamb(ie,nsamb,:)=0.0d0
+        sambxy(ie,nsamb,1:3) = matmul(sf(1:ncn(ie)),transpose(xyze(1:3,1:ncn(ie),ie))) 
+        dsamb(ie,nsamb,1:3) = matmul(sf(1:ncn(ie)),transpose(dxyze(1:3,1:ncn(ie),ie)))
+        
 
 
-      DO 180 LI=1,3
-      DSAMB(IE,NSAMB,LI)=0.0D0
-      DO 190 LK=1,NCN(IE)
-      DSAMB(IE,NSAMB,LI)=DSAMB(IE,NSAMB,LI)+SF(LK)*DXYZE(LI,LK,IE)
-190   CONTINUE
-180   CONTINUE  
+      !DO 180 LI=1,3
+      !DSAMB(IE,NSAMB,LI)=0.0D0
+      !DO 190 LK=1,NCN(IE)
+      !DSAMB(IE,NSAMB,LI)=DSAMB(IE,NSAMB,LI)+SF(LK)*DXYZE(LI,LK,IE)
+!190   CONTINUE
+!180   CONTINUE  
         !fixme
       dsamb(ie,nsamb,1:3)=dsamb(ie,nsamb,1:3)/norm2(dsamb(ie,nsamb,1:3))
+      dsamb(ie,nsamb,4:6)=cross_product(sambxy(ie,nsamb,1:3)-p,&
+          & dsamb(ie,nsamb,1:3))
+      samb(ie,nsamb,0) = wiq(isi)*wiq(ieta)*det
+      samb(ie,nsamb,1:ncn(ie)) =sf(1:ncn(ie))*samb(ie,nsamb,0)
       !write(*,'(f10.5)') norm2(dsamb(ie,nsamb,1:3))
 
 
-      DSAMB(IE,NSAMB,4)=(SAMBXY(IE,NSAMB,2)-YC)*DSAMB(IE,NSAMB,3)- &
-     &      (SAMBXY(IE,NSAMB,3)-ZC)*DSAMB(IE,NSAMB,2)
-      DSAMB(IE,NSAMB,5)=(SAMBXY(IE,NSAMB,3)-ZC)*DSAMB(IE,NSAMB,1)- &
-     &      (SAMBXY(IE,NSAMB,1)-XC)*DSAMB(IE,NSAMB,3)
-      DSAMB(IE,NSAMB,6)=(SAMBXY(IE,NSAMB,1)-XC)*DSAMB(IE,NSAMB,2)- &
-     &      (SAMBXY(IE,NSAMB,2)-YC)*DSAMB(IE,NSAMB,1)
+      !DSAMB(IE,NSAMB,4)=(SAMBXY(IE,NSAMB,2)-YC)*DSAMB(IE,NSAMB,3)- &
+     !&      (SAMBXY(IE,NSAMB,3)-ZC)*DSAMB(IE,NSAMB,2)
+      !DSAMB(IE,NSAMB,5)=(SAMBXY(IE,NSAMB,3)-ZC)*DSAMB(IE,NSAMB,1)- &
+     !&      (SAMBXY(IE,NSAMB,1)-XC)*DSAMB(IE,NSAMB,3)
+      !DSAMB(IE,NSAMB,6)=(SAMBXY(IE,NSAMB,1)-XC)*DSAMB(IE,NSAMB,2)- &
+     !&      (SAMBXY(IE,NSAMB,2)-YC)*DSAMB(IE,NSAMB,1)
 !C
 !C ** calculate the free surface boundary condition*WIT*DET
 !C
