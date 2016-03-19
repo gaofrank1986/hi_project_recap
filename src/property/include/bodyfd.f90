@@ -119,6 +119,10 @@
       DSAMB(IE,NSAMB,LI)=DSAMB(IE,NSAMB,LI)+SF(LK)*DXYZE(LI,LK,IE)
 190   CONTINUE
 180   CONTINUE  
+        !fixme
+      dsamb(ie,nsamb,1:3)=dsamb(ie,nsamb,1:3)/norm2(dsamb(ie,nsamb,1:3))
+      !write(*,'(f10.5)') norm2(dsamb(ie,nsamb,1:3))
+
 
       DSAMB(IE,NSAMB,4)=(SAMBXY(IE,NSAMB,2)-YC)*DSAMB(IE,NSAMB,3)- &
      &      (SAMBXY(IE,NSAMB,3)-ZC)*DSAMB(IE,NSAMB,2)
