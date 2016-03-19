@@ -66,7 +66,11 @@
                 gm=dsqrt(dot_product(a,a))
                 drdx=a/gm                 ! eq.(3-6-74)
             endif 
+            !block
+            cosn=matmul(cnr_nrml(1:3,1:8),sf_iter(1:8))
 
+
+            !end block
             ! dr/dx is defined above
             drdn = dot_product(cosn,drdx)  !!!!  notice dr/dn is defined  here
             !write (506,*) "drdx",drdx
@@ -74,12 +78,17 @@
             !CALL F_BAR(NDIM,NBDM,DRDX,COSN,R,DRDN,XI,SF_iter,XP,X,NF,FQ)
             if (flag .eq. 1) then
                 call f_integrand(ndim,nf,cosn,drdx,drdn,sf_iter,fq)
-            else 
+                end if
+                if (flag.eq.2) then
                 call f_integrand2(ndim,nf,cosn,drdx,drdn,sf_iter,fq)
+                end if
+                if (flag.eq.3) then
+                call f_integrand3(ndim,nf,sf_iter,fq)
+                end if
+
                  !write (505,*) "fq"
                  !write(505,1000) fq
                  !1000 format(8f10.6)
-            end if
             coefb(step_n,:) = fq*fjcb/robar**lamda
 
      

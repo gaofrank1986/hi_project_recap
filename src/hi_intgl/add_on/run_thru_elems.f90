@@ -1,6 +1,6 @@
 
    
-     subroutine RIM_ELEMS()
+      subroutine RIM_ELEMS()
 
         implicit none 
 
@@ -28,6 +28,6 @@
         print *,sum(value_list)
         print *,"==============================="
         print *,"end of RIM_ELEMS"
-     end subroutine
+      end subroutine
 
 

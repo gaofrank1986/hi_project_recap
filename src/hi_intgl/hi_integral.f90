@@ -24,6 +24,7 @@ module hi_intg
 
     integer,private :: n_pwr_g = -1
     real(8),allocatable,private :: cnr_glb_mtx(:,:) !corner_global_matrix
+    real(8),allocatable,private :: cnr_nrml(:,:) !corner_global_matrix
     real(8),private :: src_lcl_pre(2),src_glb_pre(3)
    
     real(8),private ::  src_glb(3),src_ctr_glb(3)
@@ -132,6 +133,7 @@ contains
         hi_beta = 3.
         !num_intgd = 8
         allocate(cnr_glb_mtx(num_dim,elem_type))
+        allocate(cnr_nrml(num_dim,elem_type))
         if (elem_type.eq.8) n_pwr_g = 4
         !pwr_g = elem_type/2+(elem_type/9)*2 
         !model_readed_flag = 1

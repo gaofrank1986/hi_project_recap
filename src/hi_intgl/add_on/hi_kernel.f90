@@ -37,7 +37,23 @@
         real(8) :: x(ndim),tmp
         integer :: id
         !should be partial G over partial y3      
-        tmp =-DRDx(3)/(4.*hi_PI)    ! GUIG 4.2
+        tmp =-DRDn/(4.*hi_PI)    ! GUIG 4.2
+        !attention neg sign removed in tmp to match teng's result
+        do id =1,8
+            FB(id) = tmp*shap(id)
+        end do
+    end subroutine   
+
+     subroutine f_integrand3(ndim,nf,shap,fb)
+        implicit none
+        integer,intent(in) :: ndim,nf
+        real(8),intent(in) :: shap(*)
+        real(8),intent(out) :: fb(nf)       
+
+        real(8) :: x(ndim),tmp
+        integer :: id
+        !should be partial G over partial y3      
+        tmp =-1/(4.*hi_PI)    ! GUIG 4.2
         !attention neg sign removed in tmp to match teng's result
         do id =1,8
             FB(id) = tmp*shap(id)
