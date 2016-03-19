@@ -23,12 +23,12 @@ contains
 
         implicit   none  
         real(8),intent(in) :: xc,yc,zc
-        integer ie,k,j,lk,li,lj,isi,ieta,nsamb,ind 
         real*8 xitsi(4),xiteta(4),wit(4),xiq(4),wiq(4)
-        real*8 sf(8),dsf(2,8),xj(3,3) 
+        real*8 sf(8),dsf(2,8),xj(2,3) 
 
-        real*8 det,det1,det2,det3,dum,si,eta 
+        real*8 det,si,eta 
         real(8) :: p(3)
+        integer :: i,j,ind,ie,nsamb !counter
 
         !C                      
         !C
@@ -72,17 +72,17 @@ contains
             nsamb=0
             !C ** Quadrilateral element **
             IF(NCN(IE).EQ.8) THEN
-                do isi=1,4;do ieta=1,4
+                do i=1,4;do j=1,4
                     nsamb=nsamb+1
 
-                    si =xiq(isi)
-                    eta=xiq(ieta)
+                    si =xiq(i)
+                    eta=xiq(j)
                     call spfunc8(si,eta,sf,dsf)
                     !C ** evaluate the Jacobian matrix at (SI,ETA),  XJ(2,3)
                     !c       LI: 1--SI,  2--ETA
                     !c       LJ: 1--X,   2--Y,   3--Z
-                    xj(1:2,1:3) = matmul(dsf(1:2,1:ncn(ie)), &
-                        & transpose(xyze(1:3,1:ncn(ie),ie)))
+                    xj = matmul(dsf(:,1:ncn(ie)), &
+                        & transpose(xyze(:,1:ncn(ie),ie)))
                     !** compute the determinant of the Jacobian maxtix at (SI,ETA), DET
                     det=norm2(cross_product(xj(1,:),xj(2,:)))
                     ! ** transform the local coordinates of the sampling points to 
@@ -94,15 +94,15 @@ contains
                     !       NSAMB:   
                     !       SF: shape function              
 
-                    sambxy(ie,nsamb,1:3) = matmul(sf(1:ncn(ie)),transpose(xyze(1:3,1:ncn(ie),ie))) 
-                    dsamb(ie,nsamb,1:3) = matmul(sf(1:ncn(ie)),transpose(dxyze(1:3,1:ncn(ie),ie)))
+                    sambxy(ie,nsamb,1:3) = matmul(sf(1:ncn(ie)),transpose(xyze(:,1:ncn(ie),ie))) 
+                    dsamb(ie,nsamb,1:3) = matmul(sf(1:ncn(ie)),transpose(dxyze(:,1:ncn(ie),ie)))
                     ! normlised normal vector
                     dsamb(ie,nsamb,1:3)=dsamb(ie,nsamb,1:3)/norm2(dsamb(ie,nsamb,1:3))
                     ! compute tangent vector
                     dsamb(ie,nsamb,4:6)=cross_product(sambxy(ie,nsamb,1:3)-p,&
                         & dsamb(ie,nsamb,1:3))
                     !C ** calculate the free surface boundary condition*WIT*DET
-                    samb(ie,nsamb,0) = wiq(isi)*wiq(ieta)*det
+                    samb(ie,nsamb,0) = wiq(i)*wiq(j)*det
                     samb(ie,nsamb,1:ncn(ie)) =sf(1:ncn(ie))*samb(ie,nsamb,0)
                 end do; end do
 
