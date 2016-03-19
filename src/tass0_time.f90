@@ -29,7 +29,7 @@
                 use body_property
                 use free_term,only:fterm,output_fterms
                 use mfunc_mod
-                use sebsm_mod
+                !use sebsm_mod
 
                 implicit   none  
                 integer  inode,ielem,j,jnode,ind,indd,ip
@@ -103,6 +103,7 @@
              &                        h,xyz,dxyze,s_angle)    
 
             angle(inode)=1.0d0- s_angle
+            !cmata(inode,inode,1:nsys)= -1.0d0+s_angle!angle(inode)
             amata(inode,inode,1:nsys)= 1.0d0-s_angle!angle(inode)
             !  ---------------------------
             !  Integration on the free surface
