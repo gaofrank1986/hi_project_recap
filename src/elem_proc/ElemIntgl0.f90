@@ -76,7 +76,7 @@
         IF(NUMQUA.EQ.0)       THEN
          DO 100 IS=1,  NSYS
           IF(IS.EQ.1) THEN 
-            CALL SING_INT0(IS,IELEM,XP,YP,ZP,AVAL,BVAL)
+            CALL SING_INT0(IS,IELEM,nodnum,XP,YP,ZP,AVAL,BVAL)
           ELSE IF(IS.NE.1 ) THEN   
             CALL NORM_INT0(IS,IELEM,NCN(IELEM),XP,YP,ZP,AVAL,BVAL)
           END IF
@@ -160,6 +160,7 @@
          NX=DSAMB(IELEM,N,1)
          NY=DSAMB(IELEM,N,2)
          NZ=DSAMB(IELEM,N,3)
+         !write(9012,'(4f10.5)') norm2(dsamb(ielem,n,1:3)),nx,ny,nz 
                                            
          DGN=GXF(2)*Nx+GXF(3)*Ny+GXF(4)*Nz           
 !
@@ -177,13 +178,13 @@
 ! ===========================================================
 ! Integration on an element with source point
 !
-       SUBROUTINE SING_INT0(IS,IELEM,XP,YP,ZP,AVAL,BVAL)
+       SUBROUTINE SING_INT0(IS,IELEM,nodnum,XP,YP,ZP,AVAL,BVAL)
 	   USE MVAR_MOD
 	    USE MFUNC_mod
 	   USE TRVAR_MOD
        IMPLICIT   NONE  
 !
-	   INTEGER IS,IELEM,N,J,IP       
+	   INTEGER IS,IELEM,N,J,IP,nodnum
 	   REAL*8  XP,YP,ZP,EX(4,4),EY(4,4)
 	   REAL*8  X,Y,Z,X0,Y0,Z0      
 	   REAL*8  NX,NY,NZ,DGN
@@ -222,11 +223,16 @@
 
         DO J=1, NCN(IELEM)
          AVAL(IS,J)=AVAL(IS,J)+DGN*SAMNOD(N,J)
+
          BVAL(IS,J)=BVAL(IS,J)+GXF(1)*SAMNOD(N,J)
        ENDDO
 !
 
 130     CONTINUE
+         !if(ielem>nelemf) then
+                 !write(9011,'(2i6,8f12.6)') ielem,nodnum,aval(is,:)
+                !call sing_int1(is,ielem,nodnum,xp,yp,zp,aval,bval) 
+         !end if
 !
         RETURN
         END

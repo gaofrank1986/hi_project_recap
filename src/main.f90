@@ -30,7 +30,7 @@ program hi_project
     call read_mesh()
 !  --------------------------------------------
     call init_ft(nsys,nnf) 
- 
+ 
 
     allocate(angle(nnode))
     allocate(fra3(nnode,nsys),&
@@ -70,13 +70,20 @@ program hi_project
     time=0.0d0
     tstep=0.05
     call time_intg_rk4
-    do inode =1,nnf
-        xp = xyz(1,inode)
-        yp = xyz(2,inode)
-        zp = xyz(3,inode)
-     write(4003,1202) bkn(inode,1),poxy(xp,yp,zp)
-     write(4004,1202) et(inode,1),eti(xp,yp)
-     end do
+  !  do inode =1,nnf
+        !xp = xyz(1,inode)
+        !yp = xyz(2,inode)
+        !zp = xyz(3,inode)
+     !write(4003,1202) bkn(inode,1),poxy(xp,yp,zp)
+     !write(4004,1202) et(inode,1),eti(xp,yp)
+     !end do
+        do inode =1,nnf
+            xp = xyz(1,inode)
+            yp = xyz(2,inode)
+            zp = xyz(3,inode)
+            write(7000+itime,1202) bkn(inode,1),poxy(xp,yp,zp)
+            write(8000+itime,1202) et(inode,1),eti(xp,yp)
+        end do
 
      1202 format(2f14.8)
     print *,"=================== main program ends ==============="

@@ -171,8 +171,9 @@
 
         real(8) :: src_lcl(2),src_glb(3),origin_offset(3)
         real(8) :: cnr_glb_mtx(3,8)
+        real(8) :: passed_nrml(3,8)
 
-        real(8) :: result0(8),result1(8)
+        real(8) :: result0(8),result1(8),result2(8)
         real(8) ::  x0,y0,z0,si,eta
 
         real(8) ::  xiqsi(8),xiqet(8)
@@ -228,14 +229,23 @@
         cnr_glb_mtx(:,7) = xyz(:,ncon(ielem,6))
         cnr_glb_mtx(:,8) = xyz(:,ncon(ielem,8))
 
-
+        passed_nrml(:,1) = dxyz(:,ncond(ielem,1))
+        passed_nrml(:,2) = dxyz(:,ncond(ielem,3))
+        passed_nrml(:,3) = dxyz(:,ncond(ielem,5))
+        passed_nrml(:,4) = dxyz(:,ncond(ielem,7))
+        passed_nrml(:,5) = dxyz(:,ncond(ielem,2))
+        passed_nrml(:,6) = dxyz(:,ncond(ielem,4))
+        passed_nrml(:,7) = dxyz(:,ncond(ielem,6))
+        passed_nrml(:,8) = dxyz(:,ncond(ielem,8))
         call preset_src(si,eta,xyz(1:3,ncon(ielem,nodj)),origin_offset)
-        call eval_singular_elem(cnr_glb_mtx,result0,result1)
+        call eval_singular_elem(cnr_glb_mtx,passed_nrml,result0,result1,result2)
 
         do j=1, ncn(ielem)
             amatrix(is,j) = result0(j)
             bmatrix(is,j) = result1(j)
         end do
+        write(9010,'(2i6,8f12.6)') ielem,nodj,result2
+        !bmatrix=0.0d0
 
 
     end subroutine 

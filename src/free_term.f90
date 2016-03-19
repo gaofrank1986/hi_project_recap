@@ -14,7 +14,7 @@ contains
           real(8)::tmp
           !nsys = 1
           !nnode = 5
-          print *,'nsys=',nsys,'   ,  nnode=',nnode
+          !print *,'nsys=',nsys,'   ,  nnode=',nnode
           allocate(fterm(nnode,nsys,1:4))
           open(1001,file = './INPUT/fterm_final.txt',status='old')
           do j = 1,nnode
@@ -22,7 +22,7 @@ contains
                     !read (1,*) (fterm(j,i,k) k=1,4)
                     !FIXME
                     read(1001,*) (fterm(j,i,k),k=1,4),tmp
-                    print *,(fterm(j,i,k),k=1,4)
+                    !print *,(fterm(j,i,k),k=1,4)
                     !pause
 
           enddo;enddo
