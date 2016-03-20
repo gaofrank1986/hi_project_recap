@@ -82,7 +82,15 @@ program hi_project
             yp = xyz(2,inode)
             zp = xyz(3,inode)
             write(7000+itime,1202) bkn(inode,1),poxy(xp,yp,zp)
+            
             write(8000+itime,1202) et(inode,1),eti(xp,yp)
+        end do
+
+        do inode =nnf+1,nnode
+            xp = xyz(1,inode)
+            yp = xyz(2,inode)
+            zp = xyz(3,inode)
+            write(8500+itime,1202) unkn(inode,1),poxy(xp,yp,zp)
         end do
 
      1202 format(2f14.8)
