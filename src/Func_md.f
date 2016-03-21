@@ -180,38 +180,59 @@ C       DPOZ = 0
 !  Kind=3: for a uniform current in the z-direction phi=z 
 !
 !
-        SUBROUTINE  DINP0(KIND,X,Y,Z,PHI,DPOX,DPOY,DPOZ)
-	  IMPLICIT    NONE
-	  
-	  INTEGER KIND
-	  REAL*8,INTENT(IN)::   X,Y,Z
-        REAL*8,INTENT(OUT)::  PHI,DPOX,DPOY,DPOZ
-
-		  
-		IF (KIND==0) THEN
-		  PHI=1.0d0           
-          DPOX=0.0d0
-          DPOY=0.0d0
-          DPOZ=0.0d0
-        ELSE IF (KIND==1) THEN
-		  PHI=X       
-          DPOX=1.0d0
-          DPOY=0.0d0
-          DPOZ=0.0d0
-        ELSE IF (KIND==2) THEN
-		  PHI=Y           
-          DPOX=0.0d0
-          DPOY=1.0d0
-          DPOZ=0.0d0
-        ELSE IF (KIND==3) THEN
-		  PHI=Z           
-          DPOX=0.0d0
-          DPOY=0.0d0
-          DPOZ=1.0d0          
-        ENDIF
-!
-        RETURN
-        END SUBROUTINE  DINP0         
+    !subroutine  dinp0(kind,x,y,z,phi,dpox,dpoy,dpoz)
+        !implicit    none
+        
+        !integer kind
+        !real*8,intent(in)::   x,y,z
+        !real*8,intent(out)::  phi,dpox,dpoy,dpoz
+        
+        
+        !if (kind==0) then
+            !phi=1.0d0           
+            !dpox=0.0d0
+            !dpoy=0.0d0
+            !dpoz=0.0d0
+        !else if (kind==1) then
+            !phi=x       
+            !dpox=1.0d0
+            !dpoy=0.0d0
+            !dpoz=0.0d0
+        !else if (kind==2) then
+            !phi=y           
+            !dpox=0.0d0
+            !dpoy=1.0d0
+            !dpoz=0.0d0
+        !else if (kind==3) then
+            !phi=z           
+            !dpox=0.0d0
+            !dpoy=0.0d0
+            !dpoz=1.0d0          
+        !endif
+        !!
+        !return
+    !end subroutine  dinp0         
+        subroutine  dinp0(i,p,phi,dpdx)
+            implicit    none
+            integer,intent(in) :: i
+            real(8),intent(in)::  p(3)
+            real*8,intent(out)::  phi,dpdx(3)
+            
+            
+            if (i==1) then
+                phi=1.0d0           
+                dpdx=0.0d0
+            else if (i==2) then
+                phi=p(1)       
+                dpdx=(/1.0d0,0.0d0,0.0d0/)
+            else if (i==3) then
+                phi=p(2)           
+                dpdx=(/0.0d0,1.0d0,0.0d0/)
+            else if (i==4) then
+                phi=p(3)           
+                dpdx=(/0.0d0,0.0d0,1.0d0/)
+            endif
+        end subroutine
         
 C
 C *********************************************************
