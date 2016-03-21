@@ -122,6 +122,8 @@
         X0=EX(IS)*XP
         Y0=EY(IS)*YP
         Z0= ZP
+        amatrix(is,:)=0.0d0
+        bmatrix(is,:)=0.0d0
 
 
         DO 100    N=1,   NSAMB     
@@ -190,6 +192,8 @@
 
         inode=ncon(ielem,nodj) ! corresponding node id
         inodd=ncond(ielem,nodj)!                 normal id
+        amatrix(is,:)=0.0d0
+        bmatrix(is,:)=0.0d0
 
         if(ncn(ielem).eq.8)  then 
 
@@ -238,11 +242,16 @@
         passed_nrml(:,7) = dxyz(:,ncond(ielem,6))
         passed_nrml(:,8) = dxyz(:,ncond(ielem,8))
         call preset_src(si,eta,xyz(1:3,ncon(ielem,nodj)),origin_offset)
+
+        ! add mirrored sink
+        call norm_int2(is,ielem,8,xp,yp,zp,amatrix,bmatrix)
+        !write(9013,'(2i6,8f12.6)') ielem,nodj,amatrix(is,:)
+
         call eval_singular_elem(cnr_glb_mtx,passed_nrml,result0,result1,result2)
 
         do j=1, ncn(ielem)
-            amatrix(is,j) = result0(j)
-            bmatrix(is,j) = result1(j)
+            amatrix(is,j) = amatrix(is,j)+result0(j)
+            bmatrix(is,j) = bmatrix(is,j)+result1(j)
         end do
         write(9010,'(2i6,8f12.6)') ielem,nodj,result2
         !bmatrix=0.0d0
@@ -250,3 +259,60 @@
 
     end subroutine 
                
+        SUBROUTINE NORM_INT2(IS,IELEM,NCNE,XP,YP,ZP,AMATRIX,BMATRIX)
+        USE MVAR_MOD
+        IMPLICIT   NONE  
+ 
+        INTEGER IS,IELEM,N,NSAMB,NCNE,J,IP
+        REAL*8  XP,YP,ZP,EX(4),EY(4)
+        REAL*8  X,X0,Y,Y0,Z,Z0 
+        REAL*8  NX,NY,NZ,DGN
+        REAL*8  DUM,WKX,PHi
+        REAL*8  BMATRIX(4,8),AMATRIX(4,8),GXF(4)
+!   
+        DATA EX/  1.0d0,  1.0d0, -1.0d0, -1.0d0/                                                  
+        DATA EY/  1.0d0, -1.0d0, -1.0d0,  1.0d0/
+    write(9013,'(2i6,3f14.8)') ielem,ncne,xp,yp,zp
+        write(9013,'(2i6,8f12.6)') ielem,8,amatrix(is,:)
+!
+!    PRINT *,' IN  NSWP0'
+!
+        NSAMB=16
+        IF(NCNE.EQ.6)   NSAMB=4
+
+        X0=EX(IS)*XP
+        Y0=EY(IS)*YP
+        Z0= ZP
+
+
+        DO 100    N=1,   NSAMB     
+
+         X =SAMBXY(IELEM,N,1)! guassian point info
+         Y =SAMBXY(IELEM,N,2)
+         Z =SAMBXY(IELEM,N,3)
+
+       
+       !mirrored sink
+       !GXF=-GXF
+
+        CALL DTGRN1(H,X,X0,Y,Y0,Z,Z0,GXF) 
+!                      
+          NX=EX(IS)*DSAMB(IELEM,N,1)
+          NY=EY(IS)*DSAMB(IELEM,N,2)
+          NZ=          DSAMB(IELEM,N,3)
+          DGN=GXF(2)*Nx+GXF(3)*Ny+GXF(4)*Nz
+        !write(9013,'(a5,3f16.6)') 'xyz',x,y,z
+        !write(9013,'(a5,3f16.6)') 'xyz0',x0,y0,z0
+        !write(9013,'(a5,3f16.6)') 'nxyz',nx,ny,nz
+        !write(9013,'(a5,3f16.6)') 'gxf',gxf(2:4)
+          
+                         
+        DO   J=1,   NCNE
+          BMATRIX(IS,J)=BMATRIX(IS,J)+GXF(1)*SAMB(IELEM,N,J)!line integration
+          AMATRIX(IS,J)=AMATRIX(IS,J)+DGN*SAMB(IELEM,N,J)!line integration
+        ENDDO
+
+100     CONTINUE
+!
+        RETURN
+        END
