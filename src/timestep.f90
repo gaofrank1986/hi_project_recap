@@ -31,7 +31,7 @@
  
          TimeRK=TIME 
 !       
-        if ((timerk)<1e-6) then
+        if (abs(timerk - 0*tstep)<1e-6) then
           rampf=1
           do inode =1,nnf
                   xp = xyz(1,inode)

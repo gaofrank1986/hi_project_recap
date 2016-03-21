@@ -34,7 +34,7 @@
         SR =DSQRT(SR2) 
         SR1=DSQRT(ST2)   
 ! 
-        XHF(1)= 1.D0/SR! +  1.D0/SR1 
+        XHF(1)= 1.D0/SR +  1.D0/SR1 
         XHF(2)=-DX/SR**3 -  DX /SR1**3 
         XHF(3)=-DY/SR**3 -  DY /SR1**3 
         XHF(4)=-DZ/SR**3 -  DZ1/SR1**3    
@@ -105,9 +105,13 @@
         ST5=ST3*ST2
 ! 
         XHF(1)=DZ/SR3 -DZ1/ST3 
+        ! change to mirrored sink
+        !XHF(1)=DZ/SR3 +DZ1/ST3 
         XHF(2)=3.0d0*DX*(-DZ/SR5 + DZ1/ST5)
         XHF(3)=3.0d0*DY*(-DZ/SR5 + DZ1/ST5) 
         XHF(4)=-3.0d0*DZ02/SR5+1.0d0/SR3+3.0d0*DZ12/ST5-1.0d0/ST3    
+        ! change to mirrored sink
+        !XHF(4)=-3.0d0*DZ02/SR5+1.0d0/SR3-3.0d0*DZ12/ST5+1.0d0/ST3    
 ! 
 	   ELSE
         SR2=RXY2+DZ02                      

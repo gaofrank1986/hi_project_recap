@@ -1,11 +1,13 @@
 module free_term
-     real(8),allocatable,protected,save :: fterm(:,:,:)
+     real(8),allocatable,public,save :: fterm(:,:,:)
      integer,private :: nsys,nnode
 contains
      subroutine init_ft(a,b)
           integer,intent(in) :: a,b
           nsys = a
           nnode = b
+          allocate(fterm(nnode,nsys,1:4))
+          fterm=0.0d0
      end subroutine
      
      subroutine get_free_term()
@@ -15,7 +17,6 @@ contains
           !nsys = 1
           !nnode = 5
           !print *,'nsys=',nsys,'   ,  nnode=',nnode
-          allocate(fterm(nnode,nsys,1:4))
           open(1001,file = './INPUT/fterm_final.txt',status='old')
           do j = 1,nnode
                do i=1,nsys
