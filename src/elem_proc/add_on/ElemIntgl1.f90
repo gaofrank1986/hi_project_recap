@@ -11,6 +11,7 @@
 !
         SUBROUTINE NORM_ELE1(IELEM,XP,YP,ZP,AMATRIX,BMATRIX)
         USE MVAR_MOD
+        use green_funcs,only:Gcombo1
         IMPLICIT   NONE 
       
         INTEGER IS,IP,N,ND,J,NP,IELEM
@@ -22,9 +23,11 @@
                  
           BMATRIX=0.0D0
           AMATRIX=0.0D0
+          
 
           do IS=1,   NSYS  
-              CALL NORM_INT1(IS,IELEM,NCN(IELEM),XP,YP,ZP,AMATRIX,BMATRIX) 
+              CALL NORM_INT1(IS,IELEM,NCN(IELEM),XP,YP,ZP,AMATRIX,BMATRIX,Gcombo1) 
+
               ! ncn(?) is element type
           end do
 !
@@ -100,55 +103,49 @@
 ! 
 ! ======================================================
 !                      
-        SUBROUTINE NORM_INT1(IS,IELEM,NCNE,XP,YP,ZP,AMATRIX,BMATRIX)
-        USE MVAR_MOD
-        IMPLICIT   NONE  
- 
-        INTEGER IS,IELEM,N,NSAMB,NCNE,J,IP
-        REAL*8  XP,YP,ZP,EX(4),EY(4)
-        REAL*8  X,X0,Y,Y0,Z,Z0 
-        REAL*8  NX,NY,NZ,DGN
-        REAL*8  DUM,WKX,PHi
-        REAL*8  BMATRIX(4,8),AMATRIX(4,8),GXF(4)
-!   
-        DATA EX/  1.0d0,  1.0d0, -1.0d0, -1.0d0/                                                  
-        DATA EY/  1.0d0, -1.0d0, -1.0d0,  1.0d0/
-!
-!    PRINT *,' IN  NSWP0'
-!
-        NSAMB=16
-        IF(NCNE.EQ.6)   NSAMB=4
+    subroutine norm_int1(is,ielem,ncne,xp,yp,zp,amatrix,bmatrix,bie_called)
+        use mvar_mod
+        use proj_cnst,only : ex,ey
+        implicit   none  
 
-        X0=EX(IS)*XP
-        Y0=EY(IS)*YP
-        Z0= ZP
+        integer,intent(in) :: is,ielem,ncne
+        real(8),intent(in) ::  xp,yp,zp
+        real(8),intent(inout) ::bmatrix(4,8),amatrix(4,8)
+        
+        interface
+            subroutine bie_called(h,p0,p,gxf)
+                real(8),intent(in) :: h,p0(3),p(3)
+                real(8),intent(out) :: gxf(4)
+            end subroutine
+        end interface
+        
+        real(8) :: dgn,gxf(4),p0(3),p(3),prefix(3),np(3)
+        integer :: n,nsamb,j
+
         amatrix(is,:)=0.0d0
         bmatrix(is,:)=0.0d0
 
+        nsamb=16
+        if(ncne.eq.6)   nsamb=4
+        prefix=(/ex(is),ey(is),1.0d0/)
+        p0 = prefix*(/xp,yp,zp/)
 
-        DO 100    N=1,   NSAMB     
+        do  n=1,   nsamb     
 
-         X =SAMBXY(IELEM,N,1)! guassian point info
-         Y =SAMBXY(IELEM,N,2)
-         Z =SAMBXY(IELEM,N,3)
-       
-        CALL DTGRN(H,X,X0,Y,Y0,Z,Z0,GXF) 
-        !CALL DTGRN(H,X,X0,Y,Y0,Z,Z0,GXF) 
-!                      
-          NX=EX(IS)*DSAMB(IELEM,N,1)
-          NY=EY(IS)*DSAMB(IELEM,N,2)
-          NZ=          DSAMB(IELEM,N,3)
-          DGN=GXF(2)*Nx+GXF(3)*Ny+GXF(4)*Nz
-                         
-        DO   J=1,   NCNE
-          BMATRIX(IS,J)=BMATRIX(IS,J)+GXF(1)*SAMB(IELEM,N,J)!line integration
-          AMATRIX(IS,J)=AMATRIX(IS,J)+DGN*SAMB(IELEM,N,J)!line integration
-        ENDDO
+            p=sambxy(ielem,n,1:3)
 
-100     CONTINUE
-!
-        RETURN
-        END
+            call bie_called(h,p,p0,gxf)
+
+            np = prefix*dsamb(ielem,n,1:3) 
+            dgn = dot_product(gxf(2:4),np)
+
+            do   j=1,   ncne
+                bmatrix(is,j)=bmatrix(is,j)+gxf(1)*samb(ielem,n,j)
+                amatrix(is,j)=amatrix(is,j)+dgn*samb(ielem,n,j)
+            enddo
+
+        enddo
+    end subroutine
 !
 !
 ! *************************************************************
