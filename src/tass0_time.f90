@@ -5,7 +5,7 @@
 !C * coefficients of the corresponding system of equationn *
 !C *                                                       *
 !C *********************************************************
-    !include './add_on/common_block.f90'
+    include './add_on/common_block.f90'
 
     subroutine tassb0
         use mvar_mod
@@ -42,18 +42,18 @@
              &                        h,xyz,dxyze,s_angle)    
 
             angle(inode)=1.0d0- s_angle
-            cmata(inode,inode,1:nsys)= -1.0d0+s_angle!angle(inode)
-            !amata(inode,inode,1:nsys)= 1.0d0-s_angle!angle(inode)
+            !cmata(inode,inode,1:nsys)= -1.0d0+s_angle!angle(inode)
+            amata(inode,inode,1:nsys)= 1.0d0-s_angle!angle(inode)
             !  ---------------------------
             !  Integration on the free surface
                 
             do   ielem=1,  nelemf
                 call comp_link(ielem,inode,ii)
                 if (ii .eq. 0)   then! if src node not on element 
-                    call norm_ele0(ielem,xp,yp,zp,amatrix,bmatrix)
+                    call norm_ele1(ielem,xp,yp,zp,amatrix,bmatrix)
 
                 else if (ii .ne. 0)   then 
-                    call sing_ele0(inode,ielem,nodqua(inode),xp,yp,zp,&
+                    call sing_ele1(inode,ielem,nodqua(inode),xp,yp,zp,&
                         &                   amatrix,bmatrix)
                 end if 
                 !call testopt(1,1,ielem)
@@ -65,9 +65,9 @@
 
                 call comp_link(ielem,inode,ii)
                 if (ii .eq. 0)   then 
-                    call norm_ele0(ielem,xp,yp,zp,amatrix,bmatrix)
+                    call norm_ele1(ielem,xp,yp,zp,amatrix,bmatrix)
                 else if (ii .ne. 0)   then 
-                    call sing_ele0(inode,ielem,nodqua(inode),xp,yp,zp,&
+                    call sing_ele1(inode,ielem,nodqua(inode),xp,yp,zp,&
                      &                   amatrix,bmatrix)
                 end if
                 call common_block(1,ielem,inode,amatrix,bmatrix,1)
@@ -168,10 +168,10 @@
 !
         !write(102, *) '  =========== before rludcmp =============='
 
-        do i = 1,nnode
-            do j = 1,nnode
-                write(400,*) amata(i,j,1:nsys)
-        end do;end do
+!        do i = 1,nnode
+            !do j = 1,nnode
+                !write(400,*) amata(i,j,1:nsys)
+        !end do;end do
 
   !      do i = 1,nnode
                 !write(401,*) amata(i,i,1:nsys)
@@ -181,7 +181,6 @@
             call rludcmp(ip,amata,nnode,nnode,nsys,indx,dsign)  
         enddo
         write(*,*) "Finished inversing LHS matrix............"
-        stop
 
                 write(102, *) 
         write(102, *)
@@ -206,72 +205,72 @@
         enddo
     end subroutine 
 
-    subroutine common_block(flag1,ielem,inode,amatrix,bmatrix,is_ft)!,fterm_coef)
-        use mvar_mod,only :ncn,ncon,ncond,nsys,nnf,amata,cmata,xyz,dxyz
-        use mfunc_mod,only: dinp0
-        use free_term,only:fterm
-        use proj_cnst,only:rsn,ex,ey
+    !subroutine common_block(flag1,ielem,inode,amatrix,bmatrix,is_ft)!,fterm_coef)
+        !use mvar_mod,only :ncn,ncon,ncond,nsys,nnf,amata,cmata,xyz,dxyz
+        !use mfunc_mod,only: dinp0
+        !use free_term,only:fterm
+        !use proj_cnst,only:rsn,ex,ey
 
-        implicit none
-        integer,intent(in) :: ielem,inode,flag1
-        real(8),intent(in) :: amatrix(4,8),bmatrix(4,8)
-        integer :: is_ft
+        !implicit none
+        !integer,intent(in) :: ielem,inode,flag1
+        !real(8),intent(in) :: amatrix(4,8),bmatrix(4,8)
+        !integer :: is_ft
 
-        integer :: jncon,jnrml,j,ip,is,i
-        real(8) :: dpdn,phi,prefix(3),np_j(3),p_j(3)
-        real(8) :: dpdx(3)
+        !integer :: jncon,jnrml,j,ip,is,i
+        !real(8) :: dpdn,phi,prefix(3),np_j(3),p_j(3)
+        !real(8) :: dpdx(3)
         
-        do     j=1,  ncn(ielem) 
-            jncon=ncon(ielem,j)!jth node in ielem
-            jnrml=ncond(ielem,j)  !jth nrml in ielem
-            do     ip=1, nsys          
-                prefix=(/ex(ip),ey(ip),1.0d0/)
-                p_j=dot_product(prefix,xyz(:,jncon))
-                np_j=dot_product(prefix,dxyz(1:3,jnrml))
+        !do     j=1,  ncn(ielem) 
+            !jncon=ncon(ielem,j)!jth node in ielem
+            !jnrml=ncond(ielem,j)  !jth nrml in ielem
+            !do     ip=1, nsys          
+                !prefix=(/ex(ip),ey(ip),1.0d0/)
+                !p_j=dot_product(prefix,xyz(:,jncon))
+                !np_j=dot_product(prefix,dxyz(1:3,jnrml))
 
-                if (flag1.eq.0) then
-                    do   is=1, nsys    
-                        amata(inode,jncon,ip)=amata(inode,jncon,ip)+rsn(is,ip)*bmatrix(is,j)
+                !if (flag1.eq.0) then
+                    !do   is=1, nsys    
+                        !amata(inode,jncon,ip)=amata(inode,jncon,ip)+rsn(is,ip)*bmatrix(is,j)
 
-                        cmata(inode,jnrml,ip)=cmata(inode,jnrml,ip)+rsn(is,ip)*amatrix(is,j)
-                    enddo
-                else 
-                    do  is=1, nsys    
-                        !waterline node need special treatment
-                        if(jncon .gt. nnf)  then
-                            amata(inode,jncon,ip)=amata(inode,jncon,ip)-rsn(is,ip)*amatrix(is,j)
-                        else
-                            cmata(inode,jncon,ip)=cmata(inode,jncon,ip)+rsn(is,ip)*amatrix(is,j)!*phi2
-                        endif
-                        cmata(inode,jnrml,ip)=cmata(inode,jnrml,ip)-rsn(is,ip)*bmatrix(is,j)!*dpdn
-                    enddo
-                end if
+                        !cmata(inode,jnrml,ip)=cmata(inode,jnrml,ip)+rsn(is,ip)*amatrix(is,j)
+                    !enddo
+                !else 
+                    !do  is=1, nsys    
+                        !!waterline node need special treatment
+                        !if(jncon .gt. nnf)  then
+                            !amata(inode,jncon,ip)=amata(inode,jncon,ip)-rsn(is,ip)*amatrix(is,j)
+                        !else
+                            !cmata(inode,jncon,ip)=cmata(inode,jncon,ip)+rsn(is,ip)*amatrix(is,j)!*phi2
+                        !endif
+                        !cmata(inode,jnrml,ip)=cmata(inode,jnrml,ip)-rsn(is,ip)*bmatrix(is,j)!*dpdn
+                    !enddo
+                !end if
 
-                if (is_ft.eq.1) then!
-                    do i = 1,4
-                        !call dinp0(i,xsb,ysb,zsb,phi,dpox,dpoy,dpoz)       
-                        !dpdn=dpox*nx+dpoy*ny+dpoz*nz
-                        call dinp0(i,p_j,phi,dpdx)
-                        dpdn=dot_product(dpdx,np_j)
-                        do    is=1, nsys             
-                            !fterm_coef(i,ip)=fterm_coef(i,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn        
-                            !fterm_coef(i,ip)=fterm_coef(i,ip)+rsn(is,ip)*amatrix(is,j)*phi
-                            fterm(inode,ip,i)=fterm(inode,ip,i)-rsn(is,ip)*bmatrix(is,j)*dpdn        
-                            fterm(inode,ip,i)=fterm(inode,ip,i)+rsn(is,ip)*amatrix(is,j)*phi
-                        enddo
-                    end do
-                else 
-                    !call dinp0(0,xsb,ysb,zsb,phi,dpox,dpoy,dpoz)      
-                    !phi = 1.0d0
-                    !do    is=1, nsys             
-                    !!fterm_coef(0,ip) = fterm_coef(0,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn
-                    !fterm_coef(0,ip) = fterm_coef(0,ip)+rsn(is,ip)*amatrix(is,j)*phi
+                !if (is_ft.eq.1) then!
+                    !do i = 1,4
+                        !!call dinp0(i,xsb,ysb,zsb,phi,dpox,dpoy,dpoz)       
+                        !!dpdn=dpox*nx+dpoy*ny+dpoz*nz
+                        !call dinp0(i,p_j,phi,dpdx)
+                        !dpdn=dot_product(dpdx,np_j)
+                        !do    is=1, nsys             
+                            !!fterm_coef(i,ip)=fterm_coef(i,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn        
+                            !!fterm_coef(i,ip)=fterm_coef(i,ip)+rsn(is,ip)*amatrix(is,j)*phi
+                            !fterm(inode,ip,i)=fterm(inode,ip,i)-rsn(is,ip)*bmatrix(is,j)*dpdn        
+                            !fterm(inode,ip,i)=fterm(inode,ip,i)+rsn(is,ip)*amatrix(is,j)*phi
+                        !enddo
                     !end do
+                !else 
+                    !!call dinp0(0,xsb,ysb,zsb,phi,dpox,dpoy,dpoz)      
+                    !!phi = 1.0d0
+                    !!do    is=1, nsys             
+                    !!!fterm_coef(0,ip) = fterm_coef(0,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn
+                    !!fterm_coef(0,ip) = fterm_coef(0,ip)+rsn(is,ip)*amatrix(is,j)*phi
+                    !!end do
  
-                end if
-                end do;end do !j,ip
+                !end if
+                !end do;end do !j,ip
 
-     end subroutine
+     !end subroutine
 
 
      subroutine topology_analysis
