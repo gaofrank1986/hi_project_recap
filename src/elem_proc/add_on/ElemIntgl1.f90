@@ -9,29 +9,23 @@
 !
 ! ======================================================
 !
-        SUBROUTINE NORM_ELE1(IELEM,XP,YP,ZP,AMATRIX,BMATRIX)
-        USE MVAR_MOD
-        use green_funcs,only:Gcombo1
-        IMPLICIT   NONE 
-      
-        INTEGER IS,IP,N,ND,J,NP,IELEM
-      
-        real(8) ::  xp,yp,zp 
-!       real(8) ::  x,y,z,x0,y0,z0,xsb,ysb,zsb       
+    subroutine norm_ele1(ielem,xp,yp,zp,amatrix,bmatrix)
 
-        real(8) ::  bmatrix(4,8),amatrix(4,8)
-                 
-          BMATRIX=0.0D0
-          AMATRIX=0.0D0
-          
+        use mvar_mod,only:ncn,nsys
+        use green_funcs,only:gcombo1
 
-          do IS=1,   NSYS  
-              CALL NORM_INT1(IS,IELEM,NCN(IELEM),XP,YP,ZP,AMATRIX,BMATRIX,Gcombo1) 
+        implicit   none 
+        integer,intent(in) :: ielem
+        real(8),intent(in) ::  xp,yp,zp 
+        real(8),intent(out) ::  bmatrix(4,8),amatrix(4,8)
 
-              ! ncn(?) is element type
-          end do
-!
-        END           
+        bmatrix=0.0d0
+        amatrix=0.0d0
+
+        do is=1,   nsys  
+            call norm_int(is,ielem,ncn(ielem),xp,yp,zp,amatrix,bmatrix,gcombo1) 
+        end do
+        end subroutine
 
 !
 ! ======================================================
@@ -64,7 +58,7 @@
                 IF(IS.EQ.1) THEN 
                     CALL SING_INT1(IS,IELEM,NODNUM,XP,YP,ZP,AMATRIX,BMATRIX)
                 ELSE IF( IS.NE.1 ) THEN   
-                    CALL NORM_INT1(IS,IELEM,NCN(IELEM),XP,YP,ZP,AMATRIX,BMATRIX)
+                    CALL NORM_INT(IS,IELEM,NCN(IELEM),XP,YP,ZP,AMATRIX,BMATRIX)
                     ! write(*,*) 'After Subroutine SGWP0_1'
                 END IF
              end do
@@ -74,7 +68,7 @@
             IF(IS.EQ.1.OR.IS.EQ.2) THEN  
                 CALL SING_INT1(IS,IELEM,NODNUM,XP,YP,ZP,AMATRIX,BMATRIX)
             ELSE IF(IS.EQ.3.OR.IS.EQ.4) THEN  
-                CALL NORM_INT1(IS,IELEM,NCN(IELEM),XP,YP,ZP,AMATRIX,BMATRIX) 
+                CALL NORM_INT(IS,IELEM,NCN(IELEM),XP,YP,ZP,AMATRIX,BMATRIX) 
             END IF
             !
         200      CONTINUE  
@@ -84,7 +78,7 @@
           IF(IS.EQ.1.OR.IS.EQ.4) THEN   
             CALL SING_INT1(IS,IELEM,NODNUM,XP,YP,ZP,AMATRIX,BMATRIX)
           ELSE  IF(IS.EQ.2.OR.IS.EQ.3) THEN  
-            CALL NORM_INT1(IS,IELEM,NCN(IELEM),XP,YP,ZP,AMATRIX,BMATRIX) 
+            CALL NORM_INT(IS,IELEM,NCN(IELEM),XP,YP,ZP,AMATRIX,BMATRIX) 
           END IF
 300      CONTINUE
 !
@@ -103,7 +97,7 @@
 ! 
 ! ======================================================
 !                      
-    subroutine norm_int1(is,ielem,ncne,xp,yp,zp,amatrix,bmatrix,bie_called)
+    subroutine norm_int(is,ielem,ncne,xp,yp,zp,amatrix,bmatrix,bie_called)
         use mvar_mod
         use proj_cnst,only : ex,ey
         implicit   none  
@@ -126,7 +120,7 @@
         bmatrix(is,:)=0.0d0
 
         nsamb=16
-        if(ncne.eq.6)   nsamb=4
+        !if(ncne.eq.6)   nsamb=4
         prefix=(/ex(is),ey(is),1.0d0/)
         p0 = prefix*(/xp,yp,zp/)
 
@@ -160,6 +154,7 @@
         use trvar_mod    
         use mfunc_mod
         use hi_intg
+        use green_funcs,only:Gcombo1_2
 
         implicit none
 
@@ -242,7 +237,7 @@
         call preset_src(si,eta,xyz(1:3,ncon(ielem,nodj)),origin_offset)
 
         ! add mirrored sink
-        call norm_int2(is,ielem,8,xp,yp,zp,amatrix,bmatrix)
+        call norm_int(is,ielem,8,xp,yp,zp,amatrix,bmatrix,Gcombo1_2)
         !write(9013,'(2i6,8f12.6)') ielem,nodj,amatrix(is,:)
 
         call eval_singular_elem(cnr_glb_mtx,passed_nrml,result0,result1,result2)
