@@ -133,6 +133,7 @@
          Z =SAMBXY(IELEM,N,3)
        
         CALL DTGRN(H,X,X0,Y,Y0,Z,Z0,GXF) 
+        !CALL DTGRN(H,X,X0,Y,Y0,Z,Z0,GXF) 
 !                      
           NX=EX(IS)*DSAMB(IELEM,N,1)
           NY=EY(IS)*DSAMB(IELEM,N,2)

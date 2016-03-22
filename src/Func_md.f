@@ -180,39 +180,39 @@ C       DPOZ = 0
 !  Kind=3: for a uniform current in the z-direction phi=z 
 !
 !
-    !subroutine  dinp0(kind,x,y,z,phi,dpox,dpoy,dpoz)
-        !implicit    none
-        
-        !integer kind
-        !real*8,intent(in)::   x,y,z
-        !real*8,intent(out)::  phi,dpox,dpoy,dpoz
-        
-        
-        !if (kind==0) then
-            !phi=1.0d0           
-            !dpox=0.0d0
-            !dpoy=0.0d0
-            !dpoz=0.0d0
-        !else if (kind==1) then
-            !phi=x       
-            !dpox=1.0d0
-            !dpoy=0.0d0
-            !dpoz=0.0d0
-        !else if (kind==2) then
-            !phi=y           
-            !dpox=0.0d0
-            !dpoy=1.0d0
-            !dpoz=0.0d0
-        !else if (kind==3) then
-            !phi=z           
-            !dpox=0.0d0
-            !dpoy=0.0d0
-            !dpoz=1.0d0          
-        !endif
-        !!
-        !return
-    !end subroutine  dinp0         
-        subroutine  dinp0(i,p,phi,dpdx)
+        subroutine  dinp0(kind,x,y,z,phi,dpox,dpoy,dpoz)
+            implicit    none
+            
+            integer kind
+            real*8,intent(in)::   x,y,z
+            real*8,intent(out)::  phi,dpox,dpoy,dpoz
+            
+            
+            if (kind==0) then
+                phi=1.0d0           
+                dpox=0.0d0
+                dpoy=0.0d0
+                dpoz=0.0d0
+            else if (kind==1) then
+                phi=x       
+                dpox=1.0d0
+                dpoy=0.0d0
+                dpoz=0.0d0
+            else if (kind==2) then
+                phi=y           
+                dpox=0.0d0
+                dpoy=1.0d0
+                dpoz=0.0d0
+            else if (kind==3) then
+                phi=z           
+                dpox=0.0d0
+                dpoy=0.0d0
+                dpoz=1.0d0          
+            endif
+            !
+            return
+        end subroutine  dinp0         
+        subroutine  dinp1(i,p,phi,dpdx)
             implicit    none
             integer,intent(in) :: i
             real(8),intent(in)::  p(3)

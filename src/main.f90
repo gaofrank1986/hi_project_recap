@@ -62,13 +62,17 @@ program hi_project
 
     call get_gaussian_data(xc,yc,zc)                  
     call init_hi_var() 
-    call get_free_term()
+    !call get_free_term()
     !call tassb0_freq
     call tassb0
     call init_gradient(nnf,nelemf,xyze(1:2,:,1:nelemf),nodele(1:nnf,1),nodelj(1:nnf,1))
     !call tassbt
     time=0.0d0
-    tstep=0.05
+    
+    tstep=0.005
+    do itime = 0,2000
+        print *,itime,'/2000'
+        time = itime*tstep
     call time_intg_rk4
   !  do inode =1,nnf
         !xp = xyz(1,inode)
@@ -77,21 +81,41 @@ program hi_project
      !write(4003,1202) bkn(inode,1),poxy(xp,yp,zp)
      !write(4004,1202) et(inode,1),eti(xp,yp)
      !end do
+     if (mod(itime,10).eq.0) then
         do inode =1,nnf
             xp = xyz(1,inode)
             yp = xyz(2,inode)
             zp = xyz(3,inode)
-            write(7000+itime,1202) bkn(inode,1),poxy(xp,yp,zp)
             
-            write(8000+itime,1202) et(inode,1),eti(xp,yp)
+            write(7000+itime/10,1202) bkn(inode,1),poxy(xp,yp,zp)
+            
+            write(8000+itime/10,1202) et(inode,1),eti(xp,yp)
         end do
+      endif
+        !do inode =nnf+1,nnoded
+            !xp = xyz(1,inode)
+            !yp = xyz(2,inode)
+            !zp = xyz(3,inode)
+            !write(7000+itime,1202) bkn(inode,1),poxy(xp,yp,zp)
+        !end do
+        bkn_o=bkn
+        et_o=et
+        !do inode =1,nnf
+            !xp = xyz(1,inode)
+            !yp = xyz(2,inode)
+            !zp = xyz(3,inode)
+            !write(7000+itime,1202) bkn(inode,1),poxy(xp,yp,zp)
+            
+            !write(8000+itime,1202) et(inode,1),eti(xp,yp)
+        !end do
 
-        do inode =nnf+1,nnode
-            xp = xyz(1,inode)
-            yp = xyz(2,inode)
-            zp = xyz(3,inode)
-            write(8500+itime,1202) unkn(inode,1),poxy(xp,yp,zp)
-        end do
+        !do inode =nnf+1,nnode
+            !xp = xyz(1,inode)
+            !yp = xyz(2,inode)
+            !zp = xyz(3,inode)
+            !write(8500+itime,1202) unkn(inode,1),poxy(xp,yp,zp)
+        !end do
+    end do
 
      1202 format(2f14.8)
     print *,"=================== main program ends ==============="
