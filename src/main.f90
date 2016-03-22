@@ -69,9 +69,9 @@ program hi_project
     !call tassbt
     time=0.0d0
     
-    tstep=0.005
-    do itime = 0,2000
-        print *,itime,'/2000'
+    tstep=0.05
+    do itime = 0,200
+        print *,itime,'/200'
         time = itime*tstep
     call time_intg_rk4
   !  do inode =1,nnf
@@ -81,17 +81,17 @@ program hi_project
      !write(4003,1202) bkn(inode,1),poxy(xp,yp,zp)
      !write(4004,1202) et(inode,1),eti(xp,yp)
      !end do
-     if (mod(itime,10).eq.0) then
+     !if (mod(itime,10).eq.0) then
         do inode =1,nnf
             xp = xyz(1,inode)
             yp = xyz(2,inode)
             zp = xyz(3,inode)
             
-            write(7000+itime/10,1202) bkn(inode,1),poxy(xp,yp,zp)
+            write(7000+itime,1202) bkn(inode,1),poxy(xp,yp,zp)
             
-            write(8000+itime/10,1202) et(inode,1),eti(xp,yp)
+            write(8000+itime,1202) et(inode,1),eti(xp,yp)
         end do
-      endif
+      !endif
         !do inode =nnf+1,nnoded
             !xp = xyz(1,inode)
             !yp = xyz(2,inode)
