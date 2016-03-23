@@ -12,6 +12,7 @@
         SUBROUTINE NORM_ELE0(IELEM,XP,YP,ZP,AVAL,BVAL)
         
 	    USE MVAR_MOD
+        use green_funcs,only:Gcombo0
         IMPLICIT   NONE 
 	  
 	    INTEGER  IS,ND,J,NP,IELEM,NCNE
@@ -27,7 +28,7 @@
           BVAL=0.0D0
 !
         DO 100   IS=1,   NSYS  
-          CALL NORM_INT0(IS,IELEM,NCNE,XP,YP,ZP,AVAL,BVAL)
+          CALL NORM_INT(IS,IELEM,NCNE,XP,YP,ZP,AVAL,BVAL,gcombo0)
 100     CONTINUE
 !
         RETURN
