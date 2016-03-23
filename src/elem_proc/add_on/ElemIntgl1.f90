@@ -9,6 +9,8 @@
 !
 ! ======================================================
 !
+    !< norm ele1 is wrapper function for norm integration
+    !!
     subroutine norm_ele1(ielem,xp,yp,zp,amatrix,bmatrix)
 
         use mvar_mod,only:ncn,nsys
@@ -19,11 +21,23 @@
         real(8),intent(in) ::  xp,yp,zp 
         real(8),intent(out) ::  bmatrix(4,8),amatrix(4,8)
 
+        integer :: is
+
+        interface
+            subroutine gcombo(h,p0,p,gxf)
+                real(8),intent(in) :: h,p0(3),p(3)
+                real(8),intent(out) :: gxf(4)
+            end subroutine
+        end interface
+
+        procedure(gcombo),pointer :: gpointer => NULL()
+        gpointer => gcombo1
+        
         bmatrix=0.0d0
         amatrix=0.0d0
 
         do is=1,   nsys  
-            call norm_int(is,ielem,ncn(ielem),xp,yp,zp,amatrix,bmatrix,gcombo1) 
+            call norm_int(is,ielem,ncn(ielem),xp,yp,zp,amatrix,bmatrix,gpointer) 
         end do
         end subroutine
 
@@ -34,25 +48,24 @@
 !
 ! ======================================================
 !
-       SUBROUTINE SING_ELE1(INODE,IELEM,NUMQUA,XP,YP,ZP,AMATRIX,BMATRIX)
-       USE MVAR_MOD
-       USE MFUNC_mod
-!
-      IMPLICIT   NONE  
-!
-      INTEGER I,J,IS,IELEM,INODE,NODNUM,ND,NP,NSAMB,NUMQUA
-        REAL*8  XP,YP,ZP,XYZT(3,8),DXYZT(3,8)
-        REAL*8 BMATRIX(4,8),AMATRIX(4,8)
-!
-        DO 5     I=1,  NCN(IELEM)
-         
-         IF(INODE.EQ.NCON(IELEM,I)) NODNUM=I ! get node num of inode
+    subroutine sing_ele1(inode,ielem,numqua,xp,yp,zp,amatrix,bmatrix)
+        use mvar_mod
+        !use mfunc_mod
 
-5       CONTINUE
-!
+        implicit   none  
+
+        integer i,j,is,ielem,inode,nodnum,nd,np,nsamb,numqua
+        real*8  xp,yp,zp,xyzt(3,8),dxyzt(3,8)
+        real*8 bmatrix(4,8),amatrix(4,8)
+
+        do   i=1,  ncn(ielem)
+            if(inode.eq.ncon(ielem,i)) nodnum=i ! get node num of inode
+        enddo
+
+ 
           BMATRIX= 0.0d0     
           AMATRIX= 0.0d0  
-!
+ 
         IF(NUMQUA.EQ.0)       THEN
             do IS=1,  NSYS
                 IF(IS.EQ.1) THEN 
@@ -62,7 +75,7 @@
                     ! write(*,*) 'After Subroutine SGWP0_1'
                 END IF
              end do
-!
+
         ELSE IF(NUMQUA.EQ.2) THEN
         DO 200 IS=1,NSYS     
             IF(IS.EQ.1.OR.IS.EQ.2) THEN  
@@ -70,9 +83,9 @@
             ELSE IF(IS.EQ.3.OR.IS.EQ.4) THEN  
                 CALL NORM_INT(IS,IELEM,NCN(IELEM),XP,YP,ZP,AMATRIX,BMATRIX) 
             END IF
-            !
+
         200      CONTINUE  
-!
+
         ELSE IF(NUMQUA.EQ.4) THEN
          DO 300  IS=1,  NSYS
           IF(IS.EQ.1.OR.IS.EQ.4) THEN   
@@ -81,14 +94,12 @@
             CALL NORM_INT(IS,IELEM,NCN(IELEM),XP,YP,ZP,AMATRIX,BMATRIX) 
           END IF
 300      CONTINUE
-!
         ELSE IF(NUMQUA.EQ.5) THEN
          DO 400 IS=1, NSYS  
             CALL SING_INT1(IS,IELEM,NODNUM,XP,YP,ZP,AMATRIX,BMATRIX)
 400      CONTINUE
         ENDIF
-!
-        RETURN
+
         END
                            
 ! ======================================================
