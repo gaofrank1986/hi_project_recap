@@ -8,31 +8,27 @@
 !
 ! ======================================================
         include './add_on/ElemIntgl1.f90'
-!
-        SUBROUTINE NORM_ELE0(IELEM,XP,YP,ZP,AVAL,BVAL)
-        
-	    USE MVAR_MOD
-        use green_funcs,only:Gcombo0
-        IMPLICIT   NONE 
-	  
-	    INTEGER  IS,ND,J,NP,IELEM,NCNE
-	    REAL*8  XP,YP,ZP 
-        REAL*8  AVAL(4,8),BVAL(4,8)
-!   
-!            
-	      NCNE=NCN(IELEM)
-	                 
-!	 Print *,' In TINBOD   PI=',PI             
-!
-          AVAL=0.0D0
-          BVAL=0.0D0
-!
-        DO 100   IS=1,   NSYS  
-          CALL NORM_INT(IS,IELEM,NCNE,XP,YP,ZP,AVAL,BVAL,gcombo0)
-100     CONTINUE
-!
-        RETURN
-        END           
+
+    subroutine norm_ele0(ielem,xp,yp,zp,aval,bval)
+
+        use mvar_mod
+        use green_funcs,only:gcombo0
+        implicit   none 
+
+        integer  is,nd,j,np,ielem,ncne
+        real*8  xp,yp,zp 
+        real*8  aval(4,8),bval(4,8)
+
+        ncne=ncn(ielem)
+
+        aval=0.0d0
+        bval=0.0d0
+
+        do    is=1,   nsys  
+            call norm_int(is,ielem,ncne,xp,yp,zp,aval(is,:),bval(is,:),gcombo0)
+        end do
+
+        end           
 
 !
 ! ======================================================
@@ -79,7 +75,7 @@
           IF(IS.EQ.1) THEN 
             CALL SING_INT0(IS,IELEM,nodnum,XP,YP,ZP,AVAL,BVAL)
           ELSE IF(IS.NE.1 ) THEN   
-            CALL NORM_INT0(IS,IELEM,NCN(IELEM),XP,YP,ZP,AVAL,BVAL)
+            CALL NORM_INT(IS,IELEM,NCN(IELEM),XP,YP,ZP,AVAL,BVAL)
           END IF
 100      CONTINUE
 !
@@ -88,7 +84,7 @@
           IF(IS.EQ.1.OR.IS.EQ.2) THEN
             CALL SING_INT0(IS,IELEM,XP,YP,ZP,AVAL,BVAL)
           ELSE IF(IS.EQ.3.OR.IS.EQ.4) THEN  
-            CALL NORM_INT0(IS,IELEM,NCN(IELEM),XP,YP,ZP,AVAL,BVAL)
+            !CALL NORM_INT(IS,IELEM,NCN(IELEM),XP,YP,ZP,AVAL,BVAL)
           END IF
 !
 200      CONTINUE  
@@ -98,7 +94,7 @@
           IF(IS.EQ.1.OR.IS.EQ.4) THEN   
             CALL SING_INT0(IS,IELEM,XP,YP,ZP,AVAL,BVAL)
           ELSE IF(IS.EQ.2.OR.IS.EQ.3) THEN  
-            CALL NORM_INT0(IS,IELEM,NCN(IELEM),XP,YP,ZP,AVAL,BVAL)
+            !CALL NORM_INT(IS,IELEM,NCN(IELEM),XP,YP,ZP,AVAL,BVAL)
           END IF
 300      CONTINUE
 !
@@ -110,132 +106,49 @@
 !
         RETURN
         END
-                           
-!C ======================================================
-!C
-!C Integration on an element without source point
-!C 
-!C ======================================================
-!C                      
-      SUBROUTINE NORM_INT0(IS,IELEM,NCNE,XP,YP,ZP,AVAL,BVAL)
-	  USE MVAR_MOD
-	    USE MFUNC_mod
-      IMPLICIT   NONE  
- 
-	  INTEGER IS,IELEM,N,NSAMB,NCNE,J,IP
-      REAL*8  XP,YP,ZP,EX(4,4),EY(4,4)
-	  REAL*8  X,Y,Z,X0,Y0,Z0   
+        
+    !<  -----------------------------------------------
+    !<  element integration with src point on one node
+    !!  method only capable of Gfunc desingularizaito
+    
+    subroutine sing_int0(is,ielem,nodnum,xp,yp,zp,aval,bval)
+        use mvar_mod
+        use green_funcs,only:gcombo0
+        use proj_cnst,only:ex,ey
+        use trvar_mod
+        implicit   none  
+        
+        integer is,ielem,n,j,ip,nodnum
+        real*8  xp,yp,zp!,ex(4,4),ey(4,4)
+        real*8  x,y,z,x0,y0,z0      
+        real*8  nx,ny,nz,dgn
+        real*8  aval(4,8),bval(4,8),gxf(4),p(3),p0(3),np(3)
 
-      REAL*8  NX,NY,NZ,DGN
-      REAL*8  AVAL(4,8),BVAL(4,8),GXF(4)
-!   
-	  DATA EX/  1.0d0,  1.0d0, -1.0d0, -1.0d0,    &
-                1.0d0,  1.0d0, -1.0d0, -1.0d0,    &
-               -1.0d0, -1.0d0,  1.0d0,  1.0d0,    &
-               -1.0d0, -1.0d0,  1.0d0,  1.0d0/
-!                                                  
-	  DATA EY/  1.0d0, -1.0d0, -1.0d0,  1.0d0,    &
-               -1.0d0,  1.0d0,  1.0d0, -1.0d0,    &
-               -1.0d0,  1.0d0,  1.0d0, -1.0d0,    &
-                1.0d0, -1.0d0, -1.0d0,  1.0d0/
-!
-!
-!	 PRINT *,' IN  NORM_INT0'
-!
 
-	   X0=EX(IS,1)*XP
-	   Y0=EY(IS,1)*YP
-	   Z0= ZP
+        x0=ex(is)*xp
+        y0=ey(is)*yp
+        z0= zp
+        p0=(/x0,y0,z0/)
 
-        NSAMB=16
-        IF(NCNE.EQ.6)   NSAMB=4
+        do n=1, nosamp
 
-        DO 100    N=1,   NSAMB     
+            p= xynod(1:3,n)
+            np=dxynod(1:3,n)
 
-	   X =SAMBXY(IELEM,N,1)
-	   Y =SAMBXY(IELEM,N,2)
-	   Z =SAMBXY(IELEM,N,3)
+            call gcombo0 (h,p,p0,gxf) 
+            dgn = dot_product(gxf(2:4),np)
 
-	   CALL	TGRN (H,X,X0,Y,Y0,Z,Z0,GXF) 
-! 
-         NX=DSAMB(IELEM,N,1)
-         NY=DSAMB(IELEM,N,2)
-         NZ=DSAMB(IELEM,N,3)
-         !write(9012,'(4f10.5)') norm2(dsamb(ielem,n,1:3)),nx,ny,nz 
-                                           
-         DGN=GXF(2)*Nx+GXF(3)*Ny+GXF(4)*Nz           
-!
-        DO  J=1,   NCNE
-         BVAL(IS,J)=BVAL(IS,J)+GXF(1)*SAMB(IELEM,N,J)
-         AVAL(IS,J)=AVAL(IS,J)+DGN*SAMB(IELEM,N,J)
-        ENDDO
-!
-!
-100     CONTINUE
-!
-        RETURN
-        END
-!
-! ===========================================================
-! Integration on an element with source point
-!
-       SUBROUTINE SING_INT0(IS,IELEM,nodnum,XP,YP,ZP,AVAL,BVAL)
-	   USE MVAR_MOD
-	    USE MFUNC_mod
-	   USE TRVAR_MOD
-       IMPLICIT   NONE  
-!
-	   INTEGER IS,IELEM,N,J,IP,nodnum
-	   REAL*8  XP,YP,ZP,EX(4,4),EY(4,4)
-	   REAL*8  X,Y,Z,X0,Y0,Z0      
-	   REAL*8  NX,NY,NZ,DGN
-       REAL*8  AVAL(4,8),BVAL(4,8),GXF(4)
-!
-	  DATA EX/  1.0d0,  1.0d0, -1.0d0, -1.0d0,    &
-                1.0d0,  1.0d0, -1.0d0, -1.0d0,    &
-               -1.0d0, -1.0d0,  1.0d0,  1.0d0,    &
-               -1.0d0, -1.0d0,  1.0d0,  1.0d0/
-!                                                  
-	  DATA EY/  1.0d0, -1.0d0, -1.0d0,  1.0d0,    &
-               -1.0d0,  1.0d0,  1.0d0, -1.0d0,    &
-               -1.0d0,  1.0d0,  1.0d0, -1.0d0,    &
-                1.0d0, -1.0d0, -1.0d0,  1.0d0/
-!
-!   
-201	  FORMAT(' In SING_INT0    XP, YP, ZP=',3F12.4)
-!
- 
-	  X0=EX(IS,1)*XP
-	  Y0=EY(IS,1)*YP
-	  Z0= ZP
+            do j=1, ncn(ielem)
+                aval(is,j)=aval(is,j)+dgn*samnod(n,j)
+                bval(is,j)=bval(is,j)+gxf(1)*samnod(n,j)
+            enddo
+        enddo
+            !if(ielem>nelemf) then
+            !write(9011,'(2i6,8f12.6)') ielem,nodnum,aval(is,:)
+            !call sing_int1(is,ielem,nodnum,xp,yp,zp,aval,bval) 
+            !end if
+            !
+    end subroutine
 
-      DO 130 N=1, NOSAMP
-	
-	  X =XYNOD(1,N)
-	  Y =XYNOD(2,N)
-	  Z =XYNOD(3,N)
-
-	  CALL	TGRN (H,X,X0,Y,Y0,Z,Z0,GXF) 
-!
-        DGN=GXF(2)*DXYNOD(1,N)+GXF(3)*DXYNOD(2,N)+   &
-              GXF(4)*DXYNOD(3,N)             
-
-!	  write(6,*) ' DGN=',DGN
-
-        DO J=1, NCN(IELEM)
-         AVAL(IS,J)=AVAL(IS,J)+DGN*SAMNOD(N,J)
-
-         BVAL(IS,J)=BVAL(IS,J)+GXF(1)*SAMNOD(N,J)
-       ENDDO
-!
-
-130     CONTINUE
-         !if(ielem>nelemf) then
-                 !write(9011,'(2i6,8f12.6)') ielem,nodnum,aval(is,:)
-                !call sing_int1(is,ielem,nodnum,xp,yp,zp,aval,bval) 
-         !end if
-!
-        RETURN
-        END
 
 

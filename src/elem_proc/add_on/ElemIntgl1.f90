@@ -32,12 +32,13 @@
 
         procedure(gcombo),pointer :: gpointer => NULL()
         gpointer => gcombo1
-        
+
         bmatrix=0.0d0
         amatrix=0.0d0
 
         do is=1,   nsys  
-            call norm_int(is,ielem,ncn(ielem),xp,yp,zp,amatrix,bmatrix,gpointer) 
+            call norm_int(is,ielem,ncn(ielem),xp,yp,zp,&
+                amatrix(is,:),bmatrix(is,:),gpointer) 
         end do
         end subroutine
 
@@ -50,85 +51,117 @@
 !
     subroutine sing_ele1(inode,ielem,numqua,xp,yp,zp,amatrix,bmatrix)
         use mvar_mod
-        !use mfunc_mod
+        use green_funcs,only:gcombo1,gcombo0
 
         implicit   none  
 
-        integer i,j,is,ielem,inode,nodnum,nd,np,nsamb,numqua
+        integer i,j,is,ielem,inode,nodnum,nd,np,nsamb,numqua,hi
         real*8  xp,yp,zp,xyzt(3,8),dxyzt(3,8)
         real*8 bmatrix(4,8),amatrix(4,8)
+
+        interface
+            subroutine gcombo(h,p0,p,gxf)
+                real(8),intent(in) :: h,p0(3),p(3)
+                real(8),intent(out) :: gxf(4)
+            end subroutine
+        end interface
+
+        procedure(gcombo),pointer :: gpointer => NULL()
+
+        hi=2
+        if (hi==2) then
+            gpointer => gcombo1
+        elseif (hi==1) then
+            gpointer => gcombo0
+        end if
 
         do   i=1,  ncn(ielem)
             if(inode.eq.ncon(ielem,i)) nodnum=i ! get node num of inode
         enddo
 
- 
-          BMATRIX= 0.0d0     
-          AMATRIX= 0.0d0  
- 
-        IF(NUMQUA.EQ.0)       THEN
-            do IS=1,  NSYS
-                IF(IS.EQ.1) THEN 
-                    CALL SING_INT1(IS,IELEM,NODNUM,XP,YP,ZP,AMATRIX,BMATRIX)
-                ELSE IF( IS.NE.1 ) THEN   
-                    CALL NORM_INT(IS,IELEM,NCN(IELEM),XP,YP,ZP,AMATRIX,BMATRIX)
-                    ! write(*,*) 'After Subroutine SGWP0_1'
-                END IF
-             end do
 
-        ELSE IF(NUMQUA.EQ.2) THEN
-        DO 200 IS=1,NSYS     
-            IF(IS.EQ.1.OR.IS.EQ.2) THEN  
-                CALL SING_INT1(IS,IELEM,NODNUM,XP,YP,ZP,AMATRIX,BMATRIX)
-            ELSE IF(IS.EQ.3.OR.IS.EQ.4) THEN  
-                CALL NORM_INT(IS,IELEM,NCN(IELEM),XP,YP,ZP,AMATRIX,BMATRIX) 
-            END IF
+        bmatrix= 0.0d0     
+        amatrix= 0.0d0  
 
-        200      CONTINUE  
+        !!!!attention !!!!!! sing_int1 didn't affect matrix A
+        ! it is ok, bmatrix is almost 0 fort surface boudary
 
-        ELSE IF(NUMQUA.EQ.4) THEN
-         DO 300  IS=1,  NSYS
-          IF(IS.EQ.1.OR.IS.EQ.4) THEN   
-            CALL SING_INT1(IS,IELEM,NODNUM,XP,YP,ZP,AMATRIX,BMATRIX)
-          ELSE  IF(IS.EQ.2.OR.IS.EQ.3) THEN  
-            CALL NORM_INT(IS,IELEM,NCN(IELEM),XP,YP,ZP,AMATRIX,BMATRIX) 
-          END IF
-300      CONTINUE
-        ELSE IF(NUMQUA.EQ.5) THEN
-         DO 400 IS=1, NSYS  
-            CALL SING_INT1(IS,IELEM,NODNUM,XP,YP,ZP,AMATRIX,BMATRIX)
-400      CONTINUE
-        ENDIF
+        if(numqua.eq.0)       then
+            do is=1,  nsys
+                if(is.eq.1) then 
+                    call sing_int(is,ielem,nodnum,xp,yp,zp,amatrix,bmatrix,hi)
+                else if( is.ne.1 ) then   
+                    !call norm_int(is,ielem,ncn(ielem),xp,yp,zp,amatrix,bmatrix,gpointer)
+                    ! write(*,*) 'after subroutine sgwp0_1'
+                end if
+            end do
 
-        END
-                           
-! ======================================================
-!
-! Integration on an element without source point
-! 
-! ======================================================
-!                      
-    subroutine norm_int(is,ielem,ncne,xp,yp,zp,amatrix,bmatrix,bie_called)
+        else if(numqua.eq.2) then
+            do is=1,nsys     
+                if(is.eq.1.or.is.eq.2) then  
+                    call sing_int(is,ielem,nodnum,xp,yp,zp,amatrix,bmatrix,hi)
+                else if(is.eq.3.or.is.eq.4) then  
+                    !call norm_int(is,ielem,ncn(ielem),xp,yp,zp,amatrix,bmatrix,gpointer) 
+                end if
+            end do
+
+        else if(numqua.eq.4) then
+            do   is=1,  nsys
+                if(is.eq.1.or.is.eq.4) then   
+                    call sing_int(is,ielem,nodnum,xp,yp,zp,amatrix,bmatrix,hi)
+                else  if(is.eq.2.or.is.eq.3) then  
+                    !call norm_int(is,ielem,ncn(ielem),xp,yp,zp,amatrix,bmatrix,gpointer) 
+                end if
+            end do
+        else if(numqua.eq.5) then
+            do  is=1, nsys  
+                !call sing_int(is,ielem,nodnum,xp,yp,zp,amatrix,bmatrix,hi)
+            end do
+        endif
+
+        end subroutine
+
+    subroutine sing_int(is,ielem,nodnum,xp,yp,zp,amatrix,bmatrix,hi)
+        implicit none
+        integer,intent(in) :: is,ielem,nodnum,hi
+        real(8),intent(in) :: xp,yp,zp
+        real(8) :: amatrix(4,8),bmatrix(4,8)
+        
+        real(8) :: p0(3)
+        
+        p0=(/xp,yp,zp/)
+        if (hi.eq.2) then
+            call sing_int1(is,ielem,nodnum,p0,amatrix,bmatrix) 
+        elseif (hi.eq.1) then
+            !call sing_int0(is,ielem,nodnum,p0,amatrix,bmatrix) 
+        end if
+
+    end subroutine
+
+        
+    !   < 
+    !!  @params bie_called select which gfunction combo to be used
+    subroutine norm_int(is,ielem,ncne,xp,yp,zp,a_res,b_res,bie_called)
         use mvar_mod
         use proj_cnst,only : ex,ey
         implicit   none  
 
         integer,intent(in) :: is,ielem,ncne
         real(8),intent(in) ::  xp,yp,zp
-        real(8),intent(inout) ::bmatrix(4,8),amatrix(4,8)
-        
+        real(8),intent(out) :: a_res(8),b_res(8)
+
         interface
             subroutine bie_called(h,p0,p,gxf)
                 real(8),intent(in) :: h,p0(3),p(3)
                 real(8),intent(out) :: gxf(4)
             end subroutine
         end interface
-        
+
         real(8) :: dgn,gxf(4),p0(3),p(3),prefix(3),np(3)
         integer :: n,nsamb,j
 
-        amatrix(is,:)=0.0d0
-        bmatrix(is,:)=0.0d0
+        a_res=0.0d0
+        b_res=0.0d0
 
         nsamb=16
         !if(ncne.eq.6)   nsamb=4
@@ -145,33 +178,60 @@
             dgn = dot_product(gxf(2:4),np)
 
             do   j=1,   ncne
-                bmatrix(is,j)=bmatrix(is,j)+gxf(1)*samb(ielem,n,j)
-                amatrix(is,j)=amatrix(is,j)+dgn*samb(ielem,n,j)
+                b_res(j)=b_res(j)+gxf(1)*samb(ielem,n,j)
+                a_res(j)=a_res(j)+dgn*samb(ielem,n,j)
             enddo
 
         enddo
     end subroutine
-!
-!
-! *************************************************************
-! *                                                           *
-! *  The source point is in the mesh, at the node NODJ        *
-! *                                                           *
-! *************************************************************
-!
-    subroutine sing_int1(is,ielem,nodj,xp,yp,zp,amatrix,bmatrix) 
+    !
+    !
+    ! *************************************************************
+    ! *                                                           *
+    ! *  The source point is in the mesh, at the node NODJ        *
+    ! *                                                           *
+    ! *************************************************************
+    !
+    !    function reorder_node_value(t_kind) result(h_kind)
+    !implicit none
+    !real(8),intent(in) :: t_kind(:,:) 
+    !integer,dimension(2) :: s = shape(t_kind)
+    !real(8) :: h_kind(s(1),s(2))!:,:)
+
+
+
+    !!integer :: s(2) = shape(t_kind)
+    !if (s(2).ne.8) then
+    !print *, " try to reorder a non-8-node nodal values"
+    !pause
+    !end if
+
+    !h_kind(:,1) = t_kind(:,ncon(ielem,1))
+    !h_kind(:,2) = t_kind(:,ncon(ielem,3))
+    !h_kind(:,3) = t_kind(:,ncon(ielem,5))
+    !h_kind(:,4) = t_kind(:,ncon(ielem,7))
+    !h_kind(:,5) = t_kind(:,ncon(ielem,2))
+    !h_kind(:,6) = t_kind(:,ncon(ielem,4))
+    !h_kind(:,7) = t_kind(:,ncon(ielem,6))
+    !h_kind(:,8) = t_kind(:,ncon(ielem,8))
+    !end function
+
+
+
+    !   @params p0 input src point
+    subroutine sing_int1(is,ielem,nodj,p0,amatrix,bmatrix) 
 
         use mvar_mod
-        use trvar_mod    
         use mfunc_mod
         use hi_intg
         use green_funcs,only:Gcombo1_2
+        use proj_cnst,only: ex,ey,xiqsi,xiqet
 
         implicit none
 
         integer,intent(in):: is,ielem,nodj
-        real(8),intent(in)::  xp,yp,zp
-        real(8),intent(out):: bmatrix(4,8),amatrix(4,8)
+        real(8),intent(in):: p0(3) 
+        real(8),intent(inout):: bmatrix(4,8),amatrix(4,8)
 
         integer ::inode,inodd,j,pwr_g
 
@@ -179,19 +239,9 @@
         real(8) :: cnr_glb_mtx(3,8)
         real(8) :: passed_nrml(3,8)
 
-        real(8) :: result0(8),result1(8),result2(8)
-        real(8) ::  x0,y0,z0,si,eta
+        real(8) :: result0(8),result1(8),result2(8),prefix(3)
+        real(8) ::  x0,y0,z0,si,eta,xp,yp,zp
 
-        real(8) ::  xiqsi(8),xiqet(8)
-        real(8) ::  ex(4),ey(4)
-
-
-        DATA EX/  1.0d0,  1.0d0, -1.0d0, -1.0d0/                                                  
-        DATA EY/  1.0d0, -1.0d0, -1.0d0,  1.0d0/
-
-        ! ** XIQSI AND XIQET: NODE COORDINATES FOR QUADRILATERAL ELEMENTS
-        data xiqsi/-1.0d0, 0.0d0, 1.0d0, 1.0d0, 1.0d0, 0.0d0,-1.0d0,-1.0d0/
-        data xiqet/-1.0d0,-1.0d0,-1.0d0, 0.0d0, 1.0d0, 1.0d0, 1.0d0, 0.0d0/    
 
 
         inode=ncon(ielem,nodj) ! corresponding node id
@@ -210,6 +260,11 @@
         endif
 
         ! get src point in sysmetric mesh
+        prefix=(/ex(is),ey(is),1.0d0/)
+        xp=p0(1)
+        yp=p0(2)
+        zp=p0(3)
+
         x0=ex(is)*xp
         y0=ey(is)*yp      
         z0=zp
@@ -248,7 +303,7 @@
         call preset_src(si,eta,xyz(1:3,ncon(ielem,nodj)),origin_offset)
 
         ! add mirrored sink
-        call norm_int(is,ielem,8,xp,yp,zp,amatrix,bmatrix,Gcombo1_2)
+        call norm_int(is,ielem,8,xp,yp,zp,amatrix(is,:),bmatrix(is,:),Gcombo1_2)
         !write(9013,'(2i6,8f12.6)') ielem,nodj,amatrix(is,:)
 
         call eval_singular_elem(cnr_glb_mtx,passed_nrml,result0,result1,result2)
@@ -263,60 +318,4 @@
 
     end subroutine 
                
-        SUBROUTINE NORM_INT2(IS,IELEM,NCNE,XP,YP,ZP,AMATRIX,BMATRIX)
-        USE MVAR_MOD
-        IMPLICIT   NONE  
- 
-        INTEGER IS,IELEM,N,NSAMB,NCNE,J,IP
-        REAL*8  XP,YP,ZP,EX(4),EY(4)
-        REAL*8  X,X0,Y,Y0,Z,Z0 
-        REAL*8  NX,NY,NZ,DGN
-        REAL*8  DUM,WKX,PHi
-        REAL*8  BMATRIX(4,8),AMATRIX(4,8),GXF(4)
-!   
-        DATA EX/  1.0d0,  1.0d0, -1.0d0, -1.0d0/                                                  
-        DATA EY/  1.0d0, -1.0d0, -1.0d0,  1.0d0/
-    write(9013,'(2i6,3f14.8)') ielem,ncne,xp,yp,zp
-        write(9013,'(2i6,8f12.6)') ielem,8,amatrix(is,:)
-!
-!    PRINT *,' IN  NSWP0'
-!
-        NSAMB=16
-        IF(NCNE.EQ.6)   NSAMB=4
 
-        X0=EX(IS)*XP
-        Y0=EY(IS)*YP
-        Z0= ZP
-
-
-        DO 100    N=1,   NSAMB     
-
-         X =SAMBXY(IELEM,N,1)! guassian point info
-         Y =SAMBXY(IELEM,N,2)
-         Z =SAMBXY(IELEM,N,3)
-
-       
-       !mirrored sink
-       !GXF=-GXF
-
-        CALL DTGRN1(H,X,X0,Y,Y0,Z,Z0,GXF) 
-!                      
-          NX=EX(IS)*DSAMB(IELEM,N,1)
-          NY=EY(IS)*DSAMB(IELEM,N,2)
-          NZ=          DSAMB(IELEM,N,3)
-          DGN=GXF(2)*Nx+GXF(3)*Ny+GXF(4)*Nz
-        !write(9013,'(a5,3f16.6)') 'xyz',x,y,z
-        !write(9013,'(a5,3f16.6)') 'xyz0',x0,y0,z0
-        !write(9013,'(a5,3f16.6)') 'nxyz',nx,ny,nz
-        !write(9013,'(a5,3f16.6)') 'gxf',gxf(2:4)
-          
-                         
-        DO   J=1,   NCNE
-          BMATRIX(IS,J)=BMATRIX(IS,J)+GXF(1)*SAMB(IELEM,N,J)!line integration
-          AMATRIX(IS,J)=AMATRIX(IS,J)+DGN*SAMB(IELEM,N,J)!line integration
-        ENDDO
-
-100     CONTINUE
-!
-        RETURN
-        END
