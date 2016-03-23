@@ -8,6 +8,8 @@
         implicit none
         real(8),parameter :: pi = 3.14159265358979
     contains
+
+        !<  Green Function
         function GFunc(p,p0) result(ans)
             implicit none
             real(8),dimension(3) :: p,p0
@@ -16,6 +18,8 @@
             ans = -1/(4*pi)*1/r
         end function
 
+        !<  dG/dxi 
+        !!
         function DGFunc(p,p0) result(ans)
             implicit none
             real(8),dimension(3),intent(in) :: p,p0
@@ -26,6 +30,8 @@
             ans = 1/(4*pi)*(p-p0)/r**3
         end function
 
+        !<  DG/dy3
+        !!
         function Dy3GFunc(p,p0) result(ans)
             implicit none
             real(8),dimension(3),intent(in) :: p,p0
@@ -35,6 +41,7 @@
             ans=tmp(3)
         end function
 
+        !< d^2{G}/{dy3 dxi}
         function Dy3DGFunc(p,p0) result(ans)
             implicit none
             real(8),dimension(3),intent(in) :: p,p0
@@ -57,7 +64,11 @@
             mirror(3) = -(2*h+p(3))
         end function
 
+        !> ------------------------------------------
+        !>             Combo Function
+        !> ------------------------------------------
         !> used for normal boudary integral equation 
+        !> -------------------------------------------
         subroutine Gcombo0(h,p,p0,gxf)
             real(8),intent(in) :: h,p(3),p0(3)
             real(8),intent(out) :: gxf(4)
@@ -67,8 +78,10 @@
             gxf(2:4) = DGFunc(p,p0)+DGFunc(p,mirror(h,p0))
 
         end subroutine
-
+        
+        !> -------------------------------------------------
         !> used for hypersingular boudary integral equation
+        !> -------------------------------------------------
         subroutine Gcombo1(h,p,p0,gxf)
             real(8),intent(in) :: h,p(3),p0(3)
             real(8),intent(out) :: gxf(4)
@@ -79,6 +92,25 @@
 
         end subroutine
 
+        !> hypersingular BIE with only src on boudary surface
+        subroutine Gcombo1_1(h,p,p0,gxf)
+            real(8),intent(in) :: h,p(3),p0(3)
+            real(8),intent(out) :: gxf(4)
+
+            gxf(1) = Dy3GFunc(p,p0)
+            gxf(2:4) = Dy3DGFunc(p,p0)
+
+        end subroutine
+
+        !> hypersingular BIE with only mirrored sink
+        subroutine Gcombo1_2(h,p,p0,gxf)
+            real(8),intent(in) :: h,p(3),p0(3)
+            real(8),intent(out) :: gxf(4)
+
+            gxf(1) = -Dy3GFunc(p,mirror(h,p0))
+            gxf(2:4) = -Dy3DGFunc(p,mirror(h,p0))
+
+        end subroutine
     end module               
 
 
