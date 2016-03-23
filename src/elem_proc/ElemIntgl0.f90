@@ -110,38 +110,38 @@
     !<  -----------------------------------------------
     !<  element integration with src point on one node
     !!  method only capable of Gfunc desingularizaito
-    
-    subroutine sing_int0(is,ielem,nodnum,xp,yp,zp,aval,bval)
+
+
+    subroutine sing_int0(is,ielem,nodnum,p0,aval,bval)
         use mvar_mod
         use green_funcs,only:gcombo0
         use proj_cnst,only:ex,ey
-        use trvar_mod
+        use trvar_mod,only:xynod,dxynod,nosamp,samnod
         implicit   none  
-        
+
         integer is,ielem,n,j,ip,nodnum
         real*8  xp,yp,zp!,ex(4,4),ey(4,4)
         real*8  x,y,z,x0,y0,z0      
         real*8  nx,ny,nz,dgn
-        real*8  aval(4,8),bval(4,8),gxf(4),p(3),p0(3),np(3)
+        real*8  aval(8),bval(8),gxf(4),p(3),p0(3),np(3),p0m(3),prefix(3)
 
+        prefix=[ex(is),ey(is),1.0d0]
+        !< mapped p0
+        p0m = prefix*p0
 
-        x0=ex(is)*xp
-        y0=ey(is)*yp
-        z0= zp
-        p0=(/x0,y0,z0/)
+        aval=0.0d0
+        bval=0.0d0
 
         do n=1, nosamp
 
             p= xynod(1:3,n)
             np=dxynod(1:3,n)
 
-            call gcombo0 (h,p,p0,gxf) 
+            call gcombo0 (h,p,p0m,gxf) 
             dgn = dot_product(gxf(2:4),np)
 
-            do j=1, ncn(ielem)
-                aval(is,j)=aval(is,j)+dgn*samnod(n,j)
-                bval(is,j)=bval(is,j)+gxf(1)*samnod(n,j)
-            enddo
+            aval(:)=aval(:)+dgn*samnod(n,1:8)
+            bval(:)=bval(:)+gxf(1)*samnod(n,1:8)
         enddo
             !if(ielem>nelemf) then
             !write(9011,'(2i6,8f12.6)') ielem,nodnum,aval(is,:)

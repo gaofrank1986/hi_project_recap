@@ -1,14 +1,7 @@
-!
-!  NORM_ELE1+SING_ELE1
-!  NORM_INT1+NORM_INT1
-!
-! ======================================================
-!
-!   Integration on an element without source in itself
-!   nor its symmetrical ones
-!
-! ======================================================
-!
+    !<  @file -----------
+    !!
+    !!
+    !< --------------------------------------------------
     !< norm ele1 is wrapper function for norm integration
     !!
     subroutine norm_ele1(ielem,xp,yp,zp,amatrix,bmatrix)
@@ -31,6 +24,8 @@
         end interface
 
         procedure(gcombo),pointer :: gpointer => NULL()
+
+        !< --------------execute part----------------->
         gpointer => gcombo1
 
         bmatrix=0.0d0
@@ -40,15 +35,15 @@
             call norm_int(is,ielem,ncn(ielem),xp,yp,zp,&
                 amatrix(is,:),bmatrix(is,:),gpointer) 
         end do
-        end subroutine
+    end subroutine
 
-!
-! ======================================================
-!   Integration on an element with source in itself
-!   or its mirror ones about any symmetrical axis
-!
-! ======================================================
-!
+    !
+    ! ======================================================
+    !   Integration on an element with source in itself
+    !   or its mirror ones about any symmetrical axis
+    !
+    ! ======================================================
+    !
     subroutine sing_elem_wrapper(inode,ielem,numqua,xp,yp,zp,amatrix,bmatrix,hi)
         use mvar_mod
         use green_funcs,only:gcombo1,gcombo0
@@ -148,24 +143,25 @@
         
         p0=(/xp,yp,zp/)
         if (hi.eq.2) then
-            call sing_int1(is,ielem,nodnum,p0,amatrix,bmatrix) 
+            call sing_int1(is,ielem,nodnum,p0,amatrix(is,:),bmatrix(is,:)) 
         elseif (hi.eq.1) then
-            call sing_int0(is,ielem,nodnum,xp,yp,zp,amatrix,bmatrix) 
+            call sing_int0(is,ielem,nodnum,p0,amatrix(is,:),bmatrix(is,:)) 
         end if
 
     end subroutine
 
         
-    !   < 
+    !< 
+    !!  @params a_res,b_res return high,low order parts of integral on given element
     !!  @params bie_called select which gfunction combo to be used
-    subroutine norm_int(is,ielem,ncne,xp,yp,zp,a_res,b_res,bie_called)
+    subroutine norm_int(is,ielem,ncne,xp,yp,zp,aval,bval,bie_called)
         use mvar_mod
         use proj_cnst,only : ex,ey
         implicit   none  
 
         integer,intent(in) :: is,ielem,ncne
         real(8),intent(in) ::  xp,yp,zp
-        real(8),intent(out) :: a_res(8),b_res(8)
+        real(8),intent(out) :: aval(8),bval(8)
 
         interface
             subroutine bie_called(h,p0,p,gxf)
@@ -177,8 +173,8 @@
         real(8) :: dgn,gxf(4),p0(3),p(3),prefix(3),np(3)
         integer :: n,nsamb,j
 
-        a_res=0.0d0
-        b_res=0.0d0
+        aval=0.0d0
+        bval=0.0d0
 
         nsamb=16
         !if(ncne.eq.6)   nsamb=4
@@ -194,10 +190,10 @@
             np = prefix*dsamb(ielem,n,1:3) 
             dgn = dot_product(gxf(2:4),np)
 
-            do   j=1,   ncne
-                b_res(j)=b_res(j)+gxf(1)*samb(ielem,n,j)
-                a_res(j)=a_res(j)+dgn*samb(ielem,n,j)
-            enddo
+            !do   j=1,   ncne
+                bval(:)=bval(:)+gxf(1)*samb(ielem,n,1:8)
+                aval(:)=aval(:)+dgn*samb(ielem,n,1:8)
+            !enddo
 
         enddo
     end subroutine
@@ -236,7 +232,7 @@
 
 
     !   @params p0 input src point
-    subroutine sing_int1(is,ielem,nodj,p0,amatrix,bmatrix) 
+    subroutine sing_int1(is,ielem,nodj,p0,aval,bval) 
 
         use mvar_mod
         use mfunc_mod
@@ -247,12 +243,12 @@
         implicit none
 
         integer,intent(in):: is,ielem,nodj
-        real(8),intent(in):: p0(3) 
-        real(8),intent(inout):: bmatrix(4,8),amatrix(4,8)
+        real(8),intent(in):: p0(3)
+        real(8),intent(out):: bval(8),aval(8)
 
         integer ::inode,inodd,j,pwr_g
 
-        real(8) :: src_lcl(2),src_glb(3),origin_offset(3)
+        real(8) :: src_lcl(2),src_glb(3),origin_offset(3),xi0(2),p0m(3)
         real(8) :: cnr_glb_mtx(3,8)
         real(8) :: passed_nrml(3,8)
 
@@ -263,8 +259,8 @@
 
         inode=ncon(ielem,nodj) ! corresponding node id
         inodd=ncond(ielem,nodj)!                 normal id
-        amatrix(is,:)=0.0d0
-        bmatrix(is,:)=0.0d0
+        aval=0.0d0
+        bval=0.0d0
 
         if(ncn(ielem).eq.8)  then 
 
@@ -278,6 +274,8 @@
 
         ! get src point in sysmetric mesh
         prefix=(/ex(is),ey(is),1.0d0/)
+        p0m=prefix*p0
+
         xp=p0(1)
         yp=p0(2)
         zp=p0(3)
@@ -317,20 +315,24 @@
         passed_nrml(:,6) = dxyz(:,ncond(ielem,4))
         passed_nrml(:,7) = dxyz(:,ncond(ielem,6))
         passed_nrml(:,8) = dxyz(:,ncond(ielem,8))
-        call preset_src(si,eta,xyz(1:3,ncon(ielem,nodj)),origin_offset)
+
+        !< note p03 is used here
+        call preset_src(si,eta,p0m,origin_offset)
 
         ! add mirrored sink
-        call norm_int(is,ielem,8,xp,yp,zp,amatrix(is,:),bmatrix(is,:),Gcombo1_2)
+        ! Gcombo1_2 is the mirrored sink part only
+        call norm_int(is,ielem,8,xp,yp,zp,aval,bval,Gcombo1_2)
         !write(9013,'(2i6,8f12.6)') ielem,nodj,amatrix(is,:)
 
         call eval_singular_elem(cnr_glb_mtx,passed_nrml,result0,result1,result2)
 
-        do j=1, ncn(ielem)
-            amatrix(is,j) = amatrix(is,j)+result0(j)
-            bmatrix(is,j) = bmatrix(is,j)+result1(j)
-        end do
+        !aval(:) = amatrix+result0 !< elemental plus
+        !bmatrix(:) = bmatrix(:)+result1!elemental plus
+        
+        aval(:) = aval+result0 !< elemental plus
+        bval(:) = bval+result1 !< elemental plus
+            
         write(9010,'(2i6,8f12.6)') ielem,nodj,result2
-        !bmatrix=0.0d0
 
 
     end subroutine 
