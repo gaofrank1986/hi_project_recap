@@ -49,13 +49,16 @@
 !
 ! ======================================================
 !
-    subroutine sing_ele1(inode,ielem,numqua,xp,yp,zp,amatrix,bmatrix)
+    subroutine sing_elem_wrapper(inode,ielem,numqua,xp,yp,zp,amatrix,bmatrix,hi)
         use mvar_mod
         use green_funcs,only:gcombo1,gcombo0
+        use mfunc_mod,only:tripol
 
         implicit   none  
 
-        integer i,j,is,ielem,inode,nodnum,nd,np,nsamb,numqua,hi
+        integer,intent(in) :: inode,ielem,numqua,hi
+
+        integer i,j,is,nodnum,nd,np,nsamb
         real*8  xp,yp,zp,xyzt(3,8),dxyzt(3,8)
         real*8 bmatrix(4,8),amatrix(4,8)
 
@@ -68,13 +71,24 @@
 
         procedure(gcombo),pointer :: gpointer => NULL()
 
-        hi=2
         if (hi==2) then
             gpointer => gcombo1
         elseif (hi==1) then
             gpointer => gcombo0
         end if
 
+        !< compute xynod,dxynod for weak singular elem
+        !
+        if (hi==1) then
+            do  i=1,  ncn(ielem)
+                xyzt(1:3, i)  =  xyze(1:3, i, ielem)  
+                dxyzt(1:3, i) = dxyze(1:3, i, ielem)  
+
+                if(inode.eq.ncon(ielem,i)) nodnum=i
+            enddo
+            call tripol(nodnum,ncn(ielem),xyzt,dxyzt)
+        end if
+            
         do   i=1,  ncn(ielem)
             if(inode.eq.ncon(ielem,i)) nodnum=i ! get node num of inode
         enddo
@@ -122,10 +136,13 @@
         end subroutine
 
     subroutine sing_int(is,ielem,nodnum,xp,yp,zp,amatrix,bmatrix,hi)
+        use mvar_mod,only:ncn,xyze,dxyze
         implicit none
         integer,intent(in) :: is,ielem,nodnum,hi
         real(8),intent(in) :: xp,yp,zp
+        real*8  xyzt(3,8),dxyzt(3,8)
         real(8) :: amatrix(4,8),bmatrix(4,8)
+        integer :: i
         
         real(8) :: p0(3)
         
@@ -133,7 +150,7 @@
         if (hi.eq.2) then
             call sing_int1(is,ielem,nodnum,p0,amatrix,bmatrix) 
         elseif (hi.eq.1) then
-            !call sing_int0(is,ielem,nodnum,p0,amatrix,bmatrix) 
+            call sing_int0(is,ielem,nodnum,xp,yp,zp,amatrix,bmatrix) 
         end if
 
     end subroutine
