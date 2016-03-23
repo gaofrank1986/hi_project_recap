@@ -1,6 +1,4 @@
-    !<  @file -----------
-    !!
-    !!
+!<  @file Deal with integration on element,regular or singular
     !< --------------------------------------------------
     !< norm ele1 is wrapper function for norm integration
     !!
@@ -38,13 +36,56 @@
         end do
     end subroutine
 
-    !
-    ! ======================================================
-    !   Integration on an element with source in itself
-    !   or its mirror ones about any symmetrical axis
-    !
-    ! ======================================================
-    !
+
+
+    !< 
+    !!  @params a_res,b_res return high,low order parts of integral on given element
+    !!  @params bie_called select which gfunction combo to be used
+    subroutine norm_int(is,ielem,ncne,p0,aval,bval,bie_called)
+        use mvar_mod
+        use proj_cnst,only : ex,ey
+        implicit   none  
+
+        integer,intent(in) :: is,ielem,ncne
+        real(8),intent(in) ::  p0(3)!xp,yp,zp
+        real(8),intent(out) :: aval(8),bval(8)
+
+        interface
+            subroutine bie_called(h,p0,p,gxf)
+                real(8),intent(in) :: h,p0(3),p(3)
+                real(8),intent(out) :: gxf(4)
+            end subroutine
+        end interface
+
+        real(8) :: dgn,gxf(4),p0m(3),p(3),prefix(3),np(3)
+        integer :: n,nsamb,j
+
+        aval=0.0d0
+        bval=0.0d0
+
+        nsamb=16
+        !if(ncne.eq.6)   nsamb=4
+        prefix=(/ex(is),ey(is),1.0d0/)
+        p0m = prefix*p0!(/xp,yp,zp/)
+
+        do  n=1,   nsamb     
+
+            !< get gaussian point
+            p=sambxy(ielem,n,1:3)
+
+            call bie_called(h,p,p0,gxf)
+
+            !< get nrml at gaussian point
+            np = prefix*dsamb(ielem,n,1:3) 
+            dgn = dot_product(gxf(2:4),np)
+
+            bval(:)=bval(:)+gxf(1)*samb(ielem,n,1:8)
+            aval(:)=aval(:)+dgn*samb(ielem,n,1:8)
+
+        enddo
+    end subroutine
+
+
     subroutine sing_elem_wrapper(inode,ielem,numqua,xp,yp,zp,amatrix,bmatrix,hi)
         use mvar_mod
         use green_funcs,only:gcombo1,gcombo0
@@ -148,85 +189,49 @@
 
     end subroutine
 
-        
-    !< 
-    !!  @params a_res,b_res return high,low order parts of integral on given element
-    !!  @params bie_called select which gfunction combo to be used
-    subroutine norm_int(is,ielem,ncne,p0,aval,bval,bie_called)
+
+    !<  -----------------------------------------------
+    !<  element integration with src point on one node
+    !!  method only capable of Gfunc desingularizaito
+
+
+    subroutine sing_int0(is,ielem,nodnum,p0,aval,bval)
         use mvar_mod
-        use proj_cnst,only : ex,ey
+        use green_funcs,only:gcombo0
+        use proj_cnst,only:ex,ey
+        use trvar_mod,only:xynod,dxynod,nosamp,samnod
         implicit   none  
 
-        integer,intent(in) :: is,ielem,ncne
-        real(8),intent(in) ::  p0(3)!xp,yp,zp
-        real(8),intent(out) :: aval(8),bval(8)
+        integer is,ielem,n,j,ip,nodnum
+        real*8  xp,yp,zp!,ex(4,4),ey(4,4)
+        real*8  x,y,z,x0,y0,z0      
+        real*8  nx,ny,nz,dgn
+        real*8  aval(8),bval(8),gxf(4),p(3),p0(3),np(3),p0m(3),prefix(3)
 
-        interface
-            subroutine bie_called(h,p0,p,gxf)
-                real(8),intent(in) :: h,p0(3),p(3)
-                real(8),intent(out) :: gxf(4)
-            end subroutine
-        end interface
-
-        real(8) :: dgn,gxf(4),p0m(3),p(3),prefix(3),np(3)
-        integer :: n,nsamb,j
+        prefix=[ex(is),ey(is),1.0d0]
+        !< mapped p0
+        p0m = prefix*p0
 
         aval=0.0d0
         bval=0.0d0
 
-        nsamb=16
-        !if(ncne.eq.6)   nsamb=4
-        prefix=(/ex(is),ey(is),1.0d0/)
-        p0m = prefix*p0!(/xp,yp,zp/)
+        do n=1, nosamp
 
-        do  n=1,   nsamb     
+            p= xynod(1:3,n)
+            np=dxynod(1:3,n)
 
-            !< get gaussian point
-            p=sambxy(ielem,n,1:3)
-
-            call bie_called(h,p,p0,gxf)
-
-            !< get nrml at gaussian point
-            np = prefix*dsamb(ielem,n,1:3) 
+            call gcombo0 (h,p,p0m,gxf) 
             dgn = dot_product(gxf(2:4),np)
 
-            bval(:)=bval(:)+gxf(1)*samb(ielem,n,1:8)
-            aval(:)=aval(:)+dgn*samb(ielem,n,1:8)
-
+            aval(:)=aval(:)+dgn*samnod(n,1:8)
+            bval(:)=bval(:)+gxf(1)*samnod(n,1:8)
         enddo
+            !if(ielem>nelemf) then
+            !write(9011,'(2i6,8f12.6)') ielem,nodnum,aval(is,:)
+            !call sing_int1(is,ielem,nodnum,xp,yp,zp,aval,bval) 
+            !end if
+            !
     end subroutine
-    !
-    !
-    ! *************************************************************
-    ! *                                                           *
-    ! *  The source point is in the mesh, at the node NODJ        *
-    ! *                                                           *
-    ! *************************************************************
-    !
-    !    function reorder_node_value(t_kind) result(h_kind)
-    !implicit none
-    !real(8),intent(in) :: t_kind(:,:) 
-    !integer,dimension(2) :: s = shape(t_kind)
-    !real(8) :: h_kind(s(1),s(2))!:,:)
-
-
-
-    !!integer :: s(2) = shape(t_kind)
-    !if (s(2).ne.8) then
-    !print *, " try to reorder a non-8-node nodal values"
-    !pause
-    !end if
-
-    !h_kind(:,1) = t_kind(:,ncon(ielem,1))
-    !h_kind(:,2) = t_kind(:,ncon(ielem,3))
-    !h_kind(:,3) = t_kind(:,ncon(ielem,5))
-    !h_kind(:,4) = t_kind(:,ncon(ielem,7))
-    !h_kind(:,5) = t_kind(:,ncon(ielem,2))
-    !h_kind(:,6) = t_kind(:,ncon(ielem,4))
-    !h_kind(:,7) = t_kind(:,ncon(ielem,6))
-    !h_kind(:,8) = t_kind(:,ncon(ielem,8))
-    !end function
-
 
 
     !   @params p0 input src point
@@ -327,5 +332,5 @@
 
 
     end subroutine 
-               
+         
 
