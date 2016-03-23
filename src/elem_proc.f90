@@ -4,7 +4,7 @@
     !!
     subroutine norm_elem_wrapper(ielem,xp,yp,zp,amatrix,bmatrix,hi)
 
-        use mvar_mod,only:ncn,nsys
+        use mesh,only:ncn,nsys
         use green_funcs,only:gcombo1,gcombo0
 
         implicit   none 
@@ -42,7 +42,8 @@
     !!  @params a_res,b_res return high,low order parts of integral on given element
     !!  @params bie_called select which gfunction combo to be used
     subroutine norm_int(is,ielem,ncne,p0,aval,bval,bie_called)
-        use mvar_mod
+        use gaussian_info,only:sambxy,dsamb,samb
+        use wave,only:h
         use proj_cnst,only : ex,ey
         implicit   none  
 

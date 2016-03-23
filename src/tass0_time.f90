@@ -23,36 +23,32 @@
         enddo
     end subroutine 
 
-    subroutine tassb0
+    logical function is_connected(ielem,inode) 
         use mvar_mod
-        use pvar_mod
-                use body_property
-                use free_term,only:fterm,output_fterms
-                use mfunc_mod
-                !use sebsm_mod
+        ! return how many nodes in this element 
+        implicit none
+        integer,intent(in) :: inode,ielem
+        !logical :: is_connected
 
-                implicit   none  
-                integer  inode,ielem,j,jnode,ind,indd,ip
-                integer ::    i,ii,is,l
-                real(8)  xp,yp,zp,dpox,dpoy,dpoz,phi2
-                real(8)  rsn(4,4)
-                real(8)  bmatrix(4,8),amatrix(4,8),bmat(4)
+        integer :: i,ii
 
-                real(8)  s_angle
-                !real(8) :: fterm_coef(0:3,4)
-                real(8) :: dsign
+        ii = 0 
+        do i=1, nodnoe(inode)!!list of linked element by inode (how manys times inode appear in element)
+        if(ielem .eq. nodele(inode,i)) then!
+          ii=ii+1
+        endif
+        enddo
+        if (ii==0) then
+            is_connected=.false.
+        else
+            is_connected=.true.
+        endif
+    end function 
 
-                DATA RSN /1.,  1.,  1.,  1., &
-             &            1., -1.,  1., -1., &
-             &            1.,  1., -1., -1., &
-             &            1., -1., -1.,  1./ 
-        !
-!`
-!  ----------------------------------------------------
-          WRITE(10, *)   ' IN TASSB0 '
-         
-          !DSDT(:)=0.0
-!                 
+    subroutine topology_analysis()
+        use mvar_mod
+        implicit none
+        integer :: inode,ielem,j,l
         do 50 inode=1, nnode 
         l=0
         do 40 ielem=1,  nelem
@@ -84,6 +80,44 @@
 !
 50      continue
         PRINT *,"topology analysis finished"
+    end subroutine
+
+    subroutine tassb0
+        use mvar_mod
+        use pvar_mod
+        use body_property
+        use free_term,only:fterm,output_fterms,calc_fterms
+        use mfunc_mod
+        use proj_cnst,only:rsn
+
+        !use sebsm_mod
+
+        implicit   none  
+        integer  inode,ielem,j,jnode,ind,indd,ip
+        integer ::    i,ii,is,l
+        real(8)  xp,yp,zp,dpox,dpoy,dpoz,phi2
+        real(8)  bmatrix(4,8),amatrix(4,8),bmat(4)
+
+        real(8)  s_angle
+        !real(8) :: fterm_coef(0:3,4)
+        real(8) :: dsign
+
+        interface 
+            logical function is_connected(ielem,inode)
+                integer,intent(in)::ielem,inode
+            end function
+        end interface
+
+        call topology_analysis()
+
+        !
+!`
+!  ----------------------------------------------------
+          WRITE(10, *)   ' IN TASSB0 '
+         
+          !DSDT(:)=0.0
+!                 
+
 
         amata = 0.0d0
         cmata = 0.0d0
@@ -92,7 +126,7 @@
         !call output_fterms()
         pause
         !print *,"finished fterm output"
-        do  500   inode=1,  nnf
+        do     inode=1,  nnf
                 !print *,inode
             xp=xyz(1,inode)
             yp=xyz(2,inode)
@@ -109,61 +143,69 @@
             !  Integration on the free surface
                 
             do   ielem=1,  nelemf
-                call comp_link(ielem,inode,ii)
-                if (ii .eq. 0)   then! if src node not on element 
-                    call norm_ele1(ielem,xp,yp,zp,amatrix,bmatrix)
+                if (not(is_connected(ielem,inode)))   then! if src node not on element 
+                    call norm_elem_wrapper(ielem,xp,yp,zp,amatrix,bmatrix,2)
 
-                else if (ii .ne. 0)   then 
-                    call sing_ele1(inode,ielem,nodqua(inode),xp,yp,zp,&
-                        &                   amatrix,bmatrix)
+                else 
+                    call sing_elem_wrapper(inode,ielem,nodqua(inode),xp,yp,zp,&
+                        &                   amatrix,bmatrix,2)
                 end if 
                 call common_block(0,0,ielem,inode,amatrix,bmatrix)!,fterm_coef)
             end do
             !  Integration on the body surface
             do    ielem=nelemf+1,  nelem
 
-                call comp_link(ielem,inode,ii)
-                if (ii .eq. 0)   then 
-                    call norm_ele1(ielem,xp,yp,zp,amatrix,bmatrix)
-                else if (ii .ne. 0)   then 
-                    call sing_ele1(inode,ielem,nodqua(inode),xp,yp,zp,&
-                     &                   amatrix,bmatrix)
+                if (not(is_connected(ielem,inode)))   then 
+                    call norm_elem_wrapper(ielem,xp,yp,zp,amatrix,bmatrix,2)
+                else 
+                    call sing_elem_wrapper(inode,ielem,nodqua(inode),xp,yp,zp,&
+                     &                   amatrix,bmatrix,2)
                 end if
                 call common_block(1,0,ielem,inode,amatrix,bmatrix)
 
             end do
             
-            do ip = 1,nsys
-                    fra3(inode,ip) = fterm(inode,ip,1)!
-                    frc31(inode,ip)=fterm(inode,ip,2)-fterm(inode,ip,1)*xp!
-                    frc32(inode,ip)=fterm(inode,ip,3)-fterm(inode,ip,1)*yp!
-                    frc33(inode,ip)=fterm(inode,ip,4)-fterm(inode,ip,1)*zp!
-            end do
+            !do ip = 1,nsys
+                    !fra3(inode,ip) = fterm(inode,ip,1)!
+                    !frc31(inode,ip)=fterm(inode,ip,2)-fterm(inode,ip,1)*xp!
+                    !frc32(inode,ip)=fterm(inode,ip,3)-fterm(inode,ip,1)*yp!
+                    !frc33(inode,ip)=fterm(inode,ip,4)-fterm(inode,ip,1)*zp!
+            !end do
+            !do ip = 1,nsys
+                !fterm(inode,ip,2:4) = fterm(inode,ip,2:4)-fterm(inode,ip,1)*xyz(1:3,inode)
+            !end do
 
-            !TODO only works for ip=1
-            write(*,'(i6,4f14.6)') inode,fra3(inode,1),frc31(inode,1),frc32(inode,1),frc33(inode,1)
-            write(404,5001) xp,yp,fterm(inode,1,1:4),angle(inode)
-            write(405,5000) inode,fra3(inode,1),frc31(inode,1),frc32(inode,1)
+            !write(*,'(i6,4f14.6)') inode,fterm(inode,1,1:4)
+            !write(404,5001) xp,yp,fterm(inode,1,1:4),angle(inode)
+            !write(405,5000) inode,fra3(inode,1),frc31(inode,1),frc32(inode,1)
             5000 format(I6,3f14.6)
             5001 format(7f14.8)
             
 
 
-        500     continue
-!
+        enddo
         
-! =======================================================================
-!    Source point is on the body surface
-!
-        do  1000   inode=nnf+1, nnode   
+
+        !forall(i=1:nnf,j=1:nsys)
+            !fterm(i,j,2:4)=fterm(i,j,2:4)-fterm(i,j,1)*xyz(1:3,i)
+        !end forall
+
+        !do i=1,nnf
+            !write(*,'(i6,4f14.6)') i,fterm(i,1,1:4)
+        !enddo
+        call calc_fterms()
+        ! =======================================================================
+        !    Source point is on the body surface
+        !
+        do inode=nnf+1, nnode   
 
             xp=xyz(1,inode)
             yp=xyz(2,inode)
             zp=xyz(3,inode) 
-            
+
             !fterm_coef = 0
             call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,&
-             &                    h,xyz,dxyze,s_angle) 
+                &                    h,xyz,dxyze,s_angle) 
 
             angle(inode)=1.0d0 - s_angle
 
@@ -172,25 +214,24 @@
             do   ielem=1,  nelemf
 
                 ii=0   
-                call norm_ele0(ielem,xp,yp,zp,amatrix,bmatrix)
+                call norm_elem_wrapper(ielem,xp,yp,zp,amatrix,bmatrix,1)
                 call common_block(0,1,ielem,inode,amatrix,bmatrix)
 
             end do
 
             do  ielem=1+nelemf, nelem
 
-                call comp_link(ielem,inode,ii)!
-                if (ii .eq. 0)   then 
-                    call norm_ele0(ielem,xp,yp,zp,amatrix,bmatrix)
-                else if (ii .ne. 0)   then 
-                    call sing_ele0(inode,ielem,nodqua(inode),xp,yp,zp,&
-                     &                   amatrix,bmatrix)
+                if (not(is_connected(ielem,inode)))   then 
+                    call norm_elem_wrapper(ielem,xp,yp,zp,amatrix,bmatrix,1)
+                else 
+                    call sing_elem_wrapper(inode,ielem,nodqua(inode),xp,yp,zp,&
+                        &                   amatrix,bmatrix,1)
                 end if
 
                 call common_block(1,1,ielem,inode,amatrix,bmatrix)
             end do
-            write(404,5001) xp,yp,angle(inode)
-1000     continue
+            !write(404,5001) xp,yp,angle(inode)
+        enddo
 !
 ! =============================================
 
@@ -221,11 +262,16 @@
 !
         !write(102, *) '  =========== before rludcmp =============='
 
-        !do i = 1,nnode
-            !do j = 1,nnode
-                !write(400,*) amata(i,j,1:nsys)
-        !end do;end do
-        !stop
+        do i = 1,nnode
+            do j = 1,nnode
+                write(400,*) amata(i,j,1:nsys)
+        end do;end do
+
+        do i = 1,nnode
+            do j = 1,nnoded
+                write(402,*) cmata(i,j,1:nsys)
+        end do;end do
+        stop
 
   !      do i = 1,nnode
                 !write(401,*) amata(i,i,1:nsys)
