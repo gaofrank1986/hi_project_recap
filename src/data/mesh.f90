@@ -37,7 +37,6 @@ module mesh
     real(8),allocatable :: dampe(:,:),dampf(:),damptp(:)
     integer,allocatable :: nodele(:,:),nodnoe(:),nodelj(:,:),nodqua(:) 
 contains
-        include './include/prepare_mesh_2.f90'
     subroutine read_mesh()
         implicit none
 
@@ -100,67 +99,45 @@ contains
     end subroutine
 
 
-    subroutine prepare_mesh()
+subroutine pre_mesh_2()
         implicit none
-        
-        integer :: ind,node_max
-        integer :: j,inode,l,ielem
-        
-        node_max = max(nnode,nnoded)
-        
-        allocate(xyz(3,node_max),dxyz(3,node_max),nnormc(nnoded))
-        
-        do ind = 1,nnode
-            xyz(1:3,ind) = xyztp(1:3,ind)
-            if (ind <= nnf) then
-                dampf(ind) = damptp(ind)
-            end if
-        end do
-       ! didn't assing damptp 
-        do ind = 1,nnoded
-            dxyz(1:3,ind) = dxyztp(1:3,ind)
-                NNORMC(IND)=NNORMN(IND)
-
-        end do
-        dampf(:) = w1*dampf(:) 
-        !deallocate(xyztp,dxyztp)
-
-        !==============================================
-        allocate(nodele(nnode,64),nodnoe(nnode),nodelj(nnode,64)&
-                &,nodqua(nnode))
-        
-        
-!        DO 50 INODE=1, NNODE 
-!        L=0
-!        DO 40 IELEM=1,  NELEM
-!        DO 30 J=1,      NCN(IELEM)
-!        IF(INODE.EQ.NCON(IELEM,J)) THEN
-!        L=L+1
-!        NODELE(INODE,L)=IELEM
-!        NODELJ(INODE,L)=J
-!        ENDIF
-!30      CONTINUE
-!40      CONTINUE
-!        NODNOE(INODE)=L
-!!                          
-!        NODQUA(INODE)=0
-!        IF( NSYS .GE. 2) THEN
-!          IF( DABS(XYZ(2,INODE)).LT.1.0E-06 ) THEN
-!          NODQUA(INODE)=2
-!          END IF
-!        END IF
-!!
-!        IF( NSYS .EQ. 4) THEN
-!          IF( DABS(XYZ(1,INODE)).LT.1.0E-06.AND.&
-!             & DABS(XYZ(2,INODE)).LT.1.0E-06) THEN
-!           NODQUA(INODE)=5
-!          ELSE IF( DABS(XYZ(1,INODE)).LT.1.0E-06 ) THEN
-!           NODQUA(INODE)=4
-!          ENDIF
-!        END IF
-!!
-!50      CONTINUE
-    end subroutine 
+        integer :: ndmax,ind
+          NDMAX=MAX(NNODE,NNODED)
+       ALLOCATE(NODELE(NNODE,64),NODNOE(NNODE),NODELJ(NNODE,64),&
+     &         NODQUA(NNODE),NNORMC(NNODED),&
+     &           XYZ(3,NDMAX),DXYZ(6,NDMAX),DAMPF(NNF))
+!
+! ---------------------------------------------------
+!
+!         WRITE(10,*) '  IND       X          Y          Z        DAMPing'
+         DO IND=1, NNF
+          DAMPF(IND)=DAMPTP(IND)
+          XYZ(1,IND)=XYZTP(1,IND)
+          XYZ(2,IND)=XYZTP(2,IND)
+          XYZ(3,IND)=XYZTP(3,IND)
+          !WRITE(10,111) IND, XYZ(1,IND),XYZ(2,IND),XYZ(3,IND),DAMPF(IND)
+         END DO
+!                
+         DO IND=NNF+1, NNODE
+          XYZ(1,IND)=XYZTP(1,IND)
+          XYZ(2,IND)=XYZTP(2,IND)
+          XYZ(3,IND)=XYZTP(3,IND)
+          !WRITE(10,111) IND, XYZ(1,IND),XYZ(2,IND),XYZ(3,IND)
+         END DO
+!
+         DO IND=1, NNODED
+          DXYZ(1,IND)=DXYZTP(1,IND)
+          DXYZ(2,IND)=DXYZTP(2,IND)
+          DXYZ(3,IND)=DXYZTP(3,IND)
+          NNORMC(IND)=NNORMN(IND)
+         ! WRITE(10,111) IND, DXYZ(1,IND),DXYZ(2,IND),DXYZ(3,IND)
+         END DO
+!
+!
+         DEALLOCATE(XYZTP,DXYZTP,NNORMN)
+!
+         DAMPF(:)=W1*DAMPF(:)
+         end subroutine
 !       MESHFS4 + MESHBD 
 !
 !C *******************************************************************
@@ -508,4 +485,80 @@ contains
 1005   FORMAT(8(1X,I6))
 1020   FORMAT(1X,I6,I4,6F14.6)
        END
+
+    subroutine comp_link(ielem,inode,ii) 
+        !use mvar_mod
+        ! return how many nodes in this element 
+        implicit none
+        integer,intent(in) :: inode,ielem
+        integer,intent(out) :: ii
+
+        integer :: i
+
+        ii = 0 
+        do i=1, nodnoe(inode)!!list of linked element by inode (how manys times inode appear in element)
+        if(ielem .eq. nodele(inode,i)) then!
+          ii=ii+1
+        endif
+        enddo
+    end subroutine 
+
+    logical function is_connected(ielem,inode) 
+        !use mvar_mod
+        ! return how many nodes in this element 
+        implicit none
+        integer,intent(in) :: inode,ielem
+        !logical :: is_connected
+
+        integer :: i,ii
+
+        ii = 0 
+        do i=1, nodnoe(inode)!!list of linked element by inode (how manys times inode appear in element)
+        if(ielem .eq. nodele(inode,i)) then!
+          ii=ii+1
+        endif
+        enddo
+        if (ii==0) then
+            is_connected=.false.
+        else
+            is_connected=.true.
+        endif
+    end function 
+
+    subroutine topology_analysis()
+        !use mvar_mod
+        implicit none
+        integer :: inode,ielem,j,l
+        do 50 inode=1, nnode 
+        l=0
+        do 40 ielem=1,  nelem
+        do 30 j=1,      ncn(ielem)
+        if(inode.eq.ncon(ielem,j)) then
+        l=l+1
+        nodele(inode,l)=ielem! elem num linked to inode
+        nodelj(inode,l)=j!in node-linked-element, inode appear as j-th node 
+        endif
+30      continue
+40      continue
+              nodnoe(inode)=l !total number of links
+!        below related to symmetry
+        nodqua(inode)=0
+        if( nsys .ge. 2) then
+          if( abs(xyz(2,inode)).lt.1.0e-06 ) then
+          nodqua(inode)=2
+          end if
+        end if
+!
+        if( nsys .eq. 4) then
+          if( abs(xyz(1,inode)).lt.1.0e-06.and.&
+     &        abs(xyz(2,inode)).lt.1.0e-06) then
+           nodqua(inode)=5
+          else if( abs(xyz(1,inode)).lt.1.0e-06 ) then
+           nodqua(inode)=4
+          endif
+        end if
+!
+50      continue
+        PRINT *,"topology analysis finished"
+    end subroutine
    end module
