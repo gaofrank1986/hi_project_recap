@@ -10,6 +10,7 @@
         USE TRVar_mod    
         USE  MFUNC_mod   
         use proj_cnst,only:ex,ey,xiqet,xiqsi
+        use green_funcs,only:gcombo1
 
         IMPLICIT NONE
 
@@ -169,8 +170,9 @@
                         NZ=NZ+SF(LK)*DXYZ(3,NCOND(IELEM,LK))
                     END DO
 
-                    CALL DTGRN0(-1.0d0,X,XP,Y,YP,Z,ZP,GXF0)
-                    DGN0=GXF0(2)*NX+GXF0(3)*NY+GXF0(4)*NZ
+                    !CALL DTGRN0(-1.0d0,X,XP,Y,YP,Z,ZP,GXF0)
+                    call gcombo1(-1.0d0,(/x,y,z/),(/xp,yp,zp/),gxf0)
+                    dgn0=gxf0(2)*nx+gxf0(3)*ny+gxf0(4)*nz
 
                     DO    LI=1,2
                         DO    LJ=1,3

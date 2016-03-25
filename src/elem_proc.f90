@@ -252,7 +252,7 @@
 
         integer ::inode,inodd,j,pwr_g
 
-        real(8) :: src_lcl(2),src_glb(3),origin_offset(3),xi0(2),p0m(3)
+        real(8) :: origin_offset(3),xi0(2),p0m(3)
         real(8) :: cnr_glb_mtx(3,8)
         real(8) :: passed_nrml(3,8)
 

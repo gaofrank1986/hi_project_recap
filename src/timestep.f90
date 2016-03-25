@@ -37,15 +37,17 @@
                   xp = xyz(1,inode)
                   yp = xyz(2,inode)
                   zp = xyz(3,inode)
-                
                   bkn_o(inode,1) = poxy(xp,yp,zp)
                   et_o(inode,1)= eti(xp,yp)
                   bkn(inode,1) = poxy(xp,yp,zp)
                   et(inode,1) = eti(xp,yp)
+                  !print *,bkn(inode,1)
 
                   !pause
+                  !stop
          end do
          end if
+         !stop
          !FIXME need to set unkn_o if moving body
           
          x1=xyz(1,1) 

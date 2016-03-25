@@ -14,6 +14,7 @@
       !use wave2,only:dpoxyz
       use mfunc_mod,only:rlubksb,dinp,poxy,dinp0
       use gradient,only:eval_gradient
+      use free_term,only:fterm
 
       implicit none  
 
@@ -67,7 +68,7 @@
                   cmat(inode,is)=cmat(inode,is)+rsn(is,ip)*bkn(inode,ip)
             enddo;enddo
             
-            !do j=1,ncn(nodele(inode,1))
+      !      do j=1,ncn(nodele(inode,1))
                  !tmp(j) = bkn(ncon(nodele(inode,1),j),1)!get surface value
             !end do
             !call eval_gradient(inode,tmp,tmp2)
@@ -144,9 +145,9 @@
         bmata(ind,is)=dot_product(cmata(ind,:,is),cmat(:,is))
                 !end do
                 if (ind<=nnf) then!potential only
-                        bmata(ind,is) = bmata(ind,is)-fra3(ind,is)*cmat(ind,is)&
-                         &-frc31(ind,is)*dpoxyz_save(1,is,ind) &
-                         &-frc32(ind,is)*dpoxyz_save(2,is,ind)
+                        bmata(ind,is) = bmata(ind,is)-fterm(ind,is,1)*cmat(ind,is)&
+                         &-fterm(ind,is,2)*dpoxyz_save(1,is,ind) &
+                         &-fterm(ind,is,3)*dpoxyz_save(2,is,ind)
                 end if
         !---------------------------------------------------
          200     continue   

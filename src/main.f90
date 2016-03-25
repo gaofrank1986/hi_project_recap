@@ -70,7 +70,7 @@ program hi_project
     time=0.0d0
     
     tstep=0.05
-    do itime = 0,200
+    do itime = 0,20!200
         print *,itime,'/200'
         time = itime*tstep
     call time_intg_rk4
