@@ -7,8 +7,7 @@
     !
     SUBROUTINE SGBD0_1(IS,IELEM,NODN,XP,YP,ZP,VALG,VALDG) 
         USE MVAR_MOD
-        USE TRVar_mod    
-        USE  MFUNC_mod   
+        use shape_funcs
         use proj_cnst,only:ex,ey,xiqet,xiqsi
         use green_funcs,only:gcombo1
 

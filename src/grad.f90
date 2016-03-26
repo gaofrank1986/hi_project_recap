@@ -1,5 +1,5 @@
 module gradient
-    use mfunc_mod,only: inverse
+    use linalg,only: inverse
     implicit none
     real(8),parameter :: param_pos(8,2) = &
         reshape((/-1. ,0.  ,1.  ,1.  ,1. ,0.  ,-1. ,-1. ,&

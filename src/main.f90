@@ -6,7 +6,7 @@ program hi_project
     use hi_intg
     use gradient,only:init_gradient
     use time_mod
-    use mfunc_mod,only:poxy,eti
+    use wave_funcs_simple,only:poxy,eti
 
     implicit  none  
 

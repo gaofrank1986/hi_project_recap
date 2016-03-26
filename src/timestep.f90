@@ -9,7 +9,7 @@
          USE MVAR_MOD 
          USE PVAR_MOD 
          use time_mod
-         use mfunc_mod,only:dinp,dpot,eti,deti,poxy
+         use wave_funcs_simple,only:dinp,dpot,eti,deti,poxy
          
          IMPLICIT NONE 
 !         
@@ -186,8 +186,8 @@
          USE MVAR_MOD 
          USE PVar_mod 
          use time_mod
-         use mfunc_mod,only:rlubksb
-         use mfunc_mod,only:dinp,dpot,eti,deti,poxy
+         use linalg,only:rlubksb
+         use wave_funcs_simple,only:dinp,dpot,eti,deti,poxy
  
 ! 
          IMPLICIT real(8) (A-H,O-Z) 

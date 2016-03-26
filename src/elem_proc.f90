@@ -89,8 +89,9 @@
 
     subroutine sing_elem_wrapper(inode,ielem,numqua,xp,yp,zp,amatrix,bmatrix,hi)
         use mvar_mod
+        use body_property
         use green_funcs,only:gcombo1,gcombo0
-        use mfunc_mod,only:tripol
+        use tripole_transform,only:tripol
 
         implicit   none  
 
@@ -125,7 +126,7 @@
 
                 if(inode.eq.ncon(ielem,i)) nodnum=i
             enddo
-            call tripol(nodnum,ncn(ielem),xyzt,dxyzt)
+            call tripol(nodnum,ncn(ielem),xyzt,dxyzt,xc,yc,zc)
         end if
             
         do   i=1,  ncn(ielem)
@@ -200,7 +201,7 @@
         use mvar_mod
         use green_funcs,only:gcombo0
         use proj_cnst,only:ex,ey
-        use trvar_mod,only:xynod,dxynod,nosamp,samnod
+        use tripole_transform,only:xynod,dxynod,nosamp,samnod,tripol
         implicit   none  
 
         integer is,ielem,n,j,ip,nodnum
@@ -239,7 +240,7 @@
     subroutine sing_int1(is,ielem,nodj,p0,aval,bval) 
 
         use mvar_mod
-        use mfunc_mod
+
         use hi_intg
         use green_funcs,only:Gcombo1_2
         use proj_cnst,only: ex,ey,xiqsi,xiqet

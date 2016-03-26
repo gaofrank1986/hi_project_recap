@@ -88,7 +88,7 @@
         use body_property
         use free_term,only:fterm,output_fterms,calc_fterms
         use mesh,only:is_connected,topology_analysis
-        use mfunc_mod
+        use linalg,only:rludcmp
         use proj_cnst,only:rsn
 
         !use sebsm_mod

@@ -1,8 +1,9 @@
     subroutine common_block(flag1,flag2,ielem,inode,amatrix,bmatrix)!,fterm_coef)
         use mvar_mod
-        use mfunc_mod 
+
         use free_term,only:fterm
         use proj_cnst,only :rsn,ex,ey
+        use wave_funcs_simple,only:dinp1
 
         implicit none
         integer,intent(in) :: ielem,inode,flag1,flag2
@@ -21,13 +22,6 @@
             jncon=ncon(ielem,j)!jth node in ielem
             jnrml=ncond(ielem,j)  !jth nrml in ielem
             do     ip=1, nsys          
-                !xsb=ex(ip)*xyz(1,jncon)
-                !ysb=ey(ip)*xyz(2,jncon)
-                !zsb=       xyz(3,jncon)
-                !nx=ex(ip)*dxyz(1,jnrml)
-                !ny=ey(ip)*dxyz(2,jnrml)
-                !nz=       dxyz(3,jnrml)
-                !write (*,'(2i5,8f10.6)') inode,ielem,bmatrix(1,:)
 
                 prefix=(/ex(ip),ey(ip),1.0d0/)
                 jp = prefix*xyz(1:3,jncon)
@@ -54,21 +48,15 @@
                     enddo
                 end if
 
-                !if (present(fterm_coef)) then
-                        !print *,"run with optional"
                 if (flag2.eq.0) then!
-                    !do i = 0,3
                     do i = 1,4
-                    !call dinp0(i,xsb,ysb,zsb,phi,dpox,dpoy,dpoz)       
-                    call dinp1(i,jp,phi,dpdx)       
-                    !dpdn=dpox*nx+dpoy*ny+dpoz*nz
-                    dpdn=dot_product(jnp,dpdx)
-                    do    is=1, nsys             
-                    !fterm(inode,ip,i+1)=fterm(inode,ip,i+1)-rsn(is,ip)*bmatrix(is,j)*dpdn        
-                    !fterm(inode,ip,i+1) =fterm(inode,ip,i+1)+rsn(is,ip)*amatrix(is,j)*phi
-                    fterm(inode,ip,i)=fterm(inode,ip,i)-rsn(is,ip)*bmatrix(is,j)*dpdn        
-                    fterm(inode,ip,i) =fterm(inode,ip,i)+rsn(is,ip)*amatrix(is,j)*phi
-                    enddo
+                        call dinp1(i,jp,phi,dpdx)       
+                        dpdn=dot_product(jnp,dpdx)
+                        do    is=1, nsys             
+
+                            fterm(inode,ip,i)=fterm(inode,ip,i)-rsn(is,ip)*bmatrix(is,j)*dpdn        
+                            fterm(inode,ip,i) =fterm(inode,ip,i)+rsn(is,ip)*amatrix(is,j)*phi
+                        enddo
                     end do
                 else 
                     !call dinp0(0,xsb,ysb,zsb,phi,dpox,dpoy,dpoz)      

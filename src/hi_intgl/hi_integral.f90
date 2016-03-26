@@ -118,8 +118,8 @@ contains
     end subroutine read_model_from_DAT
 
     subroutine init_hi_var()
-        !use mesh
-         USE MVAR_MOD
+        use mesh
+         !USE MVAR_MOD
         implicit none
 
 

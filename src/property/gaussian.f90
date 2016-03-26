@@ -17,7 +17,7 @@ contains
     !C
     subroutine get_gaussian_data(xc,yc,zc)
 
-        use mfunc_mod,only:spfunc8,spfunc6
+        use shape_funcs,only:spfunc8,spfunc6
         use proj_cnst,only:cross_product
 
 

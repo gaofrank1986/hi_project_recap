@@ -10,7 +10,8 @@
        SUBROUTINE SOLIDANGLE(INODE,NNODE,NELEM,NCN,NCON,NODQUA,
      1                        H,XYZ,DXYZE,SANGLE)
 
-        USE MFUNC_mod   
+        !USE MFUNC_mod   
+        use shape_funcs
 !	   
         IMPLICIT   NONE 
 !	

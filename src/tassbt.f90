@@ -12,7 +12,8 @@
       USE MVAR_MOD
       USE PVAR_MOD
       !use wave2,only:dpoxyz
-      use mfunc_mod,only:rlubksb,dinp,poxy,dinp0
+      use linalg,only:rlubksb
+      use wave_funcs_simple,only:dinp,poxy
       use gradient,only:eval_gradient
       use free_term,only:fterm
 
