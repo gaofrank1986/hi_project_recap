@@ -204,8 +204,6 @@
             nside(i,:) = [2,1]
         end if
 
-
-        !print *,"mcele=",mcele
         do i=2,mcele
             na = 0
 
@@ -221,23 +219,16 @@
                     lct(na)=j! ielem
                     lsd(na)=k! kth face vector
 
-                    !print *,"na=",na,dn(na),lct(na),lsd(na)
                 end do
             end do
             next_edge = minloc(dn(1:na))
-            !print *,next_edge(1)
             minside= next_edge(1) 
             ! check if min value is unrealistic
             ! todo if min too big (0.5) stop program
             ncont(i) = lct(next_edge(1)) 
             nside(i,1) = lsd(next_edge(1)) 
             nside(i,2) = 3 - nside(i,1)
-            !print *,"selected",ncont(i),nside(i,1)
         end do
-        !print *,"nside",nside(1:mcele,1)
-        !print *,"nside",nside(1:mcele,2)
-        !print *,"ncont",ncont(1:mcele)
-        !print *,"min",minside
 
     end subroutine
 
@@ -348,21 +339,16 @@
 
     subroutine  zxsym(dxyzn,txyzn,mcele)
         implicit   none 
-
         integer  mcele
         real*8   dxyzn(100,3),txyzn(100,2,3)
 
         call symcore(dxyzn,txyzn,mcele,3)
     end subroutine
+
     subroutine  yzzxsym(dxyzn,txyzn,mcele)
         implicit   none 
-
-        !integer  i,j
         integer  mcele
-
         real*8   dxyzn(100,3),txyzn(100,2,3)
-        !real(8) :: p(3,3),p2(3),p3(3)
-
 
         call zxsym(dxyzn,txyzn,mcele)
         call yzsym(dxyzn,txyzn,mcele)
