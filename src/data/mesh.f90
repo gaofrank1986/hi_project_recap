@@ -2,40 +2,41 @@ module mesh
     use wave 
     implicit none
     
-    real(8),public,allocatable :: XYZB(:,:),DXYZB(:,:)
+    real(8),private,allocatable :: XYZB(:,:),DXYZB(:,:)
     !xyzb => (3,node_id)  node data 
     !dxyzb => (3,nrml_id) derivative data
-    integer,public,allocatable :: NCONB(:,:),NCONDB(:,:)   
+    integer,private,allocatable :: NCONB(:,:),NCONDB(:,:)   
     ! nconb => node list body mesh
     ! ncondb => normal list body
-    real(8),allocatable :: XYZE(:,:,:),DXYZE(:,:,:),TXYZE(:,:,:)
+    real(8),protected,allocatable :: XYZE(:,:,:),DXYZE(:,:,:),TXYZE(:,:,:)
     ! xyze =>  before combine, new full mesh for node (3,8,elem_id)
     ! dxyze => before combine, new full mesh for normal (3,8,elem,id)
-    real(8),public,allocatable :: XYZTP(:,:),DXYZTP(:,:)
+    real(8),private,allocatable :: XYZTP(:,:),DXYZTP(:,:)
     ! xyztp => convsb, combined node mesh, xyztp(3,node_id)
     ! dxyztp = > combined normal mesh, dxyztp(3,nrml_id)
-    integer,allocatable :: NCN(:),NCON(:,:),NCOND(:,:),IETYPE(:)
+    integer,protected,allocatable :: NCN(:),NCON(:,:),NCOND(:,:),IETYPE(:)
     ! ncn => elem_type ,namely, the node number in a elem
     ! ncon => combined node list,ncon(8,elem_id)
     ! ncond => combined nrml list,ncond(8,elem_id)
     ! ietype => flag show if a elem is free surface mesh or a body mesh
 
-    integer,public,allocatable :: NNORMN(:),NNORMC(:)
-    real(8),allocatable :: xyz(:,:),dxyz(:,:)
-    integer :: nsys,nelem,nnode,nnoded,isys
+    integer,private,allocatable :: NNORMN(:),NNORMC(:)
+    real(8),protected,allocatable :: xyz(:,:)
+    real(8),public,allocatable ::dxyz(:,:)
+    integer,protected :: nsys,nelem,nnode,nnoded,isys
     ! nsys => about symmetr
     ! nelem => elem number in combined mesh
     ! nnode => node number in combined mesh
     ! nnoded => nrml nmber in combined mesh
-    integer :: nelemb,nnb,nnbd,nelemf,nnf
+    integer,protected :: nelemb,nnb,nnbd,nelemf,nnf
     ! nelemb => elem num in body
     ! nnb => node num  in body 
     ! nnbd => nrml num in body
     ! nelemf => elem num in fs
     ! nnf => node num in fs
 
-    real(8),allocatable :: dampe(:,:),dampf(:),damptp(:)
-    integer,allocatable :: nodele(:,:),nodnoe(:),nodelj(:,:),nodqua(:) 
+    real(8),protected,allocatable :: dampe(:,:),dampf(:),damptp(:)
+    integer,protected,allocatable :: nodele(:,:),nodnoe(:),nodelj(:,:),nodqua(:) 
 contains
     subroutine read_mesh()
         implicit none
