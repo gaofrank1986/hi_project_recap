@@ -5,82 +5,6 @@
 !C * coefficients of the corresponding system of equationn *
 !C *                                                       *
 !C *********************************************************
-    include './add_on/common_block.f90'
-    !subroutine comp_link(ielem,inode,ii) 
-        !use mvar_mod
-        !! return how many nodes in this element 
-        !implicit none
-        !integer,intent(in) :: inode,ielem
-        !integer,intent(out) :: ii
-
-        !integer :: i
-
-        !ii = 0 
-        !do i=1, nodnoe(inode)!!list of linked element by inode (how manys times inode appear in element)
-        !if(ielem .eq. nodele(inode,i)) then!
-          !ii=ii+1
-        !endif
-        !enddo
-    !end subroutine 
-
-    !logical function is_connected(ielem,inode) 
-        !use mvar_mod
-        !! return how many nodes in this element 
-        !implicit none
-        !integer,intent(in) :: inode,ielem
-        !!logical :: is_connected
-
-        !integer :: i,ii
-
-        !ii = 0 
-        !do i=1, nodnoe(inode)!!list of linked element by inode (how manys times inode appear in element)
-        !if(ielem .eq. nodele(inode,i)) then!
-          !ii=ii+1
-        !endif
-        !enddo
-        !if (ii==0) then
-            !is_connected=.false.
-        !else
-            !is_connected=.true.
-        !endif
-    !end function 
-
-    !subroutine topology_analysis()
-        !use mvar_mod
-        !implicit none
-        !integer :: inode,ielem,j,l
-        !do 50 inode=1, nnode 
-        !l=0
-        !do 40 ielem=1,  nelem
-        !do 30 j=1,      ncn(ielem)
-        !if(inode.eq.ncon(ielem,j)) then
-        !l=l+1
-        !nodele(inode,l)=ielem! elem num linked to inode
-        !nodelj(inode,l)=j!in node-linked-element, inode appear as j-th node 
-        !endif
-!30      continue
-!40      continue
-              !nodnoe(inode)=l !total number of links
-!!        below related to symmetry
-        !nodqua(inode)=0
-        !if( nsys .ge. 2) then
-          !if( abs(xyz(2,inode)).lt.1.0e-06 ) then
-          !nodqua(inode)=2
-          !end if
-        !end if
-!!
-        !if( nsys .eq. 4) then
-          !if( abs(xyz(1,inode)).lt.1.0e-06.and.&
-     !&        abs(xyz(2,inode)).lt.1.0e-06) then
-           !nodqua(inode)=5
-          !else if( abs(xyz(1,inode)).lt.1.0e-06 ) then
-           !nodqua(inode)=4
-          !endif
-        !end if
-!!
-!50      continue
-        !PRINT *,"topology analysis finished"
-    !end subroutine
 
     subroutine tassb0
         use mvar_mod
@@ -114,7 +38,7 @@
         !
 !`
 !  ----------------------------------------------------
-          WRITE(10, *)   ' IN TASSB0 '
+          WRITE(*, *)   ' IN TASSB0 '
          
           !DSDT(:)=0.0
 !                 
@@ -127,8 +51,9 @@
         !call output_fterms()
         pause
         !print *,"finished fterm output"
-        do     inode=1,  nnf
-                !print *,inode
+        do     inode=1,1 ! nnf
+        !do     inode=874,877
+                print *,inode
             xp=xyz(1,inode)
             yp=xyz(2,inode)
             zp=xyz(3,inode)
@@ -172,11 +97,12 @@
                     !frc32(inode,ip)=fterm(inode,ip,3)-fterm(inode,ip,1)*yp!
                     !frc33(inode,ip)=fterm(inode,ip,4)-fterm(inode,ip,1)*zp!
             !end do
-            !do ip = 1,nsys
-                !fterm(inode,ip,2:4) = fterm(inode,ip,2:4)-fterm(inode,ip,1)*xyz(1:3,inode)
-            !end do
+            do ip = 1,nsys
+                fterm(inode,ip,2:4) = fterm(inode,ip,2:4)-fterm(inode,ip,1)*xyz(1:3,inode)
+            end do
 
-            !write(*,'(i6,4f14.6)') inode,fterm(inode,1,1:4)
+            !write(*,'(i6,5f14.6)') inode,fterm(inode,1,1:4),angle(inode)
+            !write(398,'(i6,5f14.6)') inode,fterm(inode,1,1:4),angle(inode)
             !write(404,5001) xp,yp,fterm(inode,1,1:4),angle(inode)
             !write(405,5000) inode,fra3(inode,1),frc31(inode,1),frc32(inode,1)
             5000 format(I6,3f14.6)
@@ -185,16 +111,15 @@
 
 
         enddo
+        stop
+       
+
         
-
-        !forall(i=1:nnf,j=1:nsys)
-            !fterm(i,j,2:4)=fterm(i,j,2:4)-fterm(i,j,1)*xyz(1:3,i)
-        !end forall
-
         !do i=1,nnf
             !write(*,'(i6,4f14.6)') i,fterm(i,1,1:4)
         !enddo
-        call calc_fterms()
+        !call calc_fterms()
+
         ! =======================================================================
         !    Source point is on the body surface
         !
@@ -204,7 +129,6 @@
             yp=xyz(2,inode)
             zp=xyz(3,inode) 
 
-            !fterm_coef = 0
             call solidangle(inode,nnode,nelem,ncn,ncon,nodqua,&
                 &                    h,xyz,dxyze,s_angle) 
 
@@ -263,16 +187,16 @@
 !
         !write(102, *) '  =========== before rludcmp =============='
 
-        do i = 1,nnode
-            do j = 1,nnode
-                write(400,*) amata(i,j,1:nsys)
-        end do;end do
+        !do i = 1,nnode
+            !do j = 1,nnode
+                !write(400,*) amata(i,j,1:nsys)
+        !end do;end do
 
-        do i = 1,nnode
-            do j = 1,nnoded
-                write(402,*) cmata(i,j,1:nsys)
-        end do;end do
-        stop
+        !do i = 1,nnode
+            !do j = 1,nnoded
+                !write(402,*) cmata(i,j,1:nsys)
+        !end do;end do
+        !stop
 
   !      do i = 1,nnode
                 !write(401,*) amata(i,i,1:nsys)
@@ -287,6 +211,77 @@
         write(102, *)
         write(102, *) '  =========== after rludcmp =============='
 
-      return
-      end
+    end subroutine
 
+    subroutine common_block(flag1,flag2,ielem,inode,amatrix,bmatrix)!,fterm_coef)
+        use mvar_mod
+
+        use free_term,only:fterm
+        use proj_cnst,only :rsn,ex,ey
+        use wave_funcs_simple,only:dinp1
+
+        implicit none
+        integer,intent(in) :: ielem,inode,flag1,flag2
+        real(8),intent(in) :: amatrix(4,8),bmatrix(4,8)
+
+        integer :: jncon,jnrml,j,ip,is,i
+        real(8) :: xsb,ysb,zsb,nx,ny,nz,dpdn,phi
+        real(8) :: dpox,dpoy,dpoz,jp(3),jnp(3),prefix(3),dpdx(3)
+
+
+        !if (flag1.eq.0) then
+            !write (399,'(2i5,8f10.6)') inode,ielem,bmatrix(1,:)
+        !end if
+
+        do     j=1,  ncn(ielem) 
+            jncon=ncon(ielem,j)!jth node in ielem
+            jnrml=ncond(ielem,j)  !jth nrml in ielem
+            do     ip=1, nsys          
+
+                prefix=(/ex(ip),ey(ip),1.0d0/)
+                jp = prefix*xyz(1:3,jncon)
+                jnp = prefix*dxyz(1:3,jnrml)
+
+                if (flag1.eq.0) then
+                    do   is=1, nsys    
+                    amata(inode,jncon,ip)=amata(inode,jncon,ip)+&
+                        &              rsn(is,ip)*bmatrix(is,j)
+
+                    cmata(inode,jnrml,ip)=cmata(inode,jnrml,ip)+rsn(is,ip)&
+                        &           *amatrix(is,j)
+                    enddo
+                else 
+                    do  is=1, nsys    
+                    if(jncon .gt. nnf)  then
+                        amata(inode,jncon,ip)=amata(inode,jncon,ip)-&
+                            &                   rsn(is,ip)*amatrix(is,j)
+                    else
+                        cmata(inode,jncon,ip)=cmata(inode,jncon,ip)+rsn(is,ip)*amatrix(is,j)!*phi2
+                    endif
+
+                    cmata(inode,jnrml,ip)=cmata(inode,jnrml,ip)-rsn(is,ip)*bmatrix(is,j)!*dpdn
+                    enddo
+                end if
+
+                if (flag2.eq.0) then!
+                    do i = 1,4
+                        call dinp1(i,jp,phi,dpdx)       
+                        dpdn=dot_product(jnp,dpdx)
+                        do    is=1, nsys             
+
+                            fterm(inode,ip,i)=fterm(inode,ip,i)-rsn(is,ip)*bmatrix(is,j)*dpdn        
+                            fterm(inode,ip,i) =fterm(inode,ip,i)+rsn(is,ip)*amatrix(is,j)*phi
+                        enddo
+                    end do
+                else 
+                    !call dinp0(0,xsb,ysb,zsb,phi,dpox,dpoy,dpoz)      
+                    !phi = 1.0d0
+                    !do    is=1, nsys             
+                    !!fterm_coef(0,ip) = fterm_coef(0,ip)-rsn(is,ip)*bmatrix(is,j)*dpdn
+                    !fterm_coef(0,ip) = fterm_coef(0,ip)+rsn(is,ip)*amatrix(is,j)*phi
+                    !end do
+ 
+                end if
+                !end if!fterm
+                end do;end do !j,ip
+     end subroutine
