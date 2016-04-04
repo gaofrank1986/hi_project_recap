@@ -5,7 +5,7 @@
     ! *                                                           *
     ! *************************************************************
     !
-    subroutine sgbd0_1(is,ielem,nodn,xp,yp,zp,valg,valdg) 
+    subroutine sgbd0_1(is,ielem,nodn,p0,valg,valdg) 
         use kinds
         use mesh,only:xyz,dxyz,ncn,ncon,ncond
         use shape_funcs
@@ -16,7 +16,7 @@
         implicit none
 
         integer,intent(in)      ::  is,ielem,nodn   
-        real(rk),intent(in)     ::  xp,yp,zp       
+        real(rk),intent(in)     ::  p0(3) 
         real(rk),intent(out)    ::  valg(8),valdg(8)
 
         integer loop1,loop2,nsamb
@@ -28,7 +28,7 @@
 
         real(rk) :: det,ans
         real(rk)  xxx(3,8),xxd(3,8)
-        real(rk) ::xi0(2),p(3),np(3),xi(2),p0(3)
+        real(rk) ::xi0(2),p(3),np(3),xi(2)
         real(rk)  tot,totf
         real(rk)  f,f1,f2
         real(rk)  plo,theta(2)
@@ -52,7 +52,6 @@
 
         valg=0.0d0 
         valdg=0.0d0
-        p0=[xp,yp,zp]
 
         if(ncn(ielem).eq.8)  then 
 

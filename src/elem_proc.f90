@@ -119,7 +119,7 @@
 
         !< compute xynod,dxynod for weak singular elem
         !
-        if (hi==1) then
+        if (hi==2) then
             do  i=1,  ncn(ielem)
                 xyzt(1:3, i)  =  xyze(1:3, i, ielem)  
                 dxyzt(1:3, i) = dxyze(1:3, i, ielem)  
@@ -181,7 +181,6 @@
         real(8) :: amatrix(4,8),bmatrix(4,8)
         
         real(8) :: p0(3)
-        
         p0=(/xp,yp,zp/)
         if (hi.eq.2) then
             call sing_int1(is,ielem,nodnum,p0,amatrix(is,:),bmatrix(is,:)) 
@@ -262,6 +261,7 @@
 
 
 
+       print *,"sing ",ielem 
         inode=ncon(ielem,nodj) ! corresponding node id
         inodd=ncond(ielem,nodj)!                 normal id
         aval=0.0d0
@@ -323,6 +323,24 @@
         !< note p03 is used here
         call preset_src(si,eta,p0m,origin_offset)
         call eval_singular_elem(cnr_glb_mtx,passed_nrml,result0,result1,result2)
+        !write (*,'(2i5,8f10.5)') ielem,nodj,result0
+        !result0=0.0d0
+
+        call SGBD0_1(is,ielem,nodj,p0,result1,result2)
+
+        ! omitted since 0 on free surface
+        !call sing_int0(is,ielem,nodj,p0,result1,result0)
+        !write (*,'(2i5,8f10.5)') ielem,nodj,result0
+
+        if (any(abs(result2-result0) > -10.0d0)) then
+
+        write (*,'(2i5,8f10.5)') ielem,nodj,result2
+        write (*,'(2i5,8f10.5)') ielem,nodj,result0
+        !write (*,'(2i5,8f10.5)') ielem,nodj,result2-result0
+        print *,"========="
+    end if
+
+
 
         !aval(:) = amatrix+result0 !< elemental plus
         !bmatrix(:) = bmatrix(:)+result1!elemental plus
