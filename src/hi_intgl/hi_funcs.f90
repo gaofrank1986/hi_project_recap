@@ -2,23 +2,23 @@ module hi_mod_funcs
 
 contains
 
-      function new_norm2(r)
-        real(8) :: r(2),new_norm2
+      !function new_norm2(r)
+        !real(8) :: r(2),new_norm2
 
-        new_norm2 = dsqrt(r(1)*r(1)+r(2)*r(2))
+        !new_norm2 = dsqrt(r(1)*r(1)+r(2)*r(2))
 
-        return
+        !return
 
-      end function
+      !end function
 
-      function new_norm3(r)
-        real(8) :: r(3),new_norm3
+      !function new_norm3(r)
+        !real(8) :: r(3),new_norm3
 
-        new_norm3 = dsqrt(r(1)*r(1)+r(2)*r(2)+r(3)*r(3))
+        !new_norm3 = dsqrt(r(1)*r(1)+r(2)*r(2)+r(3)*r(3))
 
-        return
+        !return
 
-      end function
+      !end function
 
       SUBROUTINE GAUSSV(NGAUS,GP,GW)
       IMPLICIT REAL*8 (A-H,O-Z)
