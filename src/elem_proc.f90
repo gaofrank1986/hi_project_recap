@@ -119,7 +119,7 @@
 
         !< compute xynod,dxynod for weak singular elem
         !
-        if (hi==2) then
+        if (hi==1) then
             do  i=1,  ncn(ielem)
                 xyzt(1:3, i)  =  xyze(1:3, i, ielem)  
                 dxyzt(1:3, i) = dxyze(1:3, i, ielem)  
