@@ -5,7 +5,7 @@
     ! *                                                           *
     ! *************************************************************
     !
-    SUBROUTINE SGBD0_1(IS,IELEM,NODN,XP,YP,ZP,VALG,VALDG) 
+    subroutine sgbd0_1(is,ielem,nodn,xp,yp,zp,valg,valdg) 
         use kinds
         use mesh,only:xyz,dxyz,ncn,ncon,ncond
         use shape_funcs
@@ -15,28 +15,28 @@
 
         implicit none
 
-        integer,intent(in)  ::  is,ielem,nodn   
-        real(rk),intent(in) ::  xp,yp,zp       
-        real(rk),intent(out)::  valg(8),valdg(8)
+        integer,intent(in)      ::  is,ielem,nodn   
+        real(rk),intent(in)     ::  xp,yp,zp       
+        real(rk),intent(out)    ::  valg(8),valdg(8)
 
         integer loop1,loop2,nsamb
         integer i,j
-
-        real(rk)  xitsi(6),xitet(6)
-        real(rk)  xiq(8),wiq(8),xit(7),wit(7)
 
         real(rk)  sf0(8),dsf0(2,8),ddsf0(3,8) 
         real(rk)  sf(8),dsf(2,8)
         real(rk)  xj(2,3),xjp(2,3),xxj(3,3)
 
         real(rk) :: det,ans
-     
         real(rk)  xxx(3,8),xxd(3,8)
         real(rk) ::xi0(2),p(3),np(3),xi(2),p0(3)
         real(rk)  tot,totf
         real(rk)  f,f1,f2
-        real(rk)  plo
+        real(rk)  plo,theta(2)
         real(rk)  gxf0(4),dgn0,n01(3),jk01(3,3),param(2)
+
+        !< --- parameter
+        real(rk)  xitsi(6),xitet(6)
+        real(rk)  xiq(8),wiq(8),xit(7),wit(7)
 
         data xiq/ 0.960289856497536d+00, 0.796666477413626d+00, &
             0.525532409916329d+00, 0.183434642495650d+00, &
@@ -47,8 +47,9 @@
             0.313706645877887d+00, 0.362683783378362d+00, &
             0.362683783378362d+00, 0.313706645877887d+00, &
             0.222381034453374d+00, 0.101228536290376d+00/     
-        !       
-        !    ============================================    
+
+        !<---------------------------------------------------
+
         valg=0.0d0 
         valdg=0.0d0
         p0=[xp,yp,zp]
@@ -65,21 +66,22 @@
 
         endif
 
+        !< shape func 1st,2nd order derivatives at xi0
         xj(1:2,1:3) = matmul(dsf0(1:2,1:8),transpose(xxx))
         xxj(1:3,1:3) = matmul(ddsf0(1:3,1:8),transpose(xxx))
-
+        !< jk0,jk01c,jk01c
         jk01(1,:) = cross_product(xj(1,:),xj(2,:))
-        jk01(2,:)=cross_product(xxj(1,:),xj(2,:))+cross_product(xj(1,:),xxj(3,:))
-        jk01(3,:)=cross_product(xxj(3,:),xj(2,:))+cross_product(xj(1,:),xxj(2,:))
+        jk01(2,:) = cross_product(xxj(1,:),xj(2,:))+cross_product(xj(1,:),xxj(3,:))
+        jk01(3,:) = cross_product(xxj(3,:),xj(2,:))+cross_product(xj(1,:),xxj(2,:))
 
-
+        !< line integral part
         do  j=1, ncn(ielem)
             n01=[sf0(j),dsf0(1,j),dsf0(2,j)]
             call cirbod_2(nodn,ncn(ielem),xi0,jk01,n01,xj,xxj,ans)
             valdg(j) = ans
         enddo
 
-
+        !< area integral part
         nsamb=0
         if(ncn(ielem).eq.8)  then 
             do  loop1=1, 8 ;do  loop2=1, 8      
@@ -88,7 +90,7 @@
                 xi=[xiq(loop1),xiq(loop2)]
                 call spfunc8(xi(1),xi(2),sf,dsf)
                 plo=norm2(xi-xi0)
-                xi=(xi-xi0)/plo
+                theta=(xi-xi0)/plo
 
                 ! < gp global pos, gp corresponding normal
                 p=matmul(sf,transpose(xxx))
@@ -102,7 +104,7 @@
 
                 do  j=1, ncn(ielem)
                     n01=[sf0(j),dsf0(1,j),dsf0(2,j)]
-                    call comp_coef(xi(1),xi(2),xj,xxj,jk01,n01,f1,f2,param)
+                    call comp_coef(theta,xj,xxj,jk01,n01,f1,f2,param)
 
                     f=f2/plo/plo+f1/plo                       ! (c19)
 
@@ -204,12 +206,8 @@
                    xi=[xiqsi(in),xiqet(in)]
                    plo=norm2(xi-xi0)
                    theta = (xi-xi0)/plo
+                   call comp_coef(theta,xj,xxj,jk01,n01,f1,f2,param)
 
-                   call comp_coef(theta(1),theta(2),xj,xxj,jk01,n01,f1,f2,param)
-
-                   !fixme *pi4
-                   !fitg2=fitg2-f2*(param(1)/param(2)**2+1.0/plo)*wiq1(i)
-                   !fitg1=fitg1+f1*dlog(plo/param(2))*wiq1(i)
                    ans=ans-f2*(param(1)/param(2)**2+1.0/plo)*wiq1(i)
                    ans=ans+f1*dlog(plo/param(2))*wiq1(i) 
 
@@ -222,7 +220,7 @@
                    xi=[xiqsi(in),xiqet(in)]
                    plo=norm2(xi-xi0)
                    theta = (xi-xi0)/plo
-                   call comp_coef(theta(1),theta(2),xj,xxj,jk01,n01,f1,f2,param)
+                   call comp_coef(theta,xj,xxj,jk01,n01,f1,f2,param)
 
                    ans=ans-f2*(param(1)/param(2)**2+1.0/plo)*wiq2(i)
                    ans=ans+f1*dlog(plo/param(2))*wiq2(i)
@@ -236,19 +234,19 @@
 
 
 
-   subroutine comp_coef(csst,snst,xj,xxj,jk0,n0,f1,f2,param) 
+   subroutine comp_coef(theta,xj,xxj,jk0,n0,f1,f2,param) 
 
        use proj_cnst,only :pi4
 
        implicit none
 
-       real(8),intent(in) :: csst,snst,xj(2,3),xxj(3,3),jk0(3,3),n0(3)
+       real(8),intent(in) :: theta(2),xj(2,3),xxj(3,3),jk0(3,3),n0(3)
        real(8),intent(out) :: f1,f2,param(2)
 
-       real(8) :: jk1(3),n1,theta(2)
+       real(8) :: jk1(3),n1  
        real(8) :: a(3),b(3),ast,bst,as_3,as_2,g31,b30,a30,b31,a31
 
-       theta=[csst,snst]
+       !theta=[csst,snst]
 
        !jk1(1:3) = jk0(2,1:3)*csst+jk0(3,1:3)*snst
        jk1(1:3) = matmul(theta,jk0(2:3,:))
@@ -256,8 +254,10 @@
        !n1=n0(2)*csst+n0(3)*snst
        n1=dot_product(n0(2:3),theta)
 
-       a(1:3) = xj(1,:)*csst+xj(2,:)*snst
-       b(1:3) = xxj(1,:)*csst**2*0.5+xxj(2,:)*snst**2*0.5+xxj(3,:)*csst*snst
+       !a(1:3) = xj(1,:)*theta(1)+xj(2,:)*theta(2)
+       !b(1:3) = xxj(1,:)*theta(1)**2*0.5+xxj(2,:)*theta(2)**2*0.5+xxj(3,:)*theta(1)*theta(2)
+       a(1:3) = matmul(theta,xj(1:2,:))
+       b(1:3) = matmul([theta(1)**2*0.5,theta(2)**2*0.5,theta(1)*theta(2)],xxj(1:3,:))
 
        ast=norm2(a)
        bst=norm2(b)
