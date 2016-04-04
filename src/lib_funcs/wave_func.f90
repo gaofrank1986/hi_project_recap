@@ -1,3 +1,25 @@
+!-------------------------------------------------------------------------------
+! DUTWAV
+!-------------------------------------------------------------------------------
+!  MODULE: MockCall
+!
+!> @brief
+!! <BriefDescription>
+!!
+!! @author
+!! Song Gao,DUT 
+!!
+!! @date
+!! 07 Nov 2013
+!! 
+!! @note <A note here.>
+!! <Or starting here...>
+!
+! REVISION HISTORY:
+!
+! 07 Mar 2015 - Added gcombo to wrap mirrored source or sink. 
+!
+!-------------------------------------------------------------------------------
 module wave_funcs_simple
     use kinds
     use wave,only:amp,wk,beta,w1,g,h
@@ -83,7 +105,7 @@ contains
         real(rk),intent(in)::   x,y,z
         real(rk),intent(out)::  dpox,dpoy,dpoz
 
-        real*8 dum,wkx
+        real(rk) dum,wkx
 
         dum=amp*g/w1
         wkx=wk*(x*dcos(beta)+y*dsin(beta))
@@ -115,8 +137,8 @@ contains
     subroutine  dinp1(i,p,phi,dpdx)
         implicit    none
         integer,intent(in) :: i
-        real(8),intent(in)::  p(3)
-        real*8,intent(out)::  phi,dpdx(3)
+        real(rk),intent(in)::  p(3)
+        real(rk),intent(out)::  phi,dpdx(3)
 
 
         if (i==1) then

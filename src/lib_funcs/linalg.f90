@@ -1,24 +1,59 @@
+!-------------------------------------------------------------------------------
+! DUTWAV
+!-------------------------------------------------------------------------------
+!  MODULE: linalg
+!
+!> @brief
+!! <linear algebra functions>
+!!
+!! @author
+!! DUT 
+!!
+!! @date
+!! 07 Nov 2013
+!! 
+!! @note <A note here.>
+!! <Or starting here...>
+!
+! REVISION HISTORY:
+!
+! 07 Mar 2015 - Added gcombo to wrap mirrored source or sink. 
+!
+!-------------------------------------------------------------------------------
 module linalg
+
 contains
-! ********************************************* 
-! * SOLUTION OF LINEAR EQUATIONS  [A]{X}= {B} * 
-! *           LU DECOMPOSITION                * 
-! * FROM 'NUMERICAL RECIPES'     pp. 35-37    * 
-! ********************************************* 
-!
-!
-! ---------------------------------------- 
-! NSYS: ¾ØÕóA[:,:]µÄ¸öÊý£¬ÓÃÓÚ¿ªÊý×é 
-! IP  : ±¾´Î¼ÆËãµÄ¾ØÕóÐòºÅ
-! A   :
-! N   :
-! NP  :
-! LI  :
-! NMOD:
-! INDX:
-! B   :
-! ---------------------------------------- 
-! 
+     function cross_product(a,b) result(c)
+         implicit none
+
+         real(8),intent(in) :: a(3),b(3)
+         real(8),dimension(3) :: c
+
+         !c = spread(a,dim=2,ncopies=size(b)) * spread(b,dim=1,ncopies=size(a))
+         c(1) = a(2) * b(3) - a(3) * b(2)
+         c(2) = a(3) * b(1) - a(1) * b(3)
+         c(3) = a(1) * b(2) - a(2) * b(1)
+     end function
+
+     ! ********************************************* 
+     ! * SOLUTION OF LINEAR EQUATIONS  [A]{X}= {B} * 
+     ! *           LU DECOMPOSITION                * 
+     ! * FROM 'NUMERICAL RECIPES'     pp. 35-37    * 
+     ! ********************************************* 
+     !
+     !
+     ! ---------------------------------------- 
+     ! NSYS: ¾ØÕóA[:,:]µÄ¸öÊý£¬ÓÃÓÚ¿ªÊý×é 
+     ! IP  : ±¾´Î¼ÆËãµÄ¾ØÕóÐòºÅ
+     ! A   :
+     ! N   :
+     ! NP  :
+     ! LI  :
+     ! NMOD:
+     ! INDX:
+     ! B   :
+     ! ---------------------------------------- 
+     ! 
 
         SUBROUTINE RLUDCMP(IP,A,N,NP,NSYS,INDX,D)           
         IMPLICIT REAL*8(A-H,O-Z)  

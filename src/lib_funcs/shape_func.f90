@@ -1,3 +1,25 @@
+!-------------------------------------------------------------------------------
+! DUTWAV
+!-------------------------------------------------------------------------------
+!  MODULE: shape_funcs
+!
+!> @brief
+!! <shape function>
+!!
+!! @author
+!! DUT 
+!!
+!! @date
+!! 07 Nov 2013
+!! 
+!! @note <A note here.>
+!! <Or starting here...>
+!
+! REVISION HISTORY:
+!
+! 07 Mar 2015 - Added gcombo to wrap mirrored source or sink. 
+!
+!-------------------------------------------------------------------------------
 module shape_funcs
 
 contains

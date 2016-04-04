@@ -6,10 +6,12 @@
     ! *************************************************************
     !
     SUBROUTINE SGBD0_1(IS,IELEM,NODN,XP,YP,ZP,VALG,VALDG) 
-        USE MVAR_MOD
+        use kinds
+        use mesh,only:xyz,dxyz,ncn,ncon,ncond
         use shape_funcs
         use proj_cnst,only:ex,ey,xiqet,xiqsi
-        use green_funcs,only:gcombo1
+        use linalg,only:cross_product
+        use green_funcs,only:gcombo1_1
 
         IMPLICIT NONE
 
@@ -17,24 +19,21 @@
         integer loop1,loop2,i,NSAMB
         INTEGER INODD,LI,LJ,LK,INODE
 
-        REAL*8  XP,YP,ZP,X,Y,Z,r       
-        REAL*8  DPOX,DPOY,DPOZ,DGN
-        REAL*8  VALG(8),VALDG(8),GXF(4)
+        REAL*8  XP,YP,ZP       
+        REAL*8  VALG(8),VALDG(8)
         REAL*8 XITSI(6),XITET(6),SI,ETA,DUMX
         real*8  Xiq(8),Wiq(8),Xit(7),EtaT(7),WIT(7)
         REAL*8  SF0(8),DSF0(2,8),DDSF0(3,8) 
-        REAL*8  SF(8),DSF(2,8),DDSF(3,8),DET1,DET2,DET3,DET 
-        REAL*8  SISM,ETASM,FITG,SI1,ETA1
-        REAL*8  XJ(2,3),XJp(2,3),XJSM(2,3),XXJ(3,3)
-        REAL*8  jk0(3),jk1c(3),jk1s(3),jk1(3),n0,n1c,n1s
-        REAL*8  JKt(3)
-        REAL*8  DX,DY,DZ,nx,ny,nz
-        real*8  a1,a2,a3,b1,b2,b3,ast,bst,tot,totF,totf_1,totf_2
-        real*8  n1,b30,a30,b31,a31,g31,f,f1,f2,gv,xff(13)    
-        REAL*8  CSST,SNST,PLO,BETAs,GAMMA
-        REAL*8  AS_3,AS_2
+        REAL*8  SF(8),DSF(2,8),DET,ans
+     
+        REAL*8  XJ(2,3),XJp(2,3),XXJ(3,3)
+        REAL*8  jk0(3),jk1c(3),jk1s(3),n0,n1c,n1s
+        REAL*8  xxx(3,8),xxd(3,8),p(3),np(3)
+        real*8  tot,totF
+        real*8  n1,f,f1,f2,gv
+        REAL*8 PLO
         REAL*8  Line_Ele,Area0_Ele,Area1_Ele,Area2_Ele
-        REAL*8  GXF0(4),DGN0
+        REAL*8  GXF0(4),DGN0,xi0(2),n01(3),xi(2),p0(3),jk01(3,3),param(2)
 
         DATA XIQ/ 0.960289856497536D+00, 0.796666477413626D+00, &
             0.525532409916329D+00, 0.183434642495650D+00, &
@@ -49,182 +48,84 @@
         !    ============================================    
         valg=0.0d0 
         valdg=0.0d0
-        line_ele=0.0d0
-        Area0_Ele=0.0d0
-        Area1_Ele=0.0d0
-        Area2_Ele=0.0d0
-        INODD=NCOND(IELEM,NODN)
+        p0=[xp,yp,zp]
+        inodd=ncond(ielem,nodn)
 
-        IF(NCN(IELEM).EQ.8)  THEN 
+        if(ncn(ielem).eq.8)  then 
             !               
-            SI =XIQSI(NODN)
-            ETA=XIQET(NODN)
-            CALL SPFUNC8_1(SI,ETA,SF0,DSF0,DDSF0) 
+            xi0=[xiqsi(nodn),xiqet(nodn)]
+            si =xiqsi(nodn)
+            eta=xiqet(nodn)
+            call spfunc8_1(xi0(1),xi0(2),sf0,dsf0,ddsf0) 
 
-        ENDIF
-        !       
-        ! ----------------------------------------------  (C2)          
-        !
-        DO    LI=1,2
-            DO    LJ=1,3
-                DUMX=0.0D0
-                DO   LK=1, NCN(IELEM)
-                    DUMX=DUMX+DSF0(LI,LK)*XYZ(LJ,NCON(IELEM,LK))
-                ENDDO
-                XJ(LI,LJ)=DUMX
-            enddo
-        enddo!
-
-        !
-        ! ** compute the determinant of the Jacobian matrix at (SI,ETA), DET
-        !
-        ! **计算Jk0                         ------ (C12)
-
-        JK0(1)=XJ(1,2)*XJ(2,3)-XJ(1,3)*XJ(2,2)    !  J1
-        JK0(2)=XJ(1,3)*XJ(2,1)-XJ(1,1)*XJ(2,3)    !  J2
-        JK0(3)=XJ(1,1)*XJ(2,2)-XJ(1,2)*XJ(2,1)    !  J3
-        !  
-
-
-        !  --------------------------------------------  (C3)
-        !
-        DO   LI=1,3
-            DO   LJ=1,3
-                DUMX=0.0D0
-                DO   LK=1,  NCN(IELEM)
-                    DUMX=DUMX+DDSF0(LI,LK)*XYZ(LJ,NCON(IELEM,LK))   
-                ENDDO
-                XXJ(LI,LJ)=DUMX
+            do lk =1,8
+                xxx(1:3,lk) = xyz(1:3,ncon(ielem,lk))
+                xxd(1:3,lk) = dxyz(1:3,ncond(ielem,lk))
             end do
-        enddo
 
-        ! **计算  JK1=Jk1C*cos（theta）+Jk1S*sin（theta） ------ (C12)
 
-        JK1C(1)=(XXJ(1,2)*XJ(2,3)+XJ(1,2)*XXJ(3,3)) -   &
-            (XXJ(1,3)*XJ(2,2)+XJ(1,3)*XXJ(3,2))
-        JK1C(2)=(XXJ(1,3)*XJ(2,1)+XJ(1,3)*XXJ(3,1)) -   &
-            (XXJ(1,1)*XJ(2,3)+XJ(1,1)*XXJ(3,3))
-        JK1C(3)=(XXJ(1,1)*XJ(2,2)+XJ(1,1)*XXJ(3,2)) -  &
-            (XXJ(1,2)*XJ(2,1)+XJ(1,2)*XXJ(3,1))
+        endif
 
-        JK1S(1)=(XXJ(3,2)*XJ(2,3)+XJ(1,2)*XXJ(2,3)) -   &
-            (XXJ(3,3)*XJ(2,2)+XJ(1,3)*XXJ(2,2))
-        JK1S(2)=(XXJ(3,3)*XJ(2,1)+XJ(1,3)*XXJ(2,1)) -   &
-            (XXJ(3,1)*XJ(2,3)+XJ(1,1)*XXJ(2,3))
-        JK1S(3)=(XXJ(3,1)*XJ(2,2)+XJ(1,1)*XXJ(2,2)) -  &
-            (XXJ(3,2)*XJ(2,1)+XJ(1,2)*XXJ(2,1))    
+        xj(1:2,1:3) = matmul(dsf0(1:2,1:8),transpose(xxx(1:3,1:8)))
+        xxj(1:3,1:3) = matmul(ddsf0(1:3,1:8),transpose(xxx))
 
-        ! =========================================================
-        !
+        jk0(1:3) = cross_product(xj(1,:),xj(2,:))
+        jk1c=cross_product(xxj(1,:),xj(2,:))+cross_product(xj(1,:),xxj(3,:))
+        jk1s=cross_product(xxj(3,:),xj(2,:))+cross_product(xj(1,:),xxj(2,:))
+
+            jk01(1,:) = jk0
+            jk01(2,:) = jk1c
+            jk01(3,:) = jk1s
+
 
         DO  J=1, NCN(IELEM)
+            n01=[sf0(j),dsf0(1,j),dsf0(2,j)]
 
-            ! **计算N0，N1=N1C*cos（theta）+N1S*sin（theta）   (C13)
+            call cirbod_2(nodn,ncn(ielem),si,eta,   &
+                jk01,n01,xj,xxj,ans)
 
-            N0 =SF0(J)
-            N1C=DSF0(1,J)
-            N1S=DSF0(2,J)
-            !
-
-            CALL CIRBOD_2(NODN,NCN(IELEM),SI,ETA,FITG,   &
-                JK0,JK1C,JK1S,N0,N1C,N1S,XJ,XXJ)
-            
-            !line_ele=line_ele+fitg
-            valdg(j) = fitg
-
-
+            valdg(j) = ans
         enddo
-
-        !
 
 
         NSAMB=0
 
         IF(NCN(IELEM).EQ.8)  THEN 
 
-            DO  LOOP1=1, 8 
-                DO  LOOP2=1, 8      
-                    NSAMB=NSAMB+1  
+            do  loop1=1, 8 ;do  loop2=1, 8      
+                nsamb=nsamb+1  
 
-                    SISM=XIQ(loop1)
-                    ETASM=XIQ(loop2)  
-                    PLO=DSQRT((SISM-SI)*(SISM-SI)+(ETASM-ETA)*(ETASM-ETA))
-                    CSST=(SISM-SI)/PLO 
-                    SNST=(ETASM-ETA)/PLO        
+                xi=[xiq(loop1),xiq(loop2)]
 
-                    CALL SPFUNC8_1(SISM,ETASM,SF,DSF,DDSF)
-                    !
-                    X=0.0D0
-                    Y=0.0D0
-                    Z=0.0D0
-                    NX=0.0D0
-                    NY=0.0D0
-                    NZ=0.0D0
-                    DO  LK=1,  NCN(IELEM)
-                        X=X+SF(LK)*XYZ(1,NCON(IELEM,LK))    
-                        Y=Y+SF(LK)*XYZ(2,NCON(IELEM,LK))
-                        Z=Z+SF(LK)*XYZ(3,NCON(IELEM,LK))
-                        NX=NX+SF(LK)*DXYZ(1,NCOND(IELEM,LK))    
-                        NY=NY+SF(LK)*DXYZ(2,NCOND(IELEM,LK))
-                        NZ=NZ+SF(LK)*DXYZ(3,NCOND(IELEM,LK))
-                    END DO
+                call spfunc8(xi(1),xi(2),sf,dsf)
+                plo=norm2(xi-xi0)
+                xi=(xi-xi0)/plo
 
-                    !CALL DTGRN0(-1.0d0,X,XP,Y,YP,Z,ZP,GXF0)
-                    call gcombo1(-1.0d0,(/x,y,z/),(/xp,yp,zp/),gxf0)
-                    dgn0=gxf0(2)*nx+gxf0(3)*ny+gxf0(4)*nz
-
-                    DO    LI=1,2
-                        DO    LJ=1,3
-                            DUMX=0.0D0
-                            DO    LK=1,NCN(IELEM)
-                                DUMX=DUMX+DSF(LI,LK)*XYZ(LJ,NCON(IELEM,LK))
-                            enddo
-                            XJP(LI,LJ)=DUMX
-                        enddo
-                    enddo
-                    !
-                    DET1=XJP(1,2)*XJP(2,3)-XJP(1,3)*XJP(2,2)    !  J1
-                    DET2=XJP(1,3)*XJP(2,1)-XJP(1,1)*XJP(2,3)    !  J2
-                    DET3=XJP(1,1)*XJP(2,2)-XJP(1,2)*XJP(2,1)    !  J3
-                    DET=DSQRT(DET1*DET1+DET2*DET2+DET3*DET3)
+                p=matmul(sf,transpose(xxx))
+                np=matmul(sf,transpose(xxd))
 
 
-                    JKt(1)=Jk0(1)+PLO*(JK1C(1)*CSST+JK1S(1)*SNST)
-                    JKt(2)=Jk0(2)+PLO*(JK1C(2)*CSST+JK1S(2)*SNST)
-                    JKt(3)=Jk0(3)+PLO*(JK1C(3)*CSST+JK1S(3)*SNST)
+                call gcombo1_1(-1.0d0,p,[xp,yp,zp],gxf0)
+                dgn0=dot_product(gxf0(2:4),np)
+
+                xjp(1:2,1:3)=matmul(dsf,transpose(xxx))
+                det =norm2(cross_product(xjp(1,:),xjp(2,:)))
+
+                do  j=1, ncn(ielem)
+                    n01=[sf0(j),dsf0(1,j),dsf0(2,j)]
+                    call comp_coef(xi(1),xi(2),xj,xxj,jk01,n01,f1,f2,param)
 
 
+                    f=f2/plo/plo+f1/plo                       ! (c19)
 
+                    tot=f/plo*wiq(loop1)*wiq(loop2)
+                    totf=dgn0*det*wiq(loop1)*wiq(loop2)*sf(j)
 
-                    DO  J=1, NCN(IELEM)
-
-                        ! **计算N0，N1=N1C*cos（theta）+N1S*sin（theta）   (C13)
-
-                        N0 =SF0(J)
-                        N1C=DSF0(1,J)
-                        N1S=DSF0(2,J)   
-
-                        CALL AREA_COEF(CSST,SNST,JK0,JK1C,JK1S,   &
-                            N0,N1C,N1S,XJ,XXJ,F1,F2)
-
-                        F=F2/PLO/PLO+F1/PLO                       ! (C19)
-
-                        TOT=F/PLO*WIQ(LOOP1)*WIQ(LOOP2)
-                        TOTf_2=F2/PLO/PLO/PLO*WIQ(LOOP1)*WIQ(LOOP2)
-                        TOTf_1=F1/PLO/PLO*WIQ(LOOP1)*WIQ(LOOP2)         
-
-                        TOTF=DGN0*DET*WIQ(LOOP1)*WIQ(LOOP2)*SF(J)
-
-                        Area0_Ele=Area0_Ele+TOTF
-                        Area1_Ele=Area1_Ele+TOTf_1
-                        Area2_Ele=Area2_Ele+TOTf_2
-                        valdg(j)=valdg(j)+totf-tot
-                        !valdg(j)=totf
-
-                    enddo
+                    valdg(j)=valdg(j)+totf-tot
 
                 enddo
-            enddo
+
+            enddo; enddo
 
             !write(*,'(8f14.8)') valdg
             !pause
@@ -237,13 +138,6 @@
 
 
 
-        !Area1_sum=Area1_sum-Area1_Ele
-
-        !Area2_sum=Area2_sum-Area2_Ele
-
-        !Area0_sum=Area0_sum+Area0_Ele
-
-        !line_sum=line_sum+line_ele
 
         END
 
@@ -258,8 +152,8 @@
         !C *                                                            *
         !C **************************************************************
         !C
-        SUBROUTINE CIRBOD_2(NODN,NCNE,SI,ETA,FITG,   &
-                JK0,JK1C,JK1S,N0,N1C,N1S,XJ,XXJ)
+        SUBROUTINE CIRBOD_2(NODN,NCNE,SI,ETA,   &
+                JK01,N01,XJ,XXJ,fitg)
             !        USE MVAR_MOD
             IMPLICIT NONE 
             !
@@ -276,8 +170,8 @@
             REAL*8 A30,B30,jk0(3),jk1c(3),jk1s(3),jk1(3),n0,n1,n1c,n1s
             REAL*8 A31,B31,AS_3,AS_2,PI4
             REAL*8 F1,F2,SUM1,SUM2,G31
-            REAL*8 XJ(2,3),XXJ(3,3)
-            REAL*8 det1,det2,det3,dumx,sf(8),dsf(2,8),ddsf(3,8)           
+            REAL*8 XJ(2,3),XXJ(3,3),xxx(3,8)
+            REAL*8 det1,det2,det3,dumx,sf(8),dsf(2,8),ddsf(3,8),jk01(3,3),n01(3),param(2)
             !    
             ! ** SAMPLING POINTS AND WEIGHTING FACTORS FOR QUADRILATERAL ELEMENT
             !
@@ -354,7 +248,8 @@
 
             DATA PI4/12.56637061435917295385d0/ 
 
-            !
+
+        
             FITG=0.0D0
             FITG1=0.0d0
             FITG2=0.0d0
@@ -385,72 +280,15 @@
                         CSST=(SISM-SI)/PLO 
                         SNST=(ETASM-ETA)/PLO 
 
-                        JK1(1)=JK1C(1)*CSST+ JK1S(1)*SNST    !(C12)
-                        JK1(2)=JK1C(2)*CSST+ JK1S(2)*SNST
-                        JK1(3)=JK1C(3)*CSST+ JK1S(3)*SNST     
+                            call comp_coef(csst,snst,xj,xxj,jk01,n01,f1,f2,param)
 
-                        !       WRITE(10,*) ' JK1=',JK1
+                        !fixme *pi4
+                        !FITG2=FITG2-F2*(param(1)/param(2)**2+1.0/PLO)*WIQ1(I)
+                        !FITG1=FITG1+F1*DLOG(PLO/param(2))*WIQ1(I)
+                        FITG2=FITG2-F2*(param(1)/param(2)**2+1.0/PLO)*WIQ1(I)*pi4
+                        FITG1=FITG1+F1*DLOG(PLO/param(2))*WIQ1(I)*pi4 
 
-                        N1= N1C*CSST+ N1S*SNST               !(C13)
-
-                        A1=XJ(1,1)*CSST+XJ(2,1)*SNST
-                        A2=XJ(1,2)*CSST+XJ(2,2)*SNST
-                        A3=XJ(1,3)*CSST+XJ(2,3)*SNST
-
-                        B1=XXJ(1,1)*CSST*CSST*0.5+XXJ(3,1)*CSST*SNST +  &
-                            XXJ(2,1)*SNST*SNST*0.5
-                        B2=XXJ(1,2)*CSST*CSST*0.5+XXJ(3,2)*CSST*SNST +  &
-                            XXJ(2,2)*SNST*SNST*0.5
-                        B3=XXJ(1,3)*CSST*CSST*0.5+XXJ(3,3)*CSST*SNST +  &
-                            XXJ(2,3)*SNST*SNST*0.5
-
-                        AST=DSQRT(A1*A1 + A2*A2 + A3*A3)   
-                        BST=DSQRT(B1*B1 + B2*B2 + B3*B3)        !(C7)
-
-                        AS_3=1.0d0/AST**3
-                        AS_2=-3.0d0*(A1*B1+A2*B2+A3*B3)/AST**5
-
-
-                        G31=B1*JK0(1)+B2*JK0(2)+B3*JK0(3)+A1*JK1(1)+A2*JK1(2)+A3*JK1(3)
-                        G31=(A3/AST/AST)*G31
-
-                        B30=-JK0(3)
-                        A30=B30*N0
-
-                        B31=3*G31-JK1(3)
-                        A31=B31*N0+B30*N1
-
-                        !WRITE(*,*) 'jk0(3)=',jk0(3)
-
-                        !       F2=AS_3*JK0(3)
-                        !       F1=AS_2*JK0(3)+AS_3*JK1(3)     
-
-                        F1=AS_2*A30+AS_3*A31     
-                        F2=AS_3*A30
-
-                        GAMMA=-(A1*B1+A2*B2+A3*B3)/AST**4
-                        BETAs=1.0d0/AST
-
-                        !        WRITE(10,*) ' F1=',F1,' GAMMA=',GAMMA
-                        !        WRITE(10,*) ' PLO=',PLO,'  BETAs=',BETAs
-                        !        WRITE(10,*) ' DLOG(PLO/BETAs)=',DLOG(PLO/BETAs)
-
-                        FITG2=FITG2-F2*(GAMMA/BETAs**2+1.0/PLO)*WIQ1(I) 
-                        FITG1=FITG1+F1*DLOG(PLO/BETAs)*WIQ1(I) 
-
-                        !       WRITE(10,*) ' FITG1=',FITG1
-                        !       WRITE(10,*)
-
-                        ! --------------------------------------------
-                        !
-                        !**  线积分中sum1应为0， sum2应为2*Pi    
-
-                        SUM1=SUM1+F1*WIQ1(I)                      !(25)
-                        SUM2=SUM2+F2/BETAs*WIQ1(I)                !(26)
-                        !       SUM1=SUM1+F1*DLOG(1.0/AST)*WIQ11(I)                      !(25)
-                        !       SUM2=SUM2+F2*(-1.0*GAMMA/BETAs**2)*WIQ11(I)              !(26)
-                        !
-                        200  CONTINUE
+                                              200  CONTINUE
                         !
                     ELSE IF(NODN==2 .OR. NODN==4 .OR. NODN==6 .OR. NODN==8)   THEN  
 
@@ -464,70 +302,19 @@
                             CSST=(SISM-SI)/PLO 
                             SNST=(ETASM-ETA)/PLO 
 
-                            JK1(1)=JK1C(1)*CSST+ JK1S(1)*SNST    !(C12)
-                            JK1(2)=JK1C(2)*CSST+ JK1S(2)*SNST
-                            JK1(3)=JK1C(3)*CSST+ JK1S(3)*SNST     
 
-                            !       WRITE(10,*) ' JK1=',JK1
+                        
 
-                            N1= N1C*CSST+ N1S*SNST               !(C13)
+                            call comp_coef(csst,snst,xj,xxj,jk01,n01,f1,f2,param)
 
-                            A1=XJ(1,1)*CSST+XJ(2,1)*SNST
-                            A2=XJ(1,2)*CSST+XJ(2,2)*SNST
-                            A3=XJ(1,3)*CSST+XJ(2,3)*SNST
-
-                            B1=XXJ(1,1)*CSST*CSST*0.5+XXJ(3,1)*CSST*SNST +  &
-                                XXJ(2,1)*SNST*SNST*0.5
-                            B2=XXJ(1,2)*CSST*CSST*0.5+XXJ(3,2)*CSST*SNST +  &
-                                XXJ(2,2)*SNST*SNST*0.5
-                            B3=XXJ(1,3)*CSST*CSST*0.5+XXJ(3,3)*CSST*SNST +  &
-                                XXJ(2,3)*SNST*SNST*0.5
-
-                            AST=DSQRT(A1*A1 + A2*A2 + A3*A3)   
-                            BST=DSQRT(B1*B1 + B2*B2 + B3*B3)        !(C7)
-
-                            AS_3=1.0d0/AST**3
-                            AS_2=-3.0d0*(A1*B1+A2*B2+A3*B3)/AST**5
+                            fitg2=fitg2-f2*(param(1)/param(2)**2+1.0/plo)*wiq2(i)*pi4
+                            fitg1=fitg1+f1*dlog(plo/param(2))*wiq2(i)*pi4
 
 
-                            G31=B1*JK0(1)+B2*JK0(2)+B3*JK0(3)+A1*JK1(1)+A2*JK1(2)+A3*JK1(3)
-                            G31=(A3/AST/AST)*G31
-
-                            B30=-JK0(3)
-                            A30=B30*N0
-
-                            B31=3*G31-JK1(3)
-                            A31=B31*N0+B30*N1
-                            !WRITE(*,*) 'jk0(3)=',jk0(3)
-
-
-                            !        F2=AS_3*JK0(3)
-                            !        F1=AS_2*JK0(3)+AS_3*JK1(3)     
-
-                            F1=AS_2*A30+AS_3*A31     
-                            F2=AS_3*A30
-
-                            GAMMA=-(A1*B1+A2*B2+A3*B3)/AST**4
-                            BETAs=1.0d0/AST
-
-                            !       WRITE(10,*) ' F1=',F1,' GAMMA=',GAMMA
-                            !       WRITE(10,*) ' PLO=',PLO,'  BETAs=',BETAs
-                            !       WRITE(10,*) ' DLOG(PLO/BETAs)=',DLOG(PLO/BETAs)
-                            FITG2=FITG2-F2*(GAMMA/BETAs**2+1.0/PLO)*WIQ2(I) 
-                            FITG1=FITG1+F1*DLOG(PLO/BETAs)*WIQ2(I) 
-
-                            !      WRITE(10,*) ' FITG1=',FITG1
-                            !      WRITE(10,*)
-
-                            ! --------------------------------------------
-                            !
-                            !**  线积分中sum1应为0， sum2应为2*Pi    
 
                             SUM1=SUM1+F1*WIQ2(I)                      !(25)
                             SUM2=SUM2+F2/BETAs*WIQ2(I)                !(26)
-                            !       SUM1=SUM1+F1*DLOG(1.0/AST)*WIQ11(I)                      !(25)
-                            !       SUM2=SUM2+F2*(-1.0*GAMMA/BETAs**2)*WIQ11(I)              !(26)
-                            !
+                            
                             400  CONTINUE 
 
 
@@ -544,70 +331,54 @@
 
                             END
 
-                            !
-                            ! ===============================================================
-                            !
-                            !  Determine F1 and F2 for area integration
-                            !
-                            ! ===============================================================
-                            !
-                            SUBROUTINE AREA_COEF(CSST,SNST,JK0,JK1C,JK1S,N0,N1C,N1S,XJ,XXJ,F1,F2)
 
-                                IMPLICIT NONE 
-                                !
-                                REAL*8 CSST,SNST,BETAs,GAMMA
-                                REAL*8 jk0(3),jk1c(3),jk1s(3),n0,n1c,n1s
-                                !
-                                REAL*8  jk1(3),n1       
-                                REAL*8  XJ(2,3),XXJ(3,3)
-                                real*8  a1,a2,a3,b1,b2,b3,ast,bst,tot,totF,totf_1,totf_2
-                                real*8  b30,a30,b31,a31,g31,f,f1,f2,xff(13)    
-                                REAL*8  AS_3,AS_2,PI4
 
-                                DATA PI4/12.56637061435917295385d0/ 
 
-                                !
-                                ! ==================================================================
-                                !
-                                !       write(10,*) ' Inside AREA_COEF'
-                                !           
-                                JK1(1)=JK1C(1)*CSST+ JK1S(1)*SNST    !(C12)
-                                JK1(2)=JK1C(2)*CSST+ JK1S(2)*SNST
-                                JK1(3)=JK1C(3)*CSST+ JK1S(3)*SNST     
 
-                                !        write(10,*) ' JK1=',JK1
+         subroutine comp_coef(csst,snst,xj,xxj,jk0,n0,f1,f2,param) 
+            
+            use proj_cnst,only :pi4
 
-                                N1= N1C*CSST+ N1S*SNST               !(C13)
-                                !       
-                                !   -----------------------------------------(C6)
-                                !             
-                                A1=XJ(1,1)*CSST+XJ(2,1)*SNST
-                                A2=XJ(1,2)*CSST+XJ(2,2)*SNST
-                                A3=XJ(1,3)*CSST+XJ(2,3)*SNST
+            implicit none
+            
+            real(8),intent(in) :: csst,snst,xj(2,3),xxj(3,3),jk0(3,3),n0(3)
+            real(8),intent(out) :: f1,f2,param(2)
 
-                                B1=XXJ(1,1)*CSST*CSST*0.5+XXJ(3,1)*CSST*SNST +   &
-                                    XXJ(2,1)*SNST*SNST*0.5
-                                B2=XXJ(1,2)*CSST*CSST*0.5+XXJ(3,2)*CSST*SNST +   &
-                                    XXJ(2,2)*SNST*SNST*0.5
-                                B3=XXJ(1,3)*CSST*CSST*0.5+XXJ(3,3)*CSST*SNST +   &
-                                    XXJ(2,3)*SNST*SNST*0.5
+            real(8) :: jk1(3),n1,scos(2)
+            real(8) :: a(3),b(3),ast,bst,as_3,as_2,g31,b30,a30,b31,a31
 
-                                AST=DSQRT(A1*A1 + A2*A2 + A3*A3)         !  (C7)  
-                                BST=DSQRT(B1*B1 + B2*B2 + B3*B3)
+            scos=[csst,snst]
 
-                                AS_3=1.0d0/AST**3                        !  (C10)
-                                AS_2=-3.0d0*(A1*B1+A2*B2+A3*B3)/AST**5
+            !jk1(1:3) = jk0(2,1:3)*csst+jk0(3,1:3)*snst
+            jk1(1:3) = matmul(scos,jk0(2:3,:))
 
-                                G31=B1*JK0(1)+B2*JK0(2)+B3*JK0(3)+A1*JK1(1)+A2*JK1(2)+A3*JK1(3)
-                                G31=(A3/AST/AST)*G31                    !  (C16)
+            !n1=n0(2)*csst+n0(3)*snst
+            n1=dot_product(n0(2:3),scos)
 
-                                B30=-JK0(3)                             !  (C17)            
-                                B31=3*G31-JK1(3)
+            a(1:3) = xj(1,:)*csst+xj(2,:)*snst
+            b(1:3) = xxj(1,:)*csst**2*0.5+xxj(2,:)*snst**2*0.5+xxj(3,:)*csst*snst
 
-                                A30=B30*N0                              !  (C18)
-                                A31=B31*N0+B30*N1
+            ast=norm2(a)
+            bst=norm2(b)
 
-                                F1=(AS_2*A30+AS_3*A31)/PI4     
-                                F2=AS_3*A30/PI4          
-                                !                         
-                                END
+            as_3=1.0d0/ast**3
+            as_2=-3.0d0*(dot_product(a,b))/ast**5
+            g31=dot_product(b,jk0(1,:))+dot_product(a,jk1)
+            g31=(a(3)/ast**2)*g31
+
+            b30=-jk0(1,3)
+            a30=b30*n0(1)
+
+            b31=3*g31-jk1(3)
+            a31=b31*n0(1)+b30*n1
+
+            !!todo neg removed
+            !f1=-(as_2*a30+as_3*a31)/pi4
+            !f2=-(as_3*a30)/pi4
+            f1=(as_2*a30+as_3*a31)/pi4
+            f2=(as_3*a30)/pi4
+
+            param(1) = -dot_product(a,b)/ast**4
+            param(2) = 1.0d0/ast
+
+        end subroutine
