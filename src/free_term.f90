@@ -1,3 +1,25 @@
+!-------------------------------------------------------------------------------
+! DUTWAV
+!-------------------------------------------------------------------------------
+!  MODULE: free term
+!
+!> @brief
+!! <BriefDescription>
+!!
+!! @author
+!! Song Gao,DUT 
+!!
+!! @date
+!! 07 Nov 2013
+!! 
+!! @note <A note here.>
+!! <Or starting here...>
+!
+! REVISION HISTORY:
+!
+! 07 Mar 2015 - Added gcombo to wrap mirrored source or sink. 
+!
+!-------------------------------------------------------------------------------
 module free_term
      real(8),allocatable,public,save :: fterm(:,:,:)
      integer,private,save :: nsys,nnf
