@@ -1,5 +1,5 @@
 
-set(SRC_LIST  elem_proc.f90 free_term.f90 grad.f90 tassbt.f90 tsing1f.f90 tforce.f Var_md.f main.f90
+set(SRC_LIST  elem_proc.f90 free_term.f90 grad.f90 tassbt.f90 tsing1f.f90 tforce.f90 Var_md.f main.f90
     timestep.f90 tass0_time.f90 time_mod.f90 )
 
 SET(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
