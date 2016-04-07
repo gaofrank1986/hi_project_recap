@@ -27,7 +27,8 @@ elseif("${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU")
 endif()
 
 Message(STATUS "USER SET FORTRAN FLAGS:" ${CMAKE_Fortran_FLAGS})
-
+set (directory "lib")
+file(MAKE_DIRECTORY ${directory})
 
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(src/data)

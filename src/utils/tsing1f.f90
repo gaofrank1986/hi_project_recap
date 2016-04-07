@@ -29,8 +29,8 @@
         real(rk) :: det,ans
         real(rk)  xxx(3,8),xxd(3,8)
         real(rk) ::xi0(2),p(3),np(3),xi(2)
-        real(rk)  tot,totf
-        real(rk)  f,f1,f2
+        real(rk)  tot(8),totf(8)
+        real(rk)  f,f1,f2,vs
         real(rk)  plo,theta(2)
         real(rk)  gxf0(4),dgn0,n01(3),jk01(3,3),param(2)
 
@@ -52,6 +52,8 @@
 
         valg=0.0d0 
         valdg=0.0d0
+        tot=0.0d0
+        totf=0.0d0
 
         if(ncn(ielem).eq.8)  then 
 
@@ -61,6 +63,7 @@
             do i =1,8
                 xxx(1:3,i) = xyz(1:3,ncon(ielem,i))
                 xxd(1:3,i) = dxyz(1:3,ncond(ielem,i))
+                print '(3f10.5)',xxd(1:3,i)
             end do
 
         endif
@@ -79,6 +82,7 @@
             call cirbod_2(nodn,ncn(ielem),xi0,jk01,n01,xj,xxj,ans)
             valdg(j) = ans
         enddo
+        
 
         !< area integral part
         nsamb=0
@@ -104,17 +108,26 @@
                 do  j=1, ncn(ielem)
                     n01=[sf0(j),dsf0(1,j),dsf0(2,j)]
                     call comp_coef(theta,xj,xxj,jk01,n01,f1,f2,param)
+                    print '(2f10.5)',f1,f2
 
                     f=f2/plo/plo+f1/plo                       ! (c19)
 
-                    tot=f/plo*wiq(loop1)*wiq(loop2)
-                    totf=dgn0*det*wiq(loop1)*wiq(loop2)*sf(j)
+                    tot(j)=tot(j)+f/plo*wiq(loop1)*wiq(loop2)
+                    !todo added minus
+                    totf(j)=totf(j)+dgn0*det*wiq(loop1)*wiq(loop2)*sf(j)
 
-                    valdg(j)=valdg(j)+totf-tot
 
                 enddo
+            
 
             enddo; enddo
+            ! fixme add vs to compensate sign flip
+            vs=sign(1.0d0,totf(nodn)*tot(nodn))
+            write (*,'(a10,8f10.5)') "line part",valdg(:)
+            write (*,'(a10,8f10.5)') "tot part",tot(:)
+            write (*,'(a10,8f10.5)') "totf part",totf(:)
+
+            valdg=vs*valdg+totf-vs*tot
 
        endif
 
@@ -246,6 +259,16 @@
        real(8) :: a(3),b(3),ast,bst,as_3,as_2,g31,b30,a30,b31,a31
 
        !theta=[csst,snst]
+       print '(2f10.5)',theta
+       print '(3f10.5)',xj(1,:)
+       print '(3f10.5)',xj(2,:)
+       print '(3f10.5)',xxj(1,:)
+       print '(3f10.5)',xxj(2,:)
+       print '(3f10.5)',xxj(3,:)
+       print '(3f10.5)',n0(:)
+       print '(3f10.5)',jk0(1,:)
+       print '(3f10.5)',jk0(2,:)
+       print '(3f10.5)',jk0(3,:)
 
        !jk1(1:3) = jk0(2,1:3)*csst+jk0(3,1:3)*snst
        jk1(1:3) = matmul(theta,jk0(2:3,:))
@@ -261,6 +284,10 @@
        ast=norm2(a)
        bst=norm2(b)
 
+       print '(3f15.5)',a
+       print '(3f15.5)',b
+       print '(2f15.5)',bst,ast
+
        as_3=1.0d0/ast**3
        as_2=-3.0d0*(dot_product(a,b))/ast**5
        g31=dot_product(b,jk0(1,:))+dot_product(a,jk1)
@@ -275,10 +302,11 @@
        !!todo neg removed
        !f1=-(as_2*a30+as_3*a31)/pi4
        !f2=-(as_3*a30)/pi4
-       f1=(as_2*a30+as_3*a31)/pi4
-       f2=(as_3*a30)/pi4
+       f1=-(as_2*a30+as_3*a31)/pi4
+       f2=-(as_3*a30)/pi4
 
        param(1) = -dot_product(a,b)/ast**4
        param(2) = 1.0d0/ast
+       stop
 
    end subroutine
