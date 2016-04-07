@@ -1,6 +1,6 @@
 
-set(SRC_LIST  elem_proc.f90 free_term.f90 grad.f90 tassbt.f90 tsing1f.f90 tforce.f90 Var_md.f main.f90
-    timestep.f90 tass0_time.f90 time_mod.f90 )
+set(SRC_LIST  elem_proc.f90 tassbt.f90 tsing1f.f90 tforce.f90 Var_md.f main.f90
+    timestep.f90 tass0_time.f90)
 
 SET(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
@@ -11,6 +11,6 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #add_library(hello SHARED ${SRC}/te.f90)
 add_executable(testf ${SRC_LIST})
 
-target_link_libraries(testf data property hi_mod func)
+target_link_libraries(testf data utils func const)
 #set_target_properties(hello PROPERTIES OUTPUT_NAME "hello")
 
