@@ -1,6 +1,6 @@
 module wave
-  implicit none
-      
+    implicit none
+
     real(8),protected :: wk,h,beta,amp
     real(8),protected :: w1,tper,v,wl 
     real(8),parameter :: g = 9.807
@@ -17,7 +17,7 @@ contains
         implicit none
 
         integer :: ifwko
-!        real(8) :: wl
+        !        real(8) :: wl
 
         OPEN(1, FILE='INPUT/DATIN.txt',      STATUS='OLD') 
 
@@ -30,20 +30,20 @@ contains
             else
                 w1 = dsqrt(g*wk*dtanh(wk*h))
             end if
-         else
-             w1 = wk
-             if (h .le. 0.0d0) then
-                 wk = w1**2/g
-             else 
-                 call waveck(w1,h,wk)
-             end if
-         end if
+        else
+            w1 = wk
+            if (h .le. 0.0d0) then
+                wk = w1**2/g
+            else 
+                call waveck(w1,h,wk)
+            end if
+        end if
 
-          tper = 2.*pi/w1
-          beta = beta*pi/180.0d0
-          v = w1**2/g
-          wl = 2.0d0*pi/wk
-          close(1)
+        tper = 2.*pi/w1
+        beta = beta*pi/180.0d0
+        v = w1**2/g
+        wl = 2.0d0*pi/wk
+        close(1)
     end subroutine
 
     subroutine output_wav_data()
@@ -59,12 +59,13 @@ contains
         write(1,1111)  h,amp,wk,v,wl,w1,tper,beta*180./pi 
 
         1111    format(//,'  water depth=',f9.3,'    wave amplitude=', f6.2,/,&
-            &    '  wave number=',f9.5,'  k0=',f9.5,'  wave length=',f9.4,/, &
+            &    '  wave number=',f9.5,'  wave length=',f9.4,/, &
             &    '  angular frequ.=',f9.5,'   wave period=',f7.3,/,      &
             &    '  wave direction:',f7.3,'  degree',/)
-       close(1)
+        close(1)
     end subroutine 
 
+    ! < compute wk according to ?
     subroutine waveck(sigma,h,wk)
         implicit  none
 
@@ -73,8 +74,8 @@ contains
         !c  c: wave celerity  wk: wave number
         if( sigma .le. 0.0d0 )  then
             print *,' in waveck:  w=',sigma
-        stop
-    
+            stop
+
         else 
 
             if( h .gt. 0.0d0) then
@@ -89,9 +90,9 @@ contains
             else if( h .le. 0.0d0) then
                 wk=sigma**2/g
             end if
-         end if
+        end if
 
 
     end subroutine
-        
+
 end module 

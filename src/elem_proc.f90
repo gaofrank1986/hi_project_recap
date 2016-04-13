@@ -5,6 +5,7 @@
     subroutine norm_elem_wrapper(ielem,xp,yp,zp,amatrix,bmatrix,hi)
 
         use mesh,only:ncn,nsys
+        !use data_all
         use green_funcs,only:gcombo1,gcombo0
 
         implicit   none 
@@ -14,14 +15,14 @@
 
         integer :: is
 
-        interface
-            subroutine gcombo(h,p0,p,gxf)
-                real(8),intent(in) :: h,p0(3),p(3)
-                real(8),intent(out) :: gxf(4)
-            end subroutine
-        end interface
+        !interface
+            !subroutine gcombo(h,p0,p,gxf)
+                !real(8),intent(in) :: h,p0(3),p(3)
+                !real(8),intent(out) :: gxf(4)
+            !end subroutine
+        !end interface
 
-        procedure(gcombo),pointer :: gpointer => NULL()
+        procedure(gcombo1),pointer :: gpointer => NULL()
 
         !< --------------execute part----------------->
         if (hi==1) then
@@ -88,8 +89,8 @@
 
 
     subroutine sing_elem_wrapper(inode,ielem,numqua,xp,yp,zp,amatrix,bmatrix,hi)
-        use mvar_mod
-        use body_property
+        use mesh,only:ncn,ncon,xyze,dxyze,nsys
+        use motion
         use green_funcs,only:gcombo1,gcombo0
         use tripole_transform,only:tripol
 
@@ -118,7 +119,7 @@
         end if
 
         !< compute xynod,dxynod for weak singular elem
-        !
+        !< todo  maybe can let xynod ... computed for both cases
         if (hi==1) then
             do  i=1,  ncn(ielem)
                 xyzt(1:3, i)  =  xyze(1:3, i, ielem)  
@@ -174,7 +175,7 @@
         end subroutine
 
     subroutine sing_int(is,ielem,nodnum,xp,yp,zp,amatrix,bmatrix,hi)
-        use mvar_mod,only:ncn,xyze,dxyze
+        use mesh,only:ncn,xyze,dxyze
         implicit none
         integer,intent(in) :: is,ielem,nodnum,hi
         real(8),intent(in) :: xp,yp,zp
@@ -197,15 +198,15 @@
 
 
     subroutine sing_int0(is,ielem,nodnum,p0,aval,bval)
-        use mvar_mod
+        use wave,only:h
         use green_funcs,only:gcombo0
         use proj_cnst,only:ex,ey
         use tripole_transform,only:xynod,dxynod,nosamp,samnod,tripol
         implicit   none  
 
         integer is,ielem,n,j,ip,nodnum
-        real*8  xp,yp,zp!,ex(4,4),ey(4,4)
-        real*8  x,y,z,x0,y0,z0      
+       ! real*8  xp,yp,zp!,ex(4,4),ey(4,4)
+        !real*8  x,y,z,x0,y0,z0      
         real*8  nx,ny,nz,dgn
         real*8  aval(8),bval(8),gxf(4),p(3),p0(3),np(3),p0m(3),prefix(3)
 
@@ -238,7 +239,7 @@
     !   @params p0 input src point
     subroutine sing_int1(is,ielem,nodj,p0,aval,bval) 
 
-        use mvar_mod
+        use mesh,only:ncon,ncond,xyz,dxyz,ncn
 
         use hi_intg
         use green_funcs,only:Gcombo1_2
@@ -246,8 +247,8 @@
 
         implicit none
 
-        integer,intent(in):: is,ielem,nodj
-        real(8),intent(in):: p0(3)
+        integer:: is,ielem,nodj
+        real(8):: p0(3)
         real(8),intent(out):: bval(8),aval(8)
 
         integer ::inode,inodd,j,pwr_g
@@ -259,9 +260,12 @@
         real(8) :: result0(8),result1(8),result2(8),prefix(3)
         real(8) ::  x0,y0,z0,si,eta,xp,yp,zp
 
+!        ielem=460
+        !nodj=1
+        p0=xyz(1:3,ncon(ielem,nodj))
 
 
-       print *,"sing ",ielem 
+
         inode=ncon(ielem,nodj) ! corresponding node id
         inodd=ncond(ielem,nodj)!                 normal id
         aval=0.0d0
@@ -303,7 +307,10 @@
         cnr_glb_mtx(:,6) = xyz(:,ncon(ielem,4))
         cnr_glb_mtx(:,7) = xyz(:,ncon(ielem,6))
         cnr_glb_mtx(:,8) = xyz(:,ncon(ielem,8))
+        !cnr_glb_mtx(:,8) = matmul(xyze(:,1:8,ielem),trf)
+        !passed_nrml(:,8) = matmul(dxyze(:,1:8,ielem),trf)
 
+      
         passed_nrml(:,1) = dxyz(:,ncond(ielem,1))
         passed_nrml(:,2) = dxyz(:,ncond(ielem,3))
         passed_nrml(:,3) = dxyz(:,ncond(ielem,5))
@@ -332,7 +339,7 @@
         !call sing_int0(is,ielem,nodj,p0,result1,result0)
         !write (*,'(2i5,8f10.5)') ielem,nodj,result0
 
-        if (any(abs(result2-result0) > -10.0d0)) then
+        if (any(abs(result2-result0) > 0.50d0)) then
 
         write (*,'(2i5,8f10.5)') ielem,nodj,result2
         write (*,'(2i5,8f10.5)') ielem,nodj,result0
@@ -349,6 +356,7 @@
         bval(:) = bval+result1 !< elemental plus
             
         write(9010,'(2i6,8f12.6)') ielem,nodj,result2
+        stop
 
 
     end subroutine 

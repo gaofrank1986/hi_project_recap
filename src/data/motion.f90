@@ -1,27 +1,36 @@
 module motion
-      implicit none
-      real(8) :: xc,yc,zc
+    use kinds
+    implicit none
+    real(8) :: xc,yc,zc ! body center
 
-          INTEGER  NNT
-          PARAMETER (NNT=2000)    
+    integer  nnt
+    parameter (nnt=2000)    
 
-        REAL*8 XTC,YTC,ZTC
-        REAL*8 ARE,XF,YF,XK2,YK2,XCF
-        REAL*8 VOLM,XB,YB,ZB
+    real*8 xtc,ytc,ztc ! rotation center
+    real*8 are,xf,yf,xk2,yk2,xcf !
+    real*8 volm,xb,yb,zb!displacement volume, buocy center
 
-        REAL*8 AMAS(6,6),BDMP(6,6)  
-        REAL*8 RMAS(6,6),CDMP(6,6),CRS(6,6),STKM(6,6),XIA(3,3)
+    real*8 amas(6,6),bdmp(6,6)  
+    real*8 rmas(6,6),cdmp(6,6),crs(6,6),stkm(6,6),xia(3,3)
 
-        REAL*8 FORCEW(6),FORCE0(6),FORSCD(6),AMPJ(6)
-          REAL*8 FORCE(6),FORCE_O(6)
-          
-        REAL*8 TRMAS(6,6),VISC(6,6)
+    real*8 forcew(6),force0(6),forscd(6),ampj(6) !wave force,...
+    real*8 force(6),force_o(6)
 
-        REAL*8  DISP(6),DSDT(6),DISP_O(6)
-        real(8) ::  DSDT_O(6),DSDDTL(6),TRXYZ(3,3)   
+    real*8 trmas(6,6),visc(6,6)
 
-        REAL*8  RESPR(6),RESPI(6)  
-!      xc = 1
-!      yc = 2
-!      zc = 3
+    real*8  disp(6),dsdt(6),disp_o(6)!displacement,velocity,disp at initial time
+    real(8) ::  dsdt_o(6),dsddtl(6),trxyz(3,3)   
+
+    real*8  respr(6),respi(6)  
+    !      xc = 1
+    !      yc = 2
+    !      zc = 3
+contains
+    !subroutine init_motion_var(nnf,nnode,nnrml)
+        !integer,intent(in) :: nnf,nnode,nnrml
+    !end subroutine
+
+
+
 end module
+

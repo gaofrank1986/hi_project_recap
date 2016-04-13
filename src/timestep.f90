@@ -1,4 +1,5 @@
 ! 
+!todo fixme
 ! ********************************************** 
 !        
 !     4th order Runge_Kutta method 
@@ -6,19 +7,21 @@
 ! ********************************************** 
 ! 
          SUBROUTINE Time_intg_RK4 
-         USE MVAR_MOD 
-         USE PVAR_MOD 
+         !USE MVAR_MOD 
+         use mesh,only:nsys,nnf,xyz
+         use potential_mod
+         use motion
+         use wave
          use time_mod
          use wave_funcs_simple,only:dinp,dpot,eti,deti,poxy
          
          IMPLICIT NONE 
 !         
-         Integer INODE,JNODE,N0,NELE,NLOC,MOD,IP,IPLOT 
+         Integer INODE,IP
          Integer K 
-         real(8)  VECT(3) 
-         real(8)  AMPF(6),RAL 
+         !real(8)  AMPF(6),RAL 
          real(8) dp_comp(4),dh_comp(4),xp,yp,zp,p(4)
-         real(8) dpox,dpoy,dpoz,p2(4),e(4),e2(4)
+         real(8) p2(4),e(4),e2(4)
          real(8) x1,y1,z1
          
  
@@ -183,26 +186,22 @@
 !  ========================================== 
 ! 
          SUBROUTINE Runge_Kutta(N) 
-         USE MVAR_MOD 
-         USE PVar_mod 
+         !USE MVAR_MOD 
+         use data_all
+         use motion
          use time_mod
          use linalg,only:rlubksb
          use wave_funcs_simple,only:dinp,dpot,eti,deti,poxy
  
 ! 
-         IMPLICIT real(8) (A-H,O-Z) 
+        implicit none
+        
 !  
-         INTEGER INODE,N,J 
-         real(8) BMAT(4),RSN(4,4) 
-         real(8) COMP(6),AMPF(6)!,TRXYZ(3,3) 
-         real(8) xp,yp,zp,dpox,dpoy,dpoz
+         INTEGER INODE,N,ip
+         !real(8) COMP(6),AMPF(6)!,TRXYZ(3,3) 
  
  
-       DATA RSN /1.,  1.,  1.,  1.,  &
-     &           1., -1.,  1., -1., &
-     &           1.,  1., -1., -1.,  &
-     &           1., -1., -1.,  1./ 
-! 
+    ! 
 ! 
 ! RAMPF: ramp function for incient potential 
 ! RAMPV: ramp function for damping  
@@ -407,87 +406,87 @@
 ! 
 ! 
 ! 
-         SUBROUTINE PLOTOUT8 
-          USE MVAR_MOD 
-          use time_mod
-         use wave_func,only:eti2
-        IMPLICIT   NONE   
+       !  SUBROUTINE PLOTOUT8 
+          !USE MVAR_MOD 
+          !use time_mod
+         !use wave_func,only:eti2
+        !IMPLICIT   NONE   
  
-         CHARACTER*16 NAME 
-         CHARACTER*6  FIRST 
+         !CHARACTER*16 NAME 
+         !CHARACTER*6  FIRST 
  
-         INTEGER  I,INODE,NE 
-       real(8) XP,YP,ETin 
-        !real(8),EXTERNAL::  ETI2 
+         !INTEGER  I,INODE,NE 
+       !real(8) XP,YP,ETin 
+        !!real(8),EXTERNAL::  ETI2 
  
-         CALL OPENFILE(ITIME,FIRST) 
-! 
-!         Print *,' Itime=',itime,' First=',first 
-! 
-         NAME='OUTtime\WAVE'//FIRST//'.DAT' 
-       OPEN(102,FILE=NAME,STATUS='UNKNOWN') 
-! 
-!        OPEN(9,  FILE='OUTPUT\OUTPUT1.txt',    STATUS='UNKNOWN') 
-!               
-         WRITE(102,*) 'TITLE = "3D Mesh Grid Data for Element Boundary"' 
-         WRITE(102,*) 'VARIABLES = "X", "Y", "Z"' 
-         WRITE(102,*) 'ZONE N=',NNF,',','E=',NELEMF,',',& 
-     &  'F=FEPOINT,ET=QUADRILATERAL' 
-! 
-       DO INODE=1, NNF 
-        XP=XYZ(1,INODE) 
-        YP=XYZ(2,INODE) 
-!        ETin=ETI1(Amp,BETA,WK,W1,TimeRk,RampF,XP,YP) 
-        ETin=ETI2(H,G,Ampn,Phi_w,BETA,WKN,FREQ,Time,RampF, &
-     &            XP,YP,NFreq,Nwave,IOrder) 
-          WRITE(102,21)  XP,YP, ET(INODE,1),ETin 
-!         WRITE(102,21)  XP,YP, ET(INODE,1)+ETin 
-       ENDDO 
+         !CALL OPENFILE(ITIME,FIRST) 
+!! 
+!!         Print *,' Itime=',itime,' First=',first 
+!! 
+         !NAME='OUTtime\WAVE'//FIRST//'.DAT' 
+       !OPEN(102,FILE=NAME,STATUS='UNKNOWN') 
+!! 
+!!        OPEN(9,  FILE='OUTPUT\OUTPUT1.txt',    STATUS='UNKNOWN') 
+!!               
+         !WRITE(102,*) 'TITLE = "3D Mesh Grid Data for Element Boundary"' 
+         !WRITE(102,*) 'VARIABLES = "X", "Y", "Z"' 
+         !WRITE(102,*) 'ZONE N=',NNF,',','E=',NELEMF,',',& 
+     !&  'F=FEPOINT,ET=QUADRILATERAL' 
+!! 
+       !DO INODE=1, NNF 
+        !XP=XYZ(1,INODE) 
+        !YP=XYZ(2,INODE) 
+!!        ETin=ETI1(Amp,BETA,WK,W1,TimeRk,RampF,XP,YP) 
+        !ETin=ETI2(H,G,Ampn,Phi_w,BETA,WKN,FREQ,Time,RampF, &
+     !&            XP,YP,NFreq,Nwave,IOrder) 
+          !WRITE(102,21)  XP,YP, ET(INODE,1),ETin 
+!!         WRITE(102,21)  XP,YP, ET(INODE,1)+ETin 
+       !ENDDO 
  
-         DO NE=1,  NELEMF 
-        WRITE(102,22) NCON(NE,1),NCON(NE,3),NCON(NE,5),NCON(NE,7) 
-         ENDDO 
-! 
-         Close(102) 
-! 
-10     FORMAT(1X,I6,2X,3(E16.9,3X)) 
-21     FORMAT(1X,5(F10.5,3X)) 
-22     FORMAT(1X,9(I7,2X)) 
-! 
-         END 
+         !DO NE=1,  NELEMF 
+        !WRITE(102,22) NCON(NE,1),NCON(NE,3),NCON(NE,5),NCON(NE,7) 
+         !ENDDO 
+!! 
+         !Close(102) 
+!! 
+!10     FORMAT(1X,I6,2X,3(E16.9,3X)) 
+!21     FORMAT(1X,5(F10.5,3X)) 
+!22     FORMAT(1X,9(I7,2X)) 
+!! 
+         !END 
  
-! 
-! ==================================================== 
-! 
-         SUBROUTINE OPENFILE(MTIME,FIRST) 
-        !INTEGER MTIME 
-         CHARACTER*6 FIRST 
+!! 
+!! ==================================================== 
+!! 
+         !SUBROUTINE OPENFILE(MTIME,FIRST) 
+        !!INTEGER MTIME 
+         !CHARACTER*6 FIRST 
           
-         IF(MTIME.LT.10) THEN 
-          MN0=MTIME 
-          FIRST=CHAR(MN0+48) 
-         ELSE IF(MTIME.LT.100) THEN 
-          MN0=MOD(MTIME,10)      
-          MN1=(MTIME-MN0)/10 
-          FIRST=CHAR(MN1+48)//CHAR(MN0+48) 
-         ELSE IF(MTIME.LT.1000) THEN 
-          MN01=MOD(MTIME,100) 
-          MN0=MOD(MN01,10)       
-          MN1=(MN01-MN0)/10 
-          MN2=(MTIME-10*MN1-MN0)/100 
-          FIRST=CHAR(MN2+48)//CHAR(MN1+48)//CHAR(MN0+48) 
-         ELSE IF(MTIME.LT.10000) THEN  
-          MN012=MOD(MTIME,1000) 
-          MN01=MOD(MN012,100) 
-          MN0=MOD(MN01,10) 
-          MN1=(MN01-MN0)/10 
-          MN2=(MN012-10*MN1-MN0)/100 
-          MN3=(MTIME-MN012)/1000 
-          FIRST=CHAR(MN3+48)//CHAR(MN2+48)//CHAR(MN1+48)//CHAR(MN0+48) 
-         ENDIF 
-! 
-! *-*-*--* 
-! 
-         RETURN 
-         END 
+         !IF(MTIME.LT.10) THEN 
+          !MN0=MTIME 
+          !FIRST=CHAR(MN0+48) 
+         !ELSE IF(MTIME.LT.100) THEN 
+          !MN0=MOD(MTIME,10)      
+          !MN1=(MTIME-MN0)/10 
+          !FIRST=CHAR(MN1+48)//CHAR(MN0+48) 
+         !ELSE IF(MTIME.LT.1000) THEN 
+          !MN01=MOD(MTIME,100) 
+          !MN0=MOD(MN01,10)       
+          !MN1=(MN01-MN0)/10 
+          !MN2=(MTIME-10*MN1-MN0)/100 
+          !FIRST=CHAR(MN2+48)//CHAR(MN1+48)//CHAR(MN0+48) 
+         !ELSE IF(MTIME.LT.10000) THEN  
+          !MN012=MOD(MTIME,1000) 
+          !MN01=MOD(MN012,100) 
+          !MN0=MOD(MN01,10) 
+          !MN1=(MN01-MN0)/10 
+          !MN2=(MN012-10*MN1-MN0)/100 
+          !MN3=(MTIME-MN012)/1000 
+          !FIRST=CHAR(MN3+48)//CHAR(MN2+48)//CHAR(MN1+48)//CHAR(MN0+48) 
+         !ENDIF 
+!! 
+!! *-*-*--* 
+!! 
+         !RETURN 
+         !END 
  

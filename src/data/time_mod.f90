@@ -2,7 +2,7 @@ module time_mod
     implicit none
     real(8) :: ampn(1),phi_w(1),wkn(1),freq(1)
     real(8) :: time,tstep
-    integer :: nfreq,nwave,iorder,endtime,ntime
+    integer :: nfreq,nwave,iorder,endtime,ntime,itime
 contains
     subroutine init_time_var()
         use wave,only:wk,w1,amp

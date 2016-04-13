@@ -1,85 +1,70 @@
-C 
-C ****************************************************** 
-C *                                                    * 
-C *  Evaluate the wave force on a 3-D body             * 
-C *                                                    * 
-C ****************************************************** 
-C 
-        SUBROUTINE TFORCE 
- 
-          USE MVAR_MOD 
-          USE PVAR_MOD 
-          use time_mod
-          use wave_func,only:dpot2
-! 
-        IMPLICIT   NONE 
-! 
-          INTEGER IP,IELEM,NSAMB,N,K 
-        real(8)  EXY(4,2),XP,YP,ZP     
-        real(8)  DDUM 
- 
-        !real(8),EXTERNAL::  DPOT2 
+!C 
+!C ****************************************************** 
+!C *                                                    * 
+!C *  Evaluate the wave force on a 3-D body             * 
+!C *                                                    * 
+!C ****************************************************** 
+!C 
+SUBROUTINE TFORCE 
 
-C 
-        DATA EXY /1., 1.,-1.,-1.,  1.,-1.,-1., 1./ 
-C               
-        FORCEW=0.0D0 
-C 
-        DO 100  IELEM=NELEMF+1,  NELEM  
-        NSAMB=16 
-        IF(NCN(IELEM) .EQ.6 ) NSAMB=4 
-C                     
-        DO  100  IP=1,  NSYS    
- 
-        DO  80  N =1, NSAMB   
-C 
-        DDUM=0.0D0 
-        DO 40   K=1,  NCN(IELEM)  
-          DDUM=DDUM+ DPDT(NCON(IELEM,K),IP)*SAMB(IELEM,N,K)  
-!         Print *,'  IELEM=',IELEM,'  K=',K,'  NCON=',NCON(IELEM,K) 
-!         Print *,'  DPDT=',DPDT(NCON(IELEM,K),IP),' SAMB=',SAMB(IELEM,N,K) 
-40      CONTINUE  
-C 
-!       pause 
- 
-        XP=EXY(IP,1)*SAMBXY(IELEM,N,1) 
-        YP=EXY(IP,2)*SAMBXY(IELEM,N,2)   
-        ZP=          SAMBXY(IELEM,N,3)       
-! 
-        DDUM=DDUM+DPOT2(H,G,Ampn,Phi_w,BETA,WKN,Freq,TimeRK,RampF, 
-     1          XP,YP,ZP,NFreq,Nwave,IOrder)*SAMB(IELEM,N,0)  
-!          
-        
-        FORCEW(1)=FORCEW(1)+DDUM* 
-     1                        EXY(IP,1)*DSAMB(IELEM,N,1) 
-        FORCEW(2)=FORCEW(2)+ DDUM* 
-     1                        EXY(IP,2)*DSAMB(IELEM,N,2) 
- 
-        FORCEW(3)=FORCEW(3) + DDUM* DSAMB(IELEM,N,3)        
-C 
-        FORCEW(4)=FORCEW(4)+DDUM* 
-     2               EXY(IP,2)* DSAMB(IELEM,N,4)  
-        FORCEW(5)=FORCEW(5)+DDUM* 
-     2               EXY(IP,1)* DSAMB(IELEM,N,5) 
-        FORCEW(6)=FORCEW(6)+DDUM* 
-     2               EXY(IP,2)* EXY(IP,1)*DSAMB(IELEM,N,6) 
- 
-!         Print *,'  DDUM=',DDUM,' DX=',DSAMB(IELEM,N,1),' EX=',EXY(IP,1) 
- 
-80      CONTINUE 
-! 
-!         Print *,' IELEM=',IELEM,' F1=',FORCEW(1),' F3=',FORCEW(3) 
- 
-100     CONTINUE 
-! 
-C 
-          FORCEW(:)=RHO*FORCEW(:) 
-           
-!         Print *,  ' F1=',FORCEW(1),' F3=',FORCEW(3) 
-           
-!         pause 
- 
-        RETURN 
-        END                       
- 
- 
+    use kinds
+    use gaussian_info
+    use motion
+    use potential_mod,only:dpdt
+    use time_mod
+    use wave_func,only:dpot2
+    use proj_cnst,only:ex,ey
+
+    implicit   none 
+
+    integer ip,ielem,nsamb,n,k 
+    real(rk)  :: p(3),xp,yp,zp     
+    real(rk)  ddum 
+
+    forcew=0.0d0 
+
+    do ielem=nelemf+1,  nelem  
+        nsamb=16 
+        if(ncn(ielem) .eq.6 ) nsamb=4 
+
+        do  ip=1,  nsys    
+            do  n =1, nsamb   
+
+                ddum=0.0d0 
+                do k=1,  ncn(ielem)  
+                    ddum=ddum+ dpdt(ncon(ielem,k),ip)*samb(ielem,n,k)  
+                end do
+
+                p = [ex(ip),ey(ip),0.0d0]*sambxy(ielem,n,1:3)
+                !xp=ex(ip)*sambxy(ielem,n,1) 
+                !yp=ey(ip)*sambxy(ielem,n,2)   
+                !zp=          sambxy(ielem,n,3)       
+
+                ddum=ddum+dpot2(h,g,ampn,phi_w,beta,wkn,freq,timerk,rampf, &
+                    p(1),p(2),p(3),nfreq,nwave,iorder)*samb(ielem,n,0)  
+
+                forcew(1:3)= forcew(1:3) +ddum*(/ex(ip),ey(ip),1.0d0/)*dsamb(ielem,n,1:3)
+                forcew(4:6) = forcew(4:6) +ddum*(/ey(ip),ex(ip),ex(ip)*ey(ip)/)*dsamb(ielem,n,4:6)
+                !forcew(1)=forcew(1)+ddum* 
+                !1                        exy(ip,1)*dsamb(ielem,n,1) 
+                !forcew(2)=forcew(2)+ ddum* 
+                !1                        exy(ip,2)*dsamb(ielem,n,2) 
+
+                !forcew(3)=forcew(3) + ddum* dsamb(ielem,n,3)        
+                !c 
+                !forcew(4)=forcew(4)+ddum* 
+                !2               exy(ip,2)* dsamb(ielem,n,4)  
+                !forcew(5)=forcew(5)+ddum* 
+                !2               exy(ip,1)* dsamb(ielem,n,5) 
+                !forcew(6)=forcew(6)+ddum* 
+                !2               exy(ip,2)* exy(ip,1)*dsamb(ielem,n,6) 
+
+
+            end do
+        end do
+    end do
+    forcew(:)=rho*forcew(:) 
+
+end subroutine
+
+
