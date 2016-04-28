@@ -47,7 +47,7 @@
 
         do     inode=1, nnf
             !do     inode=874,877
-            !print *,inode
+            print *,inode
             if (inode <= nnf) then
                 hi = 2
             end if
@@ -109,7 +109,6 @@
 
 
         enddo
-        stop
 
 
 
@@ -122,6 +121,7 @@
         !    Source point is on the body surface
         !
         do inode=nnf+1, nnode   
+
             hi=1
 
             xp=xyz(1,inode)
@@ -142,7 +142,6 @@
                 call common_block(0,hi,ielem,inode,amatrix,bmatrix)
 
             end do
-
             do  ielem=1+nelemf, nelem
 
                 if (not(is_connected(ielem,inode)))   then 

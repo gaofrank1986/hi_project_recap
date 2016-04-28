@@ -1,6 +1,7 @@
 program hi_project
 
     use data_all
+    use gaussian_info
     use free_term,only:get_free_term,init_ft
     use hi_intg
     use gradient,only:init_gradient
@@ -44,9 +45,9 @@ program hi_project
     !!! >>===========================================<<
 
     time=0.0d0
-    tstep=0.05
+    tstep=0.005
     
-    do itime = 0,20
+    do itime = 0,200
         print *,itime,'/200'
         time = itime*tstep
     call time_intg_rk4
@@ -58,6 +59,7 @@ program hi_project
      !write(4004,1202) et(inode,1),eti(xp,yp)
      !end do
      !if (mod(itime,10).eq.0) then
+     ! elem =491 node =633,1503
         do inode =1,nnf
             xp = xyz(1,inode)
             yp = xyz(2,inode)
@@ -67,6 +69,13 @@ program hi_project
             
             write(8000+itime,1202) et(inode,1),eti(xp,yp)
         end do
+         inode =288
+            xp = xyz(1,inode)
+            yp = xyz(2,inode)
+            zp = xyz(3,inode)
+            
+            write(6001,'(1f14.6)') bkn(inode,1) - poxy(xp,yp,zp)
+ !end do
       !endif
         !do inode =nnf+1,nnoded
             !xp = xyz(1,inode)

@@ -2,7 +2,6 @@ module data_all
     use mesh
     use wave
     use time_mod
-    use gaussian_info
     use potential_mod
     use motion
     use matrix_mod

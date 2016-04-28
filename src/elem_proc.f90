@@ -333,7 +333,7 @@
         !write (*,'(2i5,8f10.5)') ielem,nodj,result0
         !result0=0.0d0
 
-        call SGBD0_1(is,ielem,nodj,p0,result1,result2)
+        !call SGBD0_1(is,ielem,nodj,p0,result1,result2)
 
         ! omitted since 0 on free surface
         !call sing_int0(is,ielem,nodj,p0,result1,result0)
@@ -341,10 +341,10 @@
 
         if (any(abs(result2-result0) > 0.50d0)) then
 
-        write (*,'(2i5,8f10.5)') ielem,nodj,result2
-        write (*,'(2i5,8f10.5)') ielem,nodj,result0
-        !write (*,'(2i5,8f10.5)') ielem,nodj,result2-result0
-        print *,"========="
+      !  write (*,'(2i5,8f10.5)') ielem,nodj,result2
+        !write (*,'(2i5,8f10.5)') ielem,nodj,result0
+        !!write (*,'(2i5,8f10.5)') ielem,nodj,result2-result0
+        !print *,"========="
     end if
 
 
@@ -356,7 +356,6 @@
         bval(:) = bval+result1 !< elemental plus
             
         write(9010,'(2i6,8f12.6)') ielem,nodj,result2
-        stop
 
 
     end subroutine 
