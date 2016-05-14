@@ -1,7 +1,7 @@
 !-------------------------------------------------------------------------------
 ! DUTWAV
 !-------------------------------------------------------------------------------
-!  MODULE: MockCall
+!  MODULE: Green Function
 !
 !> @brief
 !! <BriefDescription>
@@ -10,7 +10,7 @@
 !! Song Gao,DUT 
 !!
 !! @date
-!! 07 Nov 2013
+!! 07 Mar 2016
 !! 
 !! @note <A note here.>
 !! <Or starting here...>

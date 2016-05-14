@@ -1,3 +1,25 @@
+!-------------------------------------------------------------------------------
+! DUTWAV
+!-------------------------------------------------------------------------------
+!  MODULE: wave funcs full
+!
+!> @brief
+!! <a full version of wave function (1st and 2rd order) used>
+!!
+!! @author
+!! DUT 
+!!
+!! @date
+!! 07 Nov 2013
+!! 
+!! @note <A note here.>
+!! <Or starting here...>
+!
+! REVISION HISTORY:
+!
+! 07 Mar 2015 - Added gcombo to wrap mirrored source or sink. 
+!
+!-------------------------------------------------------------------------------
 module wave_func! 
 ! =================================================== 
 !    

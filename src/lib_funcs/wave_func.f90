@@ -1,10 +1,10 @@
 !-------------------------------------------------------------------------------
 ! DUTWAV
 !-------------------------------------------------------------------------------
-!  MODULE: MockCall
+!  MODULE: wave funcs simple
 !
 !> @brief
-!! <BriefDescription>
+!! <a simple version of wave function (1st order) used>
 !!
 !! @author
 !! Song Gao,DUT 
