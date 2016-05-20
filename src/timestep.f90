@@ -14,8 +14,11 @@
          use wave
          use time_mod
          use wave_funcs_simple,only:dinp,dpot,eti,deti,poxy
+         use io
+
          
-         IMPLICIT NONE 
+         implicit none 
+         type(Ostream) :: fstream
 !         
          Integer INODE,IP
          Integer K 
@@ -24,6 +27,7 @@
          real(8) p2(4),e(4),e2(4)
          real(8) x1,y1,z1
          
+         fstream=Ostream("time marching",6)
  
 ! 
 !  ============================================ 
@@ -66,7 +70,8 @@
          p2(1)=bkn(1,1)
          e2(1)=et(1,1)
  
-        WRITE(*,*) 'RK1 COMPLETED' 
+        !WRITE(*,*) 'RK1 COMPLETED' 
+        call fstream%fout('RK1 Completed')
 ! 
 !  ============================================ 
 !  RK2 
@@ -82,7 +87,7 @@
          p(2)=poxy(x1,y1,z1)
          p2(2)=bkn(1,1)
          e2(2)=et(1,1)
-        WRITE(*,*) 'RK2 COMPLETED'  
+        call fstream%fout('RK2 Completed')
 ! 
 !  ============================================= 
 !  R-K3 
@@ -98,7 +103,8 @@
          p(3)=poxy(x1,y1,z1)
          p2(3)=bkn(1,1)
          e2(3)=et(1,1)
-         WRITE(*,*) 'RK3 COMPLETED'  
+         
+        call fstream%fout('RK3 Completed')
 ! 
 !  ============================================= 
 !  R-K4 
@@ -114,6 +120,7 @@
          p2(4)=bkn(1,1)
          e2(4)=et(1,1)
         WRITE(*,*) 'RK4 COMPLETED' 
+        call fstream%fout('RK4 Completed')
 ! 
 ! 
 !C *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 
@@ -185,7 +192,7 @@
 !   Implicit 4th order Runge Kutta Method 
 !  ========================================== 
 ! 
-         SUBROUTINE iRunge_Kutta(N) 
+         SUBROUTINE Runge_Kutta(N) 
          !USE MVAR_MOD 
          use data_all
          use motion
@@ -422,7 +429,7 @@
 !   Explicit 4th order Runge Kutta Method 
 !  ========================================== 
 ! 
-         SUBROUTINE Runge_Kutta(N) 
+         SUBROUTINE eRunge_Kutta(N) 
          !USE MVAR_MOD 
          use data_all
          use motion

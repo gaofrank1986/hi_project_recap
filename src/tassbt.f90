@@ -122,6 +122,8 @@
         do is=1, nsys; do ind=1,   nnode
             !---------------loop-body--------------------------
             bmata(ind,is)=dot_product(cmata(ind,:,is),cmat(:,is))
+            ! .. cmat d\phi/dp   ... phi
+            ! .. cmata
 
             if (ind<=nnf) then!potential only
                 bmata(ind,is) = bmata(ind,is)-fterm(ind,is,1)*cmat(ind,is)&
@@ -131,6 +133,7 @@
             !---------------------------------------------------
         enddo;enddo 
 
+        !Solving Ax=B      // B is time varying
         do  is=1, nsys   
             call rlubksb(is,amata,nnode,nnode, 1,nsys, 1,indx,bmata)
         enddo

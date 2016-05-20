@@ -6,12 +6,14 @@ program hi_project
     use hi_intg
     use gradient,only:init_gradient
     use wave_funcs_simple,only:poxy,eti
+    use io
 
     implicit  none  
+    type(Ostream) :: fstream
 
     integer :: inode
     real(8) :: xp,yp,zp
-
+    fstream = Ostream("main",6)
     open(9,  file='output/output1.txt',    status='unknown')
     open(10, file='output/output.txt' ,    status='unknown')
     open(101,file='output/outamt.txt' ,    status='unknown')          
@@ -19,6 +21,7 @@ program hi_project
 
          
     call read_wav_data()
+    call fstream%fout('Finished reading wave info')
     call init_time_var
     call output_wav_data()
     xc=0
@@ -27,16 +30,23 @@ program hi_project
 
     print *,xc,yc,zc
     call read_mesh()
+    call fstream%fout('Finished reading mesh info')
+    call topology_analysis()
 !  --------------------------------------------
     call init_ft(nsys,nnf) 
-    call init_data(nsys,nnode,nnoded,nnf) 
 
+    call fstream%fout('Initilaized free term vars')
+    call init_data(nsys,nnode,nnoded,nnf) 
+    call fstream%fout('Initilaized data vars')
     call get_gaussian_data(xc,yc,zc)                  
+    call fstream%fout('Generating guassian point info')
     call init_hi_var() 
+    call fstream%fout('Initialising hi mod vars')
     !call get_free_term()
     !call tassb0_freq
     call tassb0
     call init_gradient(nnf,nelemf,xyze(1:2,:,1:nelemf),nodele(1:nnf,1),nodelj(1:nnf,1))
+    call fstream%fout('Initialising info needed for surface gradient evaluation')
     !call tassbt
 
 
@@ -45,10 +55,10 @@ program hi_project
     !!! >>===========================================<<
 
     time=0.0d0
-    tstep=0.005
+    tstep=0.0005
     
-    do itime = 0,200
-        print *,itime,'/200'
+    do itime = 0,2000
+        print *,itime,'/2000'
         time = itime*tstep
     call time_intg_rk4
   !  do inode =1,nnf
@@ -65,9 +75,9 @@ program hi_project
             yp = xyz(2,inode)
             zp = xyz(3,inode)
             
-            write(7000+itime,1202) bkn(inode,1),poxy(xp,yp,zp)
+            !write(7000+itime,1202) bkn(inode,1),poxy(xp,yp,zp)
             
-            write(8000+itime,1202) et(inode,1),eti(xp,yp)
+            !write(8000+itime,1202) et(inode,1),eti(xp,yp)
         end do
          inode =288
             xp = xyz(1,inode)
