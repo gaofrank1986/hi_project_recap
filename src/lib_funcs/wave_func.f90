@@ -35,7 +35,6 @@ contains
         eti=amp*dcos(wk*(x*dcos(beta)+y*dsin(beta)) -w1*timerk)
         eti=rampf*eti
 
-        return
     end function eti
 
     !< temporal Derivate of wave elevation

@@ -197,7 +197,7 @@
          use data_all
          use motion
          use time_mod
-         use linalg,only:rlubksb
+         !use linalg,only:rlubksb
          use wave_funcs_simple,only:dinp,dpot,eti,deti,poxy
  
          ! 

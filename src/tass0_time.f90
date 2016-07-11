@@ -27,6 +27,8 @@
         !real(8) :: fterm_coef(0:3,4)
         real(8) :: dsign
         type(Ostream) :: fstream 
+
+        integer :: i,j
         fstream = Ostream("tass0",6)
 
 
