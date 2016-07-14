@@ -192,7 +192,7 @@
 !   Implicit 4th order Runge Kutta Method 
 !  ========================================== 
 ! 
-         SUBROUTINE Runge_Kutta(N) 
+         SUBROUTINE iRunge_Kutta(N) 
          !USE MVAR_MOD 
          use data_all
          use motion
@@ -429,7 +429,7 @@
 !   Explicit 4th order Runge Kutta Method 
 !  ========================================== 
 ! 
-         SUBROUTINE eRunge_Kutta(N) 
+         SUBROUTINE Runge_Kutta(N) 
          !USE MVAR_MOD 
          use data_all
          use motion

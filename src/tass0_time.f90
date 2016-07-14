@@ -1,4 +1,7 @@
-    !C  TASSB0
+    !
+    !  Ax = B problem
+    !  this program generating A matrix 
+    !
     !C *********************************************************
     !C *                                                       *
     !C * Calculate the element contribution and assembly the   *
