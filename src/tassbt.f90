@@ -45,7 +45,7 @@
 
       cmat(:,:)=0.0
       dpoxyz_save = 0.0
-
+      ip=1
       do inode =1,nnf
           xp=ex(ip)*xyz(1,inode)
           yp=ey(ip)*xyz(2,inode)

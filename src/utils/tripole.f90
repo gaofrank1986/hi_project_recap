@@ -25,7 +25,7 @@ module tripole_transform
     implicit none
     
     integer :: nosamp
-    real(rk) :: xynod(3,50),dxynod(6,5),samnod(50,0:8)
+    real(rk) :: xynod(3,50),dxynod(6,50),samnod(50,0:8)
 
 contains
     !! ===================================================

@@ -1,6 +1,7 @@
 program hi_project
 
     use data_all
+    use gaussian_info
     use free_term,only:get_free_term,init_ft
     use hi_intg
     use gradient,only:init_gradient
