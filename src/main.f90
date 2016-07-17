@@ -64,9 +64,9 @@ program hi_project
             yp = xyz(2,inode)
             zp = xyz(3,inode)
             
-            write(7000+itime,1202) bkn(inode,1),poxy(xp,yp,zp)
+            write(7000+itime,1202) inode,bkn(inode,1),poxy(xp,yp,zp)
             
-            write(8000+itime,1202) et(inode,1),eti(xp,yp)
+            write(8000+itime,1202) inode,et(inode,1),eti(xp,yp)
         end do
       !endif
         !do inode =nnf+1,nnoded
@@ -94,7 +94,7 @@ program hi_project
         !end do
     end do
 
-     1202 format(2f14.8)
+     1202 format(i6,5x,2f14.8)
     print *,"============== main program ends ==============="
 end  program      
 
