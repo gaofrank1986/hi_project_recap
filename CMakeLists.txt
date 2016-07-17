@@ -19,9 +19,9 @@ Message(STATUS "Initial Fortran flags:" ${CMAKE_Fortran_FLAGS})
 if ("${CMAKE_Fortran_COMPILER_ID}" MATCHES "Intel")
   # something
   #set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -g -traceback -warn all -ftrapuv -check all -debug all")
-  #set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}   -traceback -warn all -ftrapuv")
-  #set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}   -check all,noarg_temp_created")
-  #set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}  ")
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}   -traceback -warn all -ftrapuv")
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}   -check all,noarg_temp_created")
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}  -g -debug all")
 elseif("${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU")
   # something else
 endif()
@@ -31,12 +31,19 @@ set (directory "lib")
 file(MAKE_DIRECTORY ${directory})
 
 ADD_SUBDIRECTORY(src)
+ADD_SUBDIRECTORY(src/lib_const)
 ADD_SUBDIRECTORY(src/data)
 ADD_SUBDIRECTORY(src/utils)
+ADD_SUBDIRECTORY(src/io)
 #ADD_SUBDIRECTORY(src/hi_intgl)
 ADD_SUBDIRECTORY(src/lib_funcs)
-ADD_SUBDIRECTORY(src/lib_const)
 
 SET(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+
+#add_library(hello SHARED ${SRC}/te.f90)
+#add_executable(testf test.f90)
+
+#target_link_libraries(testf hello)
+#set_target_properties(hello PROPERTIES OUTPUT_NAME "hello")
 
