@@ -53,7 +53,7 @@
         do     inode=1, nnf
             !do     inode=874,877
             !print *,inode
-            call fstream%fout(fstream%toString(inode))
+            call fstream%fout('Surface '//fstream%toString(inode))
             if (inode <= nnf) then
                 hi = 2
             end if

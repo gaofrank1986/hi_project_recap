@@ -31,11 +31,11 @@ set (directory "lib")
 file(MAKE_DIRECTORY ${directory})
 
 ADD_SUBDIRECTORY(src)
+ADD_SUBDIRECTORY(src/lib_const)
 ADD_SUBDIRECTORY(src/data)
 ADD_SUBDIRECTORY(src/utils)
 #ADD_SUBDIRECTORY(src/hi_intgl)
 ADD_SUBDIRECTORY(src/lib_funcs)
-ADD_SUBDIRECTORY(src/lib_const)
 ADD_SUBDIRECTORY(src/io)
 
 SET(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)

@@ -14,11 +14,8 @@
          use wave
          use time_mod
          use wave_funcs_simple,only:dinp,dpot,eti,deti,poxy
-         use io
-
          
-         implicit none 
-         type(Ostream) :: fstream
+         IMPLICIT NONE 
 !         
          Integer INODE,IP
          Integer K 
@@ -27,7 +24,6 @@
          real(8) p2(4),e(4),e2(4)
          real(8) x1,y1,z1
          
-         fstream=Ostream("time marching",6)
  
 ! 
 !  ============================================ 
@@ -70,8 +66,7 @@
          p2(1)=bkn(1,1)
          e2(1)=et(1,1)
  
-        !WRITE(*,*) 'RK1 COMPLETED' 
-        call fstream%fout('RK1 Completed')
+        WRITE(*,*) 'RK1 COMPLETED' 
 ! 
 !  ============================================ 
 !  RK2 
@@ -87,7 +82,7 @@
          p(2)=poxy(x1,y1,z1)
          p2(2)=bkn(1,1)
          e2(2)=et(1,1)
-        call fstream%fout('RK2 Completed')
+        WRITE(*,*) 'RK2 COMPLETED'  
 ! 
 !  ============================================= 
 !  R-K3 
@@ -103,8 +98,7 @@
          p(3)=poxy(x1,y1,z1)
          p2(3)=bkn(1,1)
          e2(3)=et(1,1)
-         
-        call fstream%fout('RK3 Completed')
+         WRITE(*,*) 'RK3 COMPLETED'  
 ! 
 !  ============================================= 
 !  R-K4 
@@ -120,7 +114,6 @@
          p2(4)=bkn(1,1)
          e2(4)=et(1,1)
         WRITE(*,*) 'RK4 COMPLETED' 
-        call fstream%fout('RK4 Completed')
 ! 
 ! 
 !C *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 
@@ -197,7 +190,7 @@
          use data_all
          use motion
          use time_mod
-         !use linalg,only:rlubksb
+         use linalg,only:rlubksb
          use wave_funcs_simple,only:dinp,dpot,eti,deti,poxy
  
          ! 
