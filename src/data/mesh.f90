@@ -51,7 +51,7 @@ contains
     
         OPEN(2, FILE='INPUT/DATBDMS.txt',    STATUS='OLD') 
         OPEN(3, FILE='INPUT/DATWPMS.txt',    STATUS='OLD')
-        OPEN(11, FILE='OUTPUT/outmesh.txt',    STATUS='UNKNOWN')
+        OPEN(11, FILE='output/outmesh.txt',    STATUS='UNKNOWN')
 
         !==================body mesh================================
         READ(2,*)   ISYS 
