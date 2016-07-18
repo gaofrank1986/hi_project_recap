@@ -13,7 +13,7 @@ program hi_project
 
     integer :: inode
     real(8) :: xp,yp,zp
-    fstream = Ostream("main",6)
+    fstream = Ostream("main",[6])
     open(9,  file='output/output1.txt',    status='unknown')
     open(10, file='output/output.txt' ,    status='unknown')
     open(101,file='output/outamt.txt' ,    status='unknown')          
@@ -28,7 +28,7 @@ program hi_project
     yc=0
     zc=0
 
-    print *,xc,yc,zc
+    !print *,xc,yc,zc
     call read_mesh()
     call fstream%fout('Finished reading mesh info')
     call fstream%fout('Total Surface Node Number:'//fstream%toString(nnf))
@@ -120,6 +120,6 @@ program hi_project
     end do
 
     1202 format(i7,5x,2f14.8)
-    print *,"============== main program ends ==============="
+    call fstream%fout("============== main program ends ===============")
 end  program      
 

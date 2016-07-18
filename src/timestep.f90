@@ -1,5 +1,5 @@
 ! 
-!todo fixme
+!todo fixme attn 
 ! ********************************************** 
 !        
 !     4th order Runge_Kutta method 
@@ -182,7 +182,245 @@
 ! 
 !  ========================================== 
 ! 
+!   Implicit 4th order Runge Kutta Method 
+!  ========================================== 
 ! 
+         SUBROUTINE iRunge_Kutta(N) 
+         !USE MVAR_MOD 
+         use data_all
+         use motion
+         use time_mod
+         use linalg,only:rlubksb
+         use wave_funcs_simple,only:dinp,dpot,eti,deti,poxy
+ 
+         ! 
+         implicit none
+
+         !  
+         INTEGER INODE,N,ip
+         !real(8) COMP(6),AMPF(6)!,TRXYZ(3,3) 
+
+
+         ! 
+         ! 
+         ! RAMPF: ramp function for incient potential 
+         ! RAMPV: ramp function for damping  
+         ! 
+
+         WRITE(11,*)  
+         WRITE(11,*) ' Inside  Runge_Kutta        N=',N 
+
+         !IF(TimeRK .LT. 2.0d0*TPER) THEN 
+         !RAMPF=0.5d0*(1.0d0-COS(PI*TimeRK/2.0d0/TPER)) 
+         !ELSE 
+         !RAMPF=1.0D0 
+         !END IF 
+         rampf=1.0d0
+
+         ! 
+         !  ================================================ at RK1 step 
+         ! 
+         IF(N  .EQ. 1)   THEN 
+             ! 
+             !  Computing wave height, potential at water surface  
+             ! 
+             !         
+             DISP(:)= DISP_O(:) 
+             DSDT(:)= DSDT_O(:) 
+             !        
+             CALL TASSBT (1)
+             !solve for unkn
+             DO IP=1,    NSYS 
+                 DO INODE=1, NNF 
+                     DH(1,INODE,IP)=  UNKN(INODE,IP) !-DAMPF(INODE)*ET(INODE,IP) 
+                     !d\eti / dt
+                     DP(1,INODE,IP)= -G*ET(INODE,IP) !-DAMPF(INODE)*BKN(INODE,IP) 
+                     !{d \phi}/dt
+                 ENDDO   
+             ENDDO 
+             !  Compute wave force, and body response 
+             !  dpdt is d_phi/dt potential deritive over time??  
+             !dsdt is velocity
+             DPDT(1:NNF,:)=DP(1,1:NNF,:) 
+             DPDT(NNF+1:NNODE,:)=(UNKN(NNF+1:NNODE,:) &
+                 &                      -UNKN_O(NNF+1:NNODE,:))/Tstep 
+
+             CALL TFORCE                      
+             !processing in time
+             UNKN_O(:,:)=UNKN(:,:) 
+
+             ! 
+             ! CALL TRMAX(DISP,TRXYZ) 
+             !CALL ACCEL(1,TRXYZ,COMP) 
+             ! DO K=1, 6 
+             !dposi is acceleration?? SG
+             !Dposi(1,K)=COMP(K) ! can set to 0 if no force
+             !END DO 
+             Dposi(1,1:6)=0.0d0
+             !        Print *,' Rk1  DPosi(1)=',DPosi(1,1) 
+
+             ! 
+             !  ================================================ at RK2 step 
+             ! 
+             ! 
+         ELSE IF(N .EQ. 2)  THEN 
+
+             !ET(:,:)      = ET_O(:,:)     +DH(1,:,:)*Tstep/2.0d0 
+             BKN(1:NNF,:) = BKN_O(1:NNF,:)+DP(1,:,:)*Tstep/2.0d0 
+             !boundary potential changed on surface
+
+             DISP(:)=DISP_O(:) +Tstep*DSDT_O(:)/2.0d0  !gives displacement
+             DSDT(:)= DSDT_O(:)+Dposi(1,:)/2.0d0!  gives velocity 
+             ! tassbt require dsdt and bkn updated before running
+             CALL TASSBT (2)
+             ! 
+             DO IP=1,    NSYS 
+                 DO INODE=1, NNF 
+                     DH(2,INODE,IP)=  UNKN(INODE,IP) !-DAMPF(INODE)*ET(INODE,IP) 
+                 ENDDO   
+             ENDDO   
+
+             ET(:,:)      = ET_O(:,:)     +DH(2,:,:)*Tstep/2.0d0 
+             DO IP=1,    NSYS 
+                 DO INODE=1, NNF 
+                     DP(2,INODE,IP)= -G*ET(INODE,IP) !-DAMPF(INODE)*BKN(INODE,IP) 
+                 ENDDO   
+             ENDDO   
+
+
+             !  
+             !  Compute wave force, and body response 
+             ! 
+             DPDT(1:NNF,:)=DP(2,1:NNF,:) 
+             DPDT(NNF+1:NNODE,:)=(UNKN(NNF+1:NNODE,:) &
+                 &                            -UNKN_O(NNF+1:NNODE,:))/(0.5*Tstep) 
+
+
+
+
+             CALL TFORCE 
+             ! 
+             ! CALL TRMAX(DISP,TRXYZ) 
+             !         CALL MESHT(TRXYZ) 
+             !CALL ACCEL(2,TRXYZ,COMP) 
+             !DO K=1, 6 
+             ! Dposi(2,K)=COMP(K) 
+             !END DO 
+             Dposi(2,1:6) = 0.0d0 
+             !        Print *,' Rk2  DPosi(1)=',DPosi(2,1) 
+             ! 
+             !  ================================================ at RK3 step 
+             ! 
+         ELSE IF(N .EQ. 3)  THEN 
+
+             !ET(:,:)      = ET_O(:,:)     +DH(2,:,:)*Tstep/2.0d0 
+             BKN(1:NNF,:) = BKN_O(1:NNF,:)+DP(2,:,:)*Tstep/2.0d0 
+
+             DISP(:)=DISP_O(:)   + &
+                 &                Tstep*DSDT_O(:)/2.0d0+Tstep*Dposi(1,:)/4.0d0 
+             DSDT(:)= DSDT_O(:)+Dposi(2,:)/2.0d0 
+
+             CALL TASSBT(3)
+
+             ! 
+             DO IP=1,    NSYS 
+                 DO INODE=1, NNF 
+                     DH(3,INODE,IP)=  UNKN(INODE,IP) !-DAMPF(INODE)*ET(INODE,IP) 
+                 ENDDO   
+             ENDDO   
+
+             ET(:,:)      = ET_O(:,:)     +DH(3,:,:)*Tstep/2.0d0 
+             DO IP=1,    NSYS 
+                 DO INODE=1, NNF 
+                     DP(3,INODE,IP)= -G*ET(INODE,IP) !-DAMPF(INODE)*BKN(INODE,IP) 
+                 ENDDO   
+             ENDDO   
+
+             ! 
+             !  
+             !  Compute wave force, and body response 
+             ! 
+             DPDT(1:NNF,:)=DP(3,1:NNF,:) 
+             DPDT(NNF+1:NNODE,:)=(UNKN(NNF+1:NNODE,:) &
+                 &                           -UNKN_O(NNF+1:NNODE,:))/(0.5*Tstep) 
+
+
+             !         write(10,*) 'DTDP   -RK3' 
+             !         DO J=1, NNODE 
+             !          write(10,*) J,DPDT(J,:) 
+             !         ENDDO 
+
+
+             CALL TFORCE      
+             !CALL TRMAX(DISP,TRXYZ) 
+             !         CALL MESHT(TRXYZ) 
+             !CALL ACCEL(3,TRXYZ,COMP) 
+             !DO K=1, 6 
+             !  Dposi(3,K)=COMP(K) 
+             !END DO 
+
+             Dposi(3,1:6) = 0.0d0 
+             !        Print *,' Rk3  DPosi(1)=',DPosi(3,1) 
+             ! 
+             !  ================================================ at RK4 step 
+             ! 
+         ELSE IF(N .EQ. 4)  THEN 
+
+             !ET(:,:)      = ET_O(:,:)     +DH(3,:,:)*Tstep 
+             BKN(1:NNF,:) = BKN_O(1:NNF,:)+DP(3,:,:)*Tstep 
+
+             DISP(:)=DISP_O(:)   + &
+                 &                        Tstep*DSDT_O(:)+Tstep*Dposi(2,:)/2.0d0 
+             DSDT(:)= DSDT_O(:)+Dposi(3,:) 
+             ! 
+             !          HEIGHT(4,:,:)=HEIGHT(4,:,:)+DH(3,:,:)*Tstep 
+             !          PFREEN(4,:,:)=PFREEN(4,:,:)+DP(3,:,:)*Tstep 
+             !          BKN(:,:) = BKN_O(:,:) 
+
+             CALL TASSBT(4)
+             ! 
+             DO IP=1,    NSYS 
+                 DO INODE=1, NNF 
+                     DH(4,INODE,IP)=  UNKN(INODE,IP) !-DAMPF(INODE)*ET(INODE,IP) 
+                 ENDDO   
+             ENDDO   
+
+             ET(:,:)      = ET_O(:,:)     +DH(4,:,:)*Tstep 
+             DO IP=1,    NSYS 
+                 DO INODE=1, NNF 
+                     DP(4,INODE,IP)= -G*ET(INODE,IP) !-DAMPF(INODE)*BKN(INODE,IP) 
+                 ENDDO   
+             ENDDO   
+
+             ! 
+             !  
+             !  Compute wave force, and body response 
+             ! 
+             DPDT(1:NNF,:)=DP(4,1:NNF,:) 
+             DPDT(NNF+1:NNODE,:)=(UNKN(NNF+1:NNODE,:) &
+                 &                           -UNKN_O(NNF+1:NNODE,:))/Tstep 
+
+
+             CALL TFORCE 
+
+
+             !CALL TRMAX(DISP,TRXYZ) 
+             !         CALL MESHT(TRXYZ) 
+
+             !CALL ACCEL(4,TRXYZ,COMP) 
+             !DO K=1, 6 
+             ! Dposi(4,K)=COMP(K) 
+             !END DO 
+             !        
+             Dposi(4,1:6) = 0.0D0 
+             !        Print *,' Rk4  DPosi(1)=',DPosi(4,1) 
+
+         ENDIF 
+     end subroutine
+! 
+!  ========================================== 
+! 
+!   Explicit 4th order Runge Kutta Method 
 !  ========================================== 
 ! 
          SUBROUTINE Runge_Kutta(N) 
@@ -193,213 +431,213 @@
          use linalg,only:rlubksb
          use wave_funcs_simple,only:dinp,dpot,eti,deti,poxy
  
-! 
-        implicit none
-        
-!  
+         ! 
+         implicit none
+
+         !  
          INTEGER INODE,N,ip
          !real(8) COMP(6),AMPF(6)!,TRXYZ(3,3) 
- 
- 
-    ! 
-! 
-! RAMPF: ramp function for incient potential 
-! RAMPV: ramp function for damping  
-! 
- 
-        WRITE(11,*)  
-        WRITE(11,*) ' Inside  Runge_Kutta        N=',N 
- 
-        !IF(TimeRK .LT. 2.0d0*TPER) THEN 
-                !RAMPF=0.5d0*(1.0d0-COS(PI*TimeRK/2.0d0/TPER)) 
-        !ELSE 
-                !RAMPF=1.0D0 
-        !END IF 
-        rampf=1.0d0
- 
-! 
-!  ================================================ at RK1 step 
-! 
-          IF(N  .EQ. 1)   THEN 
-! 
-!  Computing wave height, potential at water surface  
-! 
-!         
-          DISP(:)= DISP_O(:) 
-          DSDT(:)= DSDT_O(:) 
-!        
-          CALL TASSBT 
-          !solve for unkn
-          DO IP=1,    NSYS 
-          DO INODE=1, NNF 
-               DH(1,INODE,IP)=  UNKN(INODE,IP) !-DAMPF(INODE)*ET(INODE,IP) 
-               !d\eti / dt
-               DP(1,INODE,IP)= -G*ET(INODE,IP) !-DAMPF(INODE)*BKN(INODE,IP) 
-               !{d \phi}/dt
-          ENDDO   
-          ENDDO 
-!  Compute wave force, and body response 
-!  dpdt is d_phi/dt potential deritive over time??  
-          !dsdt is velocity
-           DPDT(1:NNF,:)=DP(1,1:NNF,:) 
-           DPDT(NNF+1:NNODE,:)=(UNKN(NNF+1:NNODE,:) &
-     &                      -UNKN_O(NNF+1:NNODE,:))/Tstep 
-
-          CALL TFORCE                      
-           !processing in time
-            UNKN_O(:,:)=UNKN(:,:) 
- 
-! 
-         ! CALL TRMAX(DISP,TRXYZ) 
-          !CALL ACCEL(1,TRXYZ,COMP) 
-         ! DO K=1, 6 
-         !dposi is acceleration?? SG
-          !Dposi(1,K)=COMP(K) ! can set to 0 if no force
-          !END DO 
-          Dposi(1,1:6)=0.0d0
-!        Print *,' Rk1  DPosi(1)=',DPosi(1,1) 
- 
-! 
-!  ================================================ at RK2 step 
-! 
-! 
-          ELSE IF(N .EQ. 2)  THEN 
- 
-                  ET(:,:)      = ET_O(:,:)     +DH(1,:,:)*Tstep/2.0d0 
-                  BKN(1:NNF,:) = BKN_O(1:NNF,:)+DP(1,:,:)*Tstep/2.0d0 
-                  !boundary potential changed on surface
-
-                  DISP(:)=DISP_O(:) +Tstep*DSDT_O(:)/2.0d0  !gives displacement
-                  DSDT(:)= DSDT_O(:)+Dposi(1,:)/2.0d0!  gives velocity 
-                  ! tassbt require dsdt and bkn updated before running
-                  CALL TASSBT 
-! 
-                  DO IP=1,    NSYS 
-                  DO INODE=1, NNF 
-                  DH(2,INODE,IP)=  UNKN(INODE,IP) !-DAMPF(INODE)*ET(INODE,IP) 
-                  DP(2,INODE,IP)= -G*ET(INODE,IP) !-DAMPF(INODE)*BKN(INODE,IP) 
-                  ENDDO   
-                  ENDDO   
- 
- 
-!  
-!  Compute wave force, and body response 
-! 
-                  DPDT(1:NNF,:)=DP(2,1:NNF,:) 
-                  DPDT(NNF+1:NNODE,:)=(UNKN(NNF+1:NNODE,:) &
-     &                            -UNKN_O(NNF+1:NNODE,:))/(0.5*Tstep) 
 
 
-           
- 
-          CALL TFORCE 
-! 
-         ! CALL TRMAX(DISP,TRXYZ) 
-!         CALL MESHT(TRXYZ) 
-          !CALL ACCEL(2,TRXYZ,COMP) 
-          !DO K=1, 6 
-           ! Dposi(2,K)=COMP(K) 
-          !END DO 
-        Dposi(2,1:6) = 0.0d0 
-!        Print *,' Rk2  DPosi(1)=',DPosi(2,1) 
-! 
-!  ================================================ at RK3 step 
-! 
-          ELSE IF(N .EQ. 3)  THEN 
- 
-           ET(:,:)      = ET_O(:,:)     +DH(2,:,:)*Tstep/2.0d0 
-           BKN(1:NNF,:) = BKN_O(1:NNF,:)+DP(2,:,:)*Tstep/2.0d0 
-           
-            DISP(:)=DISP_O(:)   + &
-        &                Tstep*DSDT_O(:)/2.0d0+Tstep*Dposi(1,:)/4.0d0 
-            DSDT(:)= DSDT_O(:)+Dposi(2,:)/2.0d0 
- 
-          CALL TASSBT 
-! 
-          DO IP=1,    NSYS 
-          DO INODE=1, NNF 
-            DH(3,INODE,IP)=  UNKN(INODE,IP) !-DAMPF(INODE)*ET(INODE,IP) 
-          DP(3,INODE,IP)= -G*ET(INODE,IP) !-DAMPF(INODE)*BKN(INODE,IP) 
-          ENDDO   
-          ENDDO   
-! 
-!  
-!  Compute wave force, and body response 
-! 
-              DPDT(1:NNF,:)=DP(3,1:NNF,:) 
-              DPDT(NNF+1:NNODE,:)=(UNKN(NNF+1:NNODE,:) &
-     &                           -UNKN_O(NNF+1:NNODE,:))/(0.5*Tstep) 
- 
- 
-!         write(10,*) 'DTDP   -RK3' 
-!         DO J=1, NNODE 
-!          write(10,*) J,DPDT(J,:) 
-!         ENDDO 
-           
- 
-          CALL TFORCE      
-          !CALL TRMAX(DISP,TRXYZ) 
-!         CALL MESHT(TRXYZ) 
-          !CALL ACCEL(3,TRXYZ,COMP) 
-          !DO K=1, 6 
-          !  Dposi(3,K)=COMP(K) 
-          !END DO 
+         ! 
+         ! 
+         ! RAMPF: ramp function for incient potential 
+         ! RAMPV: ramp function for damping  
+         ! 
 
-        Dposi(3,1:6) = 0.0d0 
-!        Print *,' Rk3  DPosi(1)=',DPosi(3,1) 
-! 
-!  ================================================ at RK4 step 
-! 
-          ELSE IF(N .EQ. 4)  THEN 
- 
-           ET(:,:)      = ET_O(:,:)     +DH(3,:,:)*Tstep 
-           BKN(1:NNF,:) = BKN_O(1:NNF,:)+DP(3,:,:)*Tstep 
- 
-            DISP(:)=DISP_O(:)   + &
-        &                        Tstep*DSDT_O(:)+Tstep*Dposi(2,:)/2.0d0 
-            DSDT(:)= DSDT_O(:)+Dposi(3,:) 
-! 
-!          HEIGHT(4,:,:)=HEIGHT(4,:,:)+DH(3,:,:)*Tstep 
-!          PFREEN(4,:,:)=PFREEN(4,:,:)+DP(3,:,:)*Tstep 
-!          BKN(:,:) = BKN_O(:,:) 
- 
-          CALL TASSBT 
-! 
-          DO IP=1,    NSYS 
-          DO INODE=1, NNF 
-            DH(4,INODE,IP)=  UNKN(INODE,IP) !-DAMPF(INODE)*ET(INODE,IP) 
-          DP(4,INODE,IP)= -G*ET(INODE,IP) !-DAMPF(INODE)*BKN(INODE,IP) 
-          ENDDO   
-          ENDDO   
-! 
-!  
-!  Compute wave force, and body response 
-! 
-              DPDT(1:NNF,:)=DP(4,1:NNF,:) 
-              DPDT(NNF+1:NNODE,:)=(UNKN(NNF+1:NNODE,:) &
-     &                           -UNKN_O(NNF+1:NNODE,:))/Tstep 
-           
- 
-          CALL TFORCE 
- 
-                           
-          !CALL TRMAX(DISP,TRXYZ) 
-!         CALL MESHT(TRXYZ) 
- 
-          !CALL ACCEL(4,TRXYZ,COMP) 
-          !DO K=1, 6 
-           ! Dposi(4,K)=COMP(K) 
-          !END DO 
-!        
-        Dposi(4,1:6) = 0.0D0 
-!        Print *,' Rk4  DPosi(1)=',DPosi(4,1) 
- 
-          ENDIF 
-! 
-!    pause 
-!         
-        
-         END 
+         WRITE(11,*)  
+         WRITE(11,*) ' Inside  Runge_Kutta        N=',N 
+
+         !IF(TimeRK .LT. 2.0d0*TPER) THEN 
+         !RAMPF=0.5d0*(1.0d0-COS(PI*TimeRK/2.0d0/TPER)) 
+         !ELSE 
+         !RAMPF=1.0D0 
+         !END IF 
+         rampf=1.0d0
+
+         ! 
+         !  ================================================ at RK1 step 
+         ! 
+         IF(N  .EQ. 1)   THEN 
+             ! 
+             !  Computing wave height, potential at water surface  
+             ! 
+             !         
+             DISP(:)= DISP_O(:) 
+             DSDT(:)= DSDT_O(:) 
+             !        
+             CALL TASSBT(1)
+             !solve for unkn
+             DO IP=1,    NSYS 
+                 DO INODE=1, NNF 
+                     DH(1,INODE,IP)=  UNKN(INODE,IP) !-DAMPF(INODE)*ET(INODE,IP) 
+                     !d\eti / dt
+                     DP(1,INODE,IP)= -G*ET(INODE,IP) !-DAMPF(INODE)*BKN(INODE,IP) 
+                     !{d \phi}/dt
+                 ENDDO   
+             ENDDO 
+             !  Compute wave force, and body response 
+             !  dpdt is d_phi/dt potential deritive over time??  
+             !dsdt is velocity
+             DPDT(1:NNF,:)=DP(1,1:NNF,:) 
+             DPDT(NNF+1:NNODE,:)=(UNKN(NNF+1:NNODE,:) &
+                 &                      -UNKN_O(NNF+1:NNODE,:))/Tstep 
+
+             CALL TFORCE                      
+             !processing in time
+             UNKN_O(:,:)=UNKN(:,:) 
+
+             ! 
+             ! CALL TRMAX(DISP,TRXYZ) 
+             !CALL ACCEL(1,TRXYZ,COMP) 
+             ! DO K=1, 6 
+             !dposi is acceleration?? SG
+             !Dposi(1,K)=COMP(K) ! can set to 0 if no force
+             !END DO 
+             Dposi(1,1:6)=0.0d0
+             !        Print *,' Rk1  DPosi(1)=',DPosi(1,1) 
+
+             ! 
+             !  ================================================ at RK2 step 
+             ! 
+             ! 
+         ELSE IF(N .EQ. 2)  THEN 
+
+             ET(:,:)      = ET_O(:,:)     +DH(1,:,:)*Tstep/2.0d0 
+             BKN(1:NNF,:) = BKN_O(1:NNF,:)+DP(1,:,:)*Tstep/2.0d0 
+             !boundary potential changed on surface
+
+             DISP(:)=DISP_O(:) +Tstep*DSDT_O(:)/2.0d0  !gives displacement
+             DSDT(:)= DSDT_O(:)+Dposi(1,:)/2.0d0!  gives velocity 
+             ! tassbt require dsdt and bkn updated before running
+             CALL TASSBT (2)
+             ! 
+             DO IP=1,    NSYS 
+                 DO INODE=1, NNF 
+                     DH(2,INODE,IP)=  UNKN(INODE,IP) !-DAMPF(INODE)*ET(INODE,IP) 
+                     DP(2,INODE,IP)= -G*ET(INODE,IP) !-DAMPF(INODE)*BKN(INODE,IP) 
+                 ENDDO   
+             ENDDO   
+
+
+             !  
+             !  Compute wave force, and body response 
+             ! 
+             DPDT(1:NNF,:)=DP(2,1:NNF,:) 
+             DPDT(NNF+1:NNODE,:)=(UNKN(NNF+1:NNODE,:) &
+                 &                            -UNKN_O(NNF+1:NNODE,:))/(0.5*Tstep) 
+
+
+
+
+             CALL TFORCE 
+             ! 
+             ! CALL TRMAX(DISP,TRXYZ) 
+             !         CALL MESHT(TRXYZ) 
+             !CALL ACCEL(2,TRXYZ,COMP) 
+             !DO K=1, 6 
+             ! Dposi(2,K)=COMP(K) 
+             !END DO 
+             Dposi(2,1:6) = 0.0d0 
+             !        Print *,' Rk2  DPosi(1)=',DPosi(2,1) 
+             ! 
+             !  ================================================ at RK3 step 
+             ! 
+         ELSE IF(N .EQ. 3)  THEN 
+
+             ET(:,:)      = ET_O(:,:)     +DH(2,:,:)*Tstep/2.0d0 
+             BKN(1:NNF,:) = BKN_O(1:NNF,:)+DP(2,:,:)*Tstep/2.0d0 
+
+             DISP(:)=DISP_O(:)   + &
+                 &                Tstep*DSDT_O(:)/2.0d0+Tstep*Dposi(1,:)/4.0d0 
+             DSDT(:)= DSDT_O(:)+Dposi(2,:)/2.0d0 
+
+             CALL TASSBT(3) 
+             ! 
+             DO IP=1,    NSYS 
+                 DO INODE=1, NNF 
+                     DH(3,INODE,IP)=  UNKN(INODE,IP) !-DAMPF(INODE)*ET(INODE,IP) 
+                     DP(3,INODE,IP)= -G*ET(INODE,IP) !-DAMPF(INODE)*BKN(INODE,IP) 
+                 ENDDO   
+             ENDDO   
+             ! 
+             !  
+             !  Compute wave force, and body response 
+             ! 
+             DPDT(1:NNF,:)=DP(3,1:NNF,:) 
+             DPDT(NNF+1:NNODE,:)=(UNKN(NNF+1:NNODE,:) &
+                 &                           -UNKN_O(NNF+1:NNODE,:))/(0.5*Tstep) 
+
+
+             !         write(10,*) 'DTDP   -RK3' 
+             !         DO J=1, NNODE 
+             !          write(10,*) J,DPDT(J,:) 
+             !         ENDDO 
+
+
+             CALL TFORCE      
+             !CALL TRMAX(DISP,TRXYZ) 
+             !         CALL MESHT(TRXYZ) 
+             !CALL ACCEL(3,TRXYZ,COMP) 
+             !DO K=1, 6 
+             !  Dposi(3,K)=COMP(K) 
+             !END DO 
+
+             Dposi(3,1:6) = 0.0d0 
+             !        Print *,' Rk3  DPosi(1)=',DPosi(3,1) 
+             ! 
+             !  ================================================ at RK4 step 
+             ! 
+         ELSE IF(N .EQ. 4)  THEN 
+
+             ET(:,:)      = ET_O(:,:)     +DH(3,:,:)*Tstep 
+             BKN(1:NNF,:) = BKN_O(1:NNF,:)+DP(3,:,:)*Tstep 
+
+             DISP(:)=DISP_O(:)   + &
+                 &                        Tstep*DSDT_O(:)+Tstep*Dposi(2,:)/2.0d0 
+             DSDT(:)= DSDT_O(:)+Dposi(3,:) 
+             ! 
+             !          HEIGHT(4,:,:)=HEIGHT(4,:,:)+DH(3,:,:)*Tstep 
+             !          PFREEN(4,:,:)=PFREEN(4,:,:)+DP(3,:,:)*Tstep 
+             !          BKN(:,:) = BKN_O(:,:) 
+
+             CALL TASSBT (4)
+             ! 
+             DO IP=1,    NSYS 
+                 DO INODE=1, NNF 
+                     DH(4,INODE,IP)=  UNKN(INODE,IP) !-DAMPF(INODE)*ET(INODE,IP) 
+                     DP(4,INODE,IP)= -G*ET(INODE,IP) !-DAMPF(INODE)*BKN(INODE,IP) 
+                 ENDDO   
+             ENDDO   
+             ! 
+             !  
+             !  Compute wave force, and body response 
+             ! 
+             DPDT(1:NNF,:)=DP(4,1:NNF,:) 
+             DPDT(NNF+1:NNODE,:)=(UNKN(NNF+1:NNODE,:) &
+                 &                           -UNKN_O(NNF+1:NNODE,:))/Tstep 
+
+
+             CALL TFORCE 
+
+
+             !CALL TRMAX(DISP,TRXYZ) 
+             !         CALL MESHT(TRXYZ) 
+
+             !CALL ACCEL(4,TRXYZ,COMP) 
+             !DO K=1, 6 
+             ! Dposi(4,K)=COMP(K) 
+             !END DO 
+             !        
+             Dposi(4,1:6) = 0.0D0 
+             !        Print *,' Rk4  DPosi(1)=',DPosi(4,1) 
+
+         ENDIF 
+         ! 
+         !    pause 
+         !         
+
+     end subroutine
 ! 
 ! ==================================================== 
 ! 
