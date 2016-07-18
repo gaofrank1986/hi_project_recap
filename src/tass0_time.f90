@@ -48,9 +48,9 @@
         pause
 
         do     inode=1, nnf
-            !do     inode=874,877
-            !print *,inode
+
             call fstream%fout('Surface '//fstream%toString(inode))
+
             if (inode <= nnf) then
                 hi = 2
             end if
@@ -64,6 +64,7 @@
                 &                        h,xyz,dxyze,s_angle)    
 
             angle(inode)=1.0d0- s_angle
+
             !cmata(inode,inode,1:nsys)= -1.0d0+s_angle!angle(inode)
             !---up---for solid angle term in rhs
 

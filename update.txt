@@ -2,3 +2,4 @@
 2. add number argument to tassbt, udpdate time step to incorporate this
 3. add inode id in 7000 and 8000 files
 4. add output nnf,nnode,nnoded in main
+5. cmake fails to link corrected, give a core dumped error when running, reason unknown
