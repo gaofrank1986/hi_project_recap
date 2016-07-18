@@ -60,7 +60,7 @@
         end interface
 
         real(8) :: dgn,gxf(4),p0m(3),p(3),prefix(3),np(3)
-        integer :: n,nsamb,j
+        integer :: n,nsamb
 
         aval=0.0d0
         bval=0.0d0
@@ -98,7 +98,7 @@
 
         integer,intent(in) :: inode,ielem,numqua,hi
 
-        integer i,j,is,nodnum,nd,np,nsamb
+        integer i,is,nodnum
         real*8  xp,yp,zp,xyzt(3,8),dxyzt(3,8)
         real*8 bmatrix(4,8),amatrix(4,8)
 
@@ -175,7 +175,6 @@
         end subroutine
 
     subroutine sing_int(is,ielem,nodnum,xp,yp,zp,amatrix,bmatrix,hi)
-        use mesh,only:ncn,xyze,dxyze
         implicit none
         integer,intent(in) :: is,ielem,nodnum,hi
         real(8),intent(in) :: xp,yp,zp
@@ -204,10 +203,10 @@
         use tripole_transform,only:xynod,dxynod,nosamp,samnod,tripol
         implicit   none  
 
-        integer is,ielem,n,j,ip,nodnum
+        integer is,ielem,n,nodnum
        ! real*8  xp,yp,zp!,ex(4,4),ey(4,4)
         !real*8  x,y,z,x0,y0,z0      
-        real*8  nx,ny,nz,dgn
+        real*8  dgn
         real*8  aval(8),bval(8),gxf(4),p(3),p0(3),np(3),p0m(3),prefix(3)
 
         prefix=[ex(is),ey(is),1.0d0]
@@ -235,8 +234,8 @@
             !
     end subroutine
 
-
-    !   @params p0 input src point
+    ! @ func: [sing_int1] integration for hypersingular elem
+    ! @params p0 input src point
     subroutine sing_int1(is,ielem,nodj,p0,aval,bval) 
 
         use mesh,only:ncon,ncond,xyz,dxyz,ncn
@@ -251,14 +250,14 @@
         real(8):: p0(3)
         real(8),intent(out):: bval(8),aval(8)
 
-        integer ::inode,inodd,j,pwr_g
-
+        integer ::inode,inodd
+        
         real(8) :: origin_offset(3),xi0(2),p0m(3)
         real(8) :: cnr_glb_mtx(3,8)
         real(8) :: passed_nrml(3,8)
 
         real(8) :: result0(8),result1(8),result2(8),prefix(3)
-        real(8) ::  x0,y0,z0,si,eta,xp,yp,zp
+        real(8) ::  si,eta
 
 !        ielem=460
         !nodj=1
