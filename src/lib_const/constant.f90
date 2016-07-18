@@ -34,7 +34,7 @@ module proj_cnst
     !used in sg0_1
     real(rk),parameter :: new8(8) = (/1, 5, 9, 13, 17, 21, 25, 29/)
     real(rk),parameter :: pi4 = 12.56637061435917295385d0
-    ! <@var transform matrix for hi_intgl order
+    ! @var : transform matrix for hi_intgl order
     integer,parameter  :: trf(8,8) = reshape(  &
                                     [   1,0,0,0,0,0,0,0, &
                                         0,0,0,0,1,0,0,0, &
