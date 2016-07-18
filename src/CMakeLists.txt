@@ -10,6 +10,6 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #add_library(hello SHARED ${SRC}/te.f90)
 add_executable(testf ${SRC_LIST})
 
-target_link_libraries(testf data utils func const)
+target_link_libraries(testf data utils func const io)
 #set_target_properties(hello PROPERTIES OUTPUT_NAME "hello")
 
