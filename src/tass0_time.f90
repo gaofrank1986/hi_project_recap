@@ -1,4 +1,7 @@
-    !C  TASSB0
+    !
+    !  @file : this program generating A matrix 
+    !  @memo : Ax = B problem
+    !
     !C *********************************************************
     !C *                                                       *
     !C * Calculate the element contribution and assembly the   *
@@ -15,6 +18,7 @@
         use misc_var,only:angle
         use linalg,only:rludcmp
         use proj_cnst,only:rsn
+        use io
 
         implicit   none  
         integer  inode,ielem,ip
@@ -25,14 +29,12 @@
         real(8)  s_angle
         !real(8) :: fterm_coef(0:3,4)
         real(8) :: dsign
+        type(Ostream) :: fstream 
 
+        fstream = Ostream("tass0",[6])
 
-        call topology_analysis()
-
-        !
-        !`
-        !  ----------------------------------------------------
-        WRITE(*, *)   ' IN TASSB0 '
+        call fstream%fout('lhs matrix computing start......')
+        
 
         !DSDT(:)=0.0
         !                 
@@ -47,7 +49,8 @@
 
         do     inode=1, nnf
             !do     inode=874,877
-            print *,inode
+            !print *,inode
+            call fstream%fout('Surface '//fstream%toString(inode))
             if (inode <= nnf) then
                 hi = 2
             end if
@@ -62,12 +65,14 @@
 
             angle(inode)=1.0d0- s_angle
             !cmata(inode,inode,1:nsys)= -1.0d0+s_angle!angle(inode)
+            !---up---for solid angle term in rhs
+
             amata(inode,inode,1:nsys)= 1.0d0-s_angle!angle(inode)
             !  ---------------------------
             !  Integration on the free surface
 
             do   ielem=1,  nelemf
-                if (not(is_connected(ielem,inode)))   then! if src node not on element 
+                if ((is_connected(ielem,inode)).eqv.(.false.))   then! if src node not on element 
                     call norm_elem_wrapper(ielem,xp,yp,zp,amatrix,bmatrix,hi)
 
                 else 
@@ -79,7 +84,7 @@
             !  Integration on the body surface
             do    ielem=nelemf+1,  nelem
 
-                if (not(is_connected(ielem,inode)))   then 
+                if ((is_connected(ielem,inode)).eqv.(.false.))   then 
                     call norm_elem_wrapper(ielem,xp,yp,zp,amatrix,bmatrix,hi)
                 else 
                     call sing_elem_wrapper(inode,ielem,nodqua(inode),xp,yp,zp,&
@@ -122,6 +127,8 @@
         !
         do inode=nnf+1, nnode   
 
+            call fstream%fout('Body    '//fstream%toString(inode))
+
             hi=1
 
             xp=xyz(1,inode)
@@ -144,7 +151,7 @@
             end do
             do  ielem=1+nelemf, nelem
 
-                if (not(is_connected(ielem,inode)))   then 
+                if ((is_connected(ielem,inode)).eqv.(.false.))   then 
                     call norm_elem_wrapper(ielem,xp,yp,zp,amatrix,bmatrix,hi)
                 else 
                     call sing_elem_wrapper(inode,ielem,nodqua(inode),xp,yp,zp,&
@@ -181,7 +188,7 @@
         !endif
 
         !! =============================================
-        print *,"I am here!"
+        !print *,"I am here!"
         !
         !write(102, *) '  =========== before rludcmp =============='
 
@@ -199,15 +206,16 @@
         !      do i = 1,nnode
         !write(401,*) amata(i,i,1:nsys)
         !end do
-        write(*,*) "Begin inversing LHS matrix............"
+
+        call fstream%fout('Begin inversing LHS matrix............')
         do ip=1, nsys
             call rludcmp(ip,amata,nnode,nnode,nsys,indx,dsign)  
         enddo
-        write(*,*) "Finished inversing LHS matrix............"
+        call fstream%fout('Finished inversing LHS matrix............')
 
-        write(102, *) 
-        write(102, *)
-        write(102, *) '  =========== after rludcmp =============='
+        !write(102, *) 
+        !write(102, *)
+        !write(102, *) '  =========== after rludcmp =============='
 
     end subroutine
 
