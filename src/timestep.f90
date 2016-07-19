@@ -1,190 +1,185 @@
-! 
-!todo fixme attn 
-! ********************************************** 
-!        
-!     4th order Runge_Kutta method 
-! 
-! ********************************************** 
-! 
-         SUBROUTINE Time_intg_RK4 
-         !USE MVAR_MOD 
-         use mesh,only:nsys,nnf,xyz
-         use potential_mod
-         use motion
-         use wave
-         use time_mod
-         use wave_funcs_simple,only:dinp,dpot,eti,deti,poxy
-         
-         IMPLICIT NONE 
-!         
-         Integer INODE,IP
-         Integer K 
-         !real(8)  AMPF(6),RAL 
-         real(8) dp_comp(4),dh_comp(4),xp,yp,zp,p(4)
-         real(8) p2(4),e(4),e2(4)
-         real(8) x1,y1,z1
-         
- 
-! 
-!  ============================================ 
-!  RK1  
+    ! 
+    !todo fixme attn 
+    ! ********************************************** 
+    !        
+    !     4th order Runge_Kutta method 
+    ! 
+    ! ********************************************** 
 
-       
- 
- 
-         TimeRK=TIME 
-!       
+
+    subroutine time_intg_rk4 
+        use mesh,only:nsys,nnf,xyz
+        use potential_mod
+        use motion
+        use wave
+        use time_mod
+        use wave_funcs_simple,only:dinp,dpot,eti,deti,poxy
+
+        implicit none 
+
+        integer inode,ip
+        integer k 
+        !real(8)  ampf(6),ral 
+        real(8) dp_comp(4),dh_comp(4),xp,yp,zp,p(4)
+        real(8) p2(4),e(4),e2(4)
+        real(8) x1,y1,z1
+
+        !  ============================================ 
+        !  rk1  
+
+        timerk=time 
+
         if (abs(timerk - 0*tstep)<1e-6) then
-          rampf=1
-          do inode =1,nnf
-                  xp = xyz(1,inode)
-                  yp = xyz(2,inode)
-                  zp = xyz(3,inode)
-                  bkn_o(inode,1) = poxy(xp,yp,zp)
-                  et_o(inode,1)= eti(xp,yp)
-                  bkn(inode,1) = poxy(xp,yp,zp)
-                  et(inode,1) = eti(xp,yp)
-                  !print *,bkn(inode,1)
+            rampf=1
+            do inode =1,nnf
+                xp = xyz(1,inode)
+                yp = xyz(2,inode)
+                zp = xyz(3,inode)
+                bkn_o(inode,1) = poxy(xp,yp,zp)
+                et_o(inode,1)= eti(xp,yp)
+                bkn(inode,1) = poxy(xp,yp,zp)
+                et(inode,1) = eti(xp,yp)
+                !print *,bkn(inode,1)
 
-                  !pause
-                  !stop
-         end do
-         end if
-         !stop
-         !FIXME need to set unkn_o if moving body
-          
-         x1=xyz(1,1) 
-         y1=xyz(2,1) 
-         z1=xyz(3,1) 
-         
-         CALL Runge_Kutta(1) 
-         !compute dp,dh at testing point 1
-         dp_comp(1)=dpot(x1,y1,z1)
-         dh_comp(1)=deti(x1,y1)
-         e(1)=eti(x1,y1)
-         p(1)=poxy(x1,y1,z1)
-         p2(1)=bkn(1,1)
-         e2(1)=et(1,1)
- 
-        WRITE(*,*) 'RK1 COMPLETED' 
-! 
-!  ============================================ 
-!  RK2 
-! 
-         TimeRK=TIME+Tstep/2.0d0 
-!  
- 
-         call runge_kutta(2) 
- 
-         dp_comp(2)=dpot(x1,y1,z1)
-         dh_comp(2)=deti(x1,y1)
-         e(2)=eti(x1,y1)
-         p(2)=poxy(x1,y1,z1)
-         p2(2)=bkn(1,1)
-         e2(2)=et(1,1)
-        WRITE(*,*) 'RK2 COMPLETED'  
-! 
-!  ============================================= 
-!  R-K3 
- 
-          TimeRK=TIME+Tstep/2.0d0 
-  
-! 
-          CALL Runge_Kutta(3) 
- 
-         dp_comp(3)=dpot(x1,y1,z1)
-         dh_comp(3)=deti(x1,y1)
-         e(3)=eti(x1,y1)
-         p(3)=poxy(x1,y1,z1)
-         p2(3)=bkn(1,1)
-         e2(3)=et(1,1)
-         WRITE(*,*) 'RK3 COMPLETED'  
-! 
-!  ============================================= 
-!  R-K4 
-! 
-          TimeRK=TIME+Tstep 
-!  
-         CALL Runge_Kutta(4) 
- 
-         dp_comp(4)=dpot(x1,y1,z1)
-         dh_comp(4)=deti(x1,y1)
-         e(4)=eti(x1,y1)
-         p(4)=poxy(x1,y1,z1)
-         p2(4)=bkn(1,1)
-         e2(4)=et(1,1)
-        WRITE(*,*) 'RK4 COMPLETED' 
-! 
-! 
-!C *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 
-! 
+                !pause
+                !stop
+            end do
+        end if
+
+        !fixme need to set unkn_o if moving body
+
+        x1=xyz(1,1) 
+        y1=xyz(2,1) 
+        z1=xyz(3,1) 
+
+        CALL Runge_Kutta(1) 
+        !compute dp,dh at testing point 1
+        dp_comp(1)=dpot(x1,y1,z1)
+        dh_comp(1)=deti(x1,y1)
+        e(1)=eti(x1,y1)
+        p(1)=poxy(x1,y1,z1)
+        p2(1)=bkn(1,1)
+        e2(1)=et(1,1)
+
+        !WRITE(*,*) 'RK1 COMPLETED' 
+
+        !  ============================================ 
+        !  RK2 
+
+        TimeRK=TIME+Tstep/2.0d0 
+
+
+        call runge_kutta(2) 
+
+        dp_comp(2)=dpot(x1,y1,z1)
+        dh_comp(2)=deti(x1,y1)
+        e(2)=eti(x1,y1)
+        p(2)=poxy(x1,y1,z1)
+        p2(2)=bkn(1,1)
+        e2(2)=et(1,1)
+        !WRITE(*,*) 'RK2 COMPLETED'  
+        ! 
+        !  ============================================= 
+        !  R-K3 
+
+        TimeRK=TIME+Tstep/2.0d0 
+
+        ! 
+        CALL Runge_Kutta(3) 
+
+        dp_comp(3)=dpot(x1,y1,z1)
+        dh_comp(3)=deti(x1,y1)
+        e(3)=eti(x1,y1)
+        p(3)=poxy(x1,y1,z1)
+        p2(3)=bkn(1,1)
+        e2(3)=et(1,1)
+        !WRITE(*,*) 'RK3 COMPLETED'  
+        ! 
+        !  ============================================= 
+        !  R-K4 
+        ! 
+        TimeRK=TIME+Tstep 
+        !  
+        CALL Runge_Kutta(4) 
+
+        dp_comp(4)=dpot(x1,y1,z1)
+        dh_comp(4)=deti(x1,y1)
+        e(4)=eti(x1,y1)
+        p(4)=poxy(x1,y1,z1)
+        p2(4)=bkn(1,1)
+        e2(4)=et(1,1)
+        !WRITE(*,*) 'RK4 COMPLETED' 
+        ! 
+        ! 
+        !C *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 
+        ! 
         ! bkn is boudnary value
-       do ip=1, nsys 
-         do inode=1, nnf 
-         !wave height
-            et(inode,ip)=et_o(inode,ip)+tstep/6.0* &
-     &                       (dh(1,inode,ip)+2.0*dh(2,inode,ip)+ &
-     &               2.0*dh(3,inode,ip)+dh(4,inode,ip) ) 
-        !wave potential on surface 
-            bkn(inode,ip)=bkn_o(inode,ip)+tstep/6.0d0* &
-     &                    (dp(1,inode,ip)+2.0d0*dp(2,inode,ip)+ &
-     &                2.0d0*dp(3,inode,ip)+dp(4,inode,ip) ) 
- 
-       enddo 
-       enddo 
-       print *,"dh"
-       write(*,5001) dh(1:4,1,1)
-       write(*,5001) dh_comp(1:4)
-       print *,"dp"
-       write(*,5001) dp(1:4,1,1)
-       write(*,5001) dp_comp(1:4)
-       print *,"p"
-       write(*,5001) p2(1:4)
-       write(*,5001) p(1:4)
-       print *,"et"
-       write(*,5001) e2(1:4)
-       write(*,5001) e(1:4)
-       print *,"et=",et(1,1),eti(x1,y1)
-       print *,"bkn=",bkn(1,1),poxy(x1,y1,z1)
-       5001 format(4f14.8)
+        do ip=1, nsys 
+            do inode=1, nnf 
+                !wave height
+                et(inode,ip)=et_o(inode,ip)+tstep/6.0* &
+                    &                       (dh(1,inode,ip)+2.0*dh(2,inode,ip)+ &
+                    &               2.0*dh(3,inode,ip)+dh(4,inode,ip) ) 
+                !wave potential on surface 
+                bkn(inode,ip)=bkn_o(inode,ip)+tstep/6.0d0* &
+                    &                    (dp(1,inode,ip)+2.0d0*dp(2,inode,ip)+ &
+                    &                2.0d0*dp(3,inode,ip)+dp(4,inode,ip) ) 
+
+            enddo 
+        enddo 
+        !print *,"dh"
+        !write(*,5001) dh(1:4,1,1)
+        !write(*,5001) dh_comp(1:4)
+        !print *,"dp"
+        !write(*,5001) dp(1:4,1,1)
+        !write(*,5001) dp_comp(1:4)
+        !print *,"p"
+        !write(*,5001) p2(1:4)
+        !write(*,5001) p(1:4)
+        !print *,"et"
+        !write(*,5001) e2(1:4)
+        !write(*,5001) e(1:4)
+        !print *,"et=",et(1,1),eti(x1,y1)
+        !print *,"bkn=",bkn(1,1),poxy(x1,y1,z1)
+        5001 format(4f14.8)
 
         !if (itime.eq.endtime) then
         !write (4010,*) et
         !write (4011,*) bkn
         !end if
- 
- 
-          FORCE=FORCEW 
-          WRITE(21, 1010)  TIME, FORCE(1), FORCE(2), FORCE(3),& 
-                              &        FORCE(4), FORCE(5), FORCE(6) 
- 
-         DO 150 K=1, 6 
-        IF( DISP(K).GT. 1000.0d0) DISP(K)= 1000.0d0 
-        IF( DISP(K).LT.-1000.0d0) DISP(K)=-1000.0d0 
-150      CONTINUE 
- 
- 
-! 
-1010    FORMAT(F7.3,1x,7E12.4)  
-! 
-!C *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 
-! 
-10    FORMAT(1X,I6,2X,3(E16.9,3X)) 
-21    FORMAT(1X,5(F10.5,3X)) 
-22    FORMAT(1X,9(I7,2X)) 
-        RETURN 
-        END 
- 
-        !subroutine get_dp_cmp(inode, 
-                !use mvar_mod
-                
- 
-! 
-!  ========================================== 
-! 
-!   Implicit 4th order Runge Kutta Method 
-!  ========================================== 
-! 
+
+
+        FORCE=FORCEW 
+        WRITE(21, 1010)  TIME, FORCE(1), FORCE(2), FORCE(3),& 
+            &        FORCE(4), FORCE(5), FORCE(6) 
+
+        DO 150 K=1, 6 
+            IF( DISP(K).GT. 1000.0d0) DISP(K)= 1000.0d0 
+            IF( DISP(K).LT.-1000.0d0) DISP(K)=-1000.0d0 
+            150      CONTINUE 
+
+
+            ! 
+            1010    FORMAT(F7.3,1x,7E12.4)  
+            ! 
+            !C *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 
+            ! 
+            10    FORMAT(1X,I6,2X,3(E16.9,3X)) 
+            21    FORMAT(1X,5(F10.5,3X)) 
+            22    FORMAT(1X,9(I7,2X)) 
+            RETURN 
+            END 
+
+            !subroutine get_dp_cmp(inode, 
+            !use mvar_mod
+
+
+            ! 
+            !  ========================================== 
+            ! 
+            !   Implicit 4th order Runge Kutta Method 
+            !  ========================================== 
+            ! 
          SUBROUTINE iRunge_Kutta(N) 
          !USE MVAR_MOD 
          use data_all

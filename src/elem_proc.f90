@@ -26,8 +26,11 @@
 
         !< --------------execute part----------------->
         if (hi==1) then
+            ! gcombo0 is green function combination with mirrored src point for old BIE
             gpointer => gcombo0
+
         elseif (hi==2) then
+            ! gcombo1 is the green function combination with mirrored src point for new BIE
             gpointer => gcombo1
         end if
 
@@ -66,6 +69,7 @@
         bval=0.0d0
 
         nsamb=16
+        ! todo triangle case
         !if(ncne.eq.6)   nsamb=4
         prefix=(/ex(is),ey(is),1.0d0/)
         p0m = prefix*p0!(/xp,yp,zp/)

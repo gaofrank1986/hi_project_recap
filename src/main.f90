@@ -58,10 +58,11 @@ program hi_project
     !!! >>===========================================<<
 
     time=0.0d0
-    tstep=0.05
+    tstep=0.005
+    ntime=1000
     
-    do itime = 0,100
-        print *,itime,'/2000'
+    do itime = 0,ntime
+        call fstream%fout(fstream%toString(itime)//'/'//fstream%toString(ntime,'(i5)'))
         time = itime*tstep
         call time_intg_rk4
 

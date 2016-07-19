@@ -27,7 +27,7 @@
       real(8) bmat(nsys),cmat(nnoded,nsys)
       real(8) :: dpoxyz_save(2,4,nnoded)
 
-      print *,"Entering tassbt",timerk
+      !print *,"Entering tassbt",timerk
 
 
       ! establish nrml to node relationship
@@ -90,7 +90,7 @@
       do 40 inode=nnf+1, nnoded
           do 40 ip=1, nsys 
 
-              !FIXME inode is wrong|corrected
+              !fixme inode is wrong|corrected
               n2 = nrml_2_node(inode)
               xp=ex(ip)*xyz(1,n2)
               yp=ey(ip)*xyz(2,n2)
@@ -136,11 +136,11 @@
             bmata(ind,is)=dot_product(cmata(ind,:,is),cmat(:,is))
             ! .. cmat d\phi/dp   ... phi
             ! .. cmata
-            if (ind<=nnf) then!potential only
-                bmata(ind,is) = bmata(ind,is)-fterm(ind,is,1)*cmat(ind,is)&
-                    &-fterm(ind,is,2)*dpoxyz_save(1,is,ind) &
-                    &-fterm(ind,is,3)*dpoxyz_save(2,is,ind)
-            end if
+            !if (ind<=nnf) then!potential only
+                !bmata(ind,is) = bmata(ind,is)-fterm(ind,is,1)*cmat(ind,is)&
+                    !&-fterm(ind,is,2)*dpoxyz_save(1,is,ind) &
+                    !&-fterm(ind,is,3)*dpoxyz_save(2,is,ind)
+            !end if
             !---------------------------------------------------
         enddo;enddo 
 

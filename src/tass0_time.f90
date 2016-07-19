@@ -52,7 +52,8 @@
             call fstream%fout('Surface '//fstream%toString(inode))
 
             if (inode <= nnf) then
-                hi = 2
+                hi = 1
+                !hi = 2
             end if
 
             xp=xyz(1,inode)
@@ -65,10 +66,13 @@
 
             angle(inode)=1.0d0- s_angle
 
-            !cmata(inode,inode,1:nsys)= -1.0d0+s_angle!angle(inode)
-            !---up---for solid angle term in rhs
-
-            amata(inode,inode,1:nsys)= 1.0d0-s_angle!angle(inode)
+            if (hi.eq.1) then
+                ! old BIE, alpha goes to rhs matrix
+                cmata(inode,inode,1:nsys)= -1.0d0+s_angle!angle(inode)
+            else 
+                ! new BIE, alpha goes to lhs matrix
+                amata(inode,inode,1:nsys)= 1.0d0-s_angle!angle(inode)
+            end if
             !  ---------------------------
             !  Integration on the free surface
 
