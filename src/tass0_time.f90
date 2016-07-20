@@ -68,7 +68,7 @@
 
             if (hi.eq.1) then
                 ! old BIE, alpha goes to rhs matrix
-                cmata(inode,inode,1:nsys)= -1.0d0+s_angle!angle(inode)
+                cmata(inode,inode,1:nsys)= -1.0d0+s_angle!-angle(inode)
             else 
                 ! new BIE, alpha goes to lhs matrix
                 amata(inode,inode,1:nsys)= 1.0d0-s_angle!angle(inode)
@@ -213,6 +213,7 @@
         !end do
 
         call fstream%fout('Begin inversing LHS matrix............')
+        stop
         do ip=1, nsys
             call rludcmp(ip,amata,nnode,nnode,nsys,indx,dsign)  
         enddo

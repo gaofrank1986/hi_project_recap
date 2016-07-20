@@ -106,7 +106,7 @@ contains
         !&         DSAMB(NELEM,16,6))
 
 
-        call MESHFS4_2(0)! Read in data on free surface mesh
+        call MESHFS4_2(1)! Read in data on free surface mesh
         call MESHBD_2(IPOL) ! Read in data on body mesh
 
         close(2)
