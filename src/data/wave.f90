@@ -1,15 +1,22 @@
 module wave
     implicit none
 
+    ! @var [wk] : wave number
+    ! @var [h]  : water depth
+    ! @var [beta] : incident wave angle
+    ! @var [amp] : wave amplitude
+    ! @var [w1]  : wave frequency
+    ! @var [tper] : wave period
+    ! @var [v] : wave number deep water ??
+    ! @var [wl] : wave length ?
+
     real(8),protected :: wk,h,beta,amp
     real(8),protected :: w1,tper,v,wl 
     real(8),parameter :: g = 9.807
     real(8),parameter :: rho = 1.023e3
     real(8),parameter :: pi = 3.14159265359 
     real(8) :: timerk,rampf
-    !w1 => angular freq
     !v => wav num deep water
-    !wk =>wave num
 contains
 
     subroutine read_wav_data()

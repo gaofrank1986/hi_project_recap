@@ -19,6 +19,7 @@ module motion
     real*8 trmas(6,6),visc(6,6)
 
     real*8  disp(6),dsdt(6),disp_o(6)!displacement,velocity,disp at initial time
+
     real(8) ::  dsdt_o(6),dsddtl(6),trxyz(3,3)   
 
     real*8  respr(6),respi(6)  
@@ -26,11 +27,11 @@ module motion
     !      yc = 2
     !      zc = 3
 contains
-    !subroutine init_motion_var(nnf,nnode,nnrml)
-        !integer,intent(in) :: nnf,nnode,nnrml
-    !end subroutine
+    subroutine init_motion_var(nnf,nnode,nnrml)
+        integer,intent(in) :: nnf,nnode,nnrml
 
+        ! pass
 
-
+    end subroutine
 end module
 
