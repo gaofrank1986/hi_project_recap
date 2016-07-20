@@ -62,8 +62,8 @@ program hi_project
     !!! >>===========================================<<
 
     time=0.0d0
-    tstep=0.005
-    ntime=1000
+    tstep=0.05
+    ntime=100
     
     do itime = 0,ntime
         call fstream%fout(fstream%toString(itime)//'/'//fstream%toString(ntime,'(i5)'))
