@@ -1,16 +1,40 @@
+!!-------------------------------------------------------------------------------
+! DUTWAV
+!-------------------------------------------------------------------------------
+!  MODULE: mesh
+!
+!> @brief
+!! 
+!!
+!! @author
+!! DUT 
+!!
+!! @date
+!! 07 Nov 2013
+!! 
+!! @note <A note here.>
+!! <Or starting here...>
+!
+! REVISION HISTORY:
+!
+! 7.20.2016 : add read damp info  
+!
+!------------------------------------------------------------------------------- 
 module mesh
+
     use wave 
+
     implicit none
-    
-    real(8),private,allocatable :: XYZB(:,:),DXYZB(:,:)
-    !xyzb => (3,node_id)  node data 
-    !dxyzb => (3,nrml_id) derivative data
-    integer,private,allocatable :: NCONB(:,:),NCONDB(:,:)   
+    ! @var : [xyzb] store body node with dimension(3,node_id) 
+    ! @var : [dxyzb] store body nrml with dimension (3,nrml_id)
+    real(8),private,allocatable :: xyzb(:,:),dxyzb(:,:)
+
+    integer,private,allocatable :: nconb(:,:),ncondb(:,:)   
     ! nconb => node list body mesh
     ! ncondb => normal list body
     real(8),protected,allocatable :: XYZE(:,:,:),DXYZE(:,:,:),TXYZE(:,:,:)
-    ! xyze =>  before combine, new full mesh for node (3,8,elem_id)
-    ! dxyze => before combine, new full mesh for normal (3,8,elem,id)
+    ! @var : [xyze]  before combine, new full mesh for node (3,8,elem_id)
+    ! @var : [dxyze] before combine, new full mesh for normal (3,8,elem,id)
     real(8),private,allocatable :: XYZTP(:,:),DXYZTP(:,:)
     ! xyztp => convsb, combined node mesh, xyztp(3,node_id)
     ! dxyztp = > combined normal mesh, dxyztp(3,nrml_id)
@@ -49,9 +73,9 @@ contains
       !REAL*8  PL_AMP(6),FORAMP
       !REAL*8  FCD_AMR,  FCD_AMI
     
-        OPEN(2, FILE='INPUT/DATBDMS.txt',    STATUS='OLD') 
-        OPEN(3, FILE='INPUT/DATWPMS.txt',    STATUS='OLD')
-        OPEN(11, FILE='output/outmesh.txt',    STATUS='UNKNOWN')
+        open(2, FILE='INPUT/DATBDMS.txt',    status='old') 
+        open(3, FILE='INPUT/DATWPMS.txt',    status='old')
+        open(11, FILE='output/outmesh.txt',    status='unknown')
 
         !==================body mesh================================
         READ(2,*)   ISYS 
@@ -68,23 +92,21 @@ contains
 
         NELEM=NELEMB+NELEMF
 
-        ALLOCATE (NCONB(NELEMB,8),NCONDB(NELEMB,8))!body node/normal list
-        ALLOCATE (XYZB(3,NNB),DXYZB(3,NNBD))    !body node/normal
-        
+        allocate (nconb(nelemb,8),ncondb(nelemb,8))!body node/normal list
+        allocate (xyzb(3,nnb),dxyzb(3,nnbd))    !body node/normal
+        allocate(ncn(nelem),ncon(nelem,8),ncond(nelem,8),ietype(nelem))
 
-        ALLOCATE(NCN(NELEM),NCON(NELEM,8),NCOND(NELEM,8),IETYPE(NELEM))
-    
-        allocate(NNORMN(8*NELEM) )
+        allocate(nnormn(8*nelem) )
 
-        ALLOCATE( XYZE(3,8,NELEM),DXYZE(3,8,NELEM))
-        ALLOCATE( TXYZE(3,8,NELEM))
+        allocate( xyze(3,8,nelem),dxyze(3,8,nelem))
+        allocate( txyze(3,8,nelem))
         allocate(xyztp(3,8*nelem),dxyztp(3,8*nelem))
         allocate(dampe(8,nelem),damptp(8*nelem))
         !ALLOCATE(SAMB(NELEM,16,0:8),SAMBXY(NELEM,16,3),
         !&         DSAMB(NELEM,16,6))
 
 
-        call MESHFS4_2()! Read in data on free surface mesh
+        call MESHFS4_2(0)! Read in data on free surface mesh
         call MESHBD_2(IPOL) ! Read in data on body mesh
 
         close(2)
@@ -148,31 +170,38 @@ subroutine pre_mesh_2()
 !C *                                                                 *
 !C *******************************************************************
 !C 
-    subroutine meshfs4_2()
+    ! @func : read in data file of free surface mesh
+    ! @param: [flag] 0 if no damping info, 1 if damp info presents
+
+    subroutine meshfs4_2(flag)
 
         implicit none
 
-        integer :: IE,J,M
-        
+        integer :: IE,J,M,flag
+
         XYZE(3,1:8, 1:NELEMF)=0.0d0
-        
+
         DO 100 IE=1, NELEMF
             IETYPE(IE)=2
             READ(3, *)    M, NCN(IE)
             READ(3, *) (XYZE(1,J,IE), J=1, NCN(IE))
             READ(3, *) (XYZE(2,J,IE), J=1, NCN(IE))
+        if (flag.eq.0) then
+            dampe(:,:)=0.0d0
+        else if(flag.eq.1) then
+            read(3, *) (dampe(j,ie), j=1, ncn(ie))
+        end if
 
-      dampe(:,:)=0.0d0
 
-100    CONTINUE
+        100    CONTINUE
         ! in dat file ,positive nrml is set as pointing into fulid field
-      DXYZE(1, 1:8, 1:NELEMF)= 0.0d0
-      DXYZE(2, 1:8, 1:NELEMF)= 0.0d0
-      DXYZE(3, 1:8, 1:NELEMF)= 1.0d0 
-!     DXYZE(3, 1:8, 1:NELEMF)=-1.0d0 
+        DXYZE(1, 1:8, 1:NELEMF)= 0.0d0
+        DXYZE(2, 1:8, 1:NELEMF)= 0.0d0
+        DXYZE(3, 1:8, 1:NELEMF)= 1.0d0 
+        !     DXYZE(3, 1:8, 1:NELEMF)=-1.0d0 
 
-      RETURN
-      END
+
+    end subroutine
 
 !C ***************************************************************
 !C *                                                             *
