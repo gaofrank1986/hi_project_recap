@@ -10,6 +10,8 @@ program hi_project
 
     implicit  none  
     type(Ostream) :: fstream
+    character(len=1024) :: filename
+    
 
     integer :: inode
     real(8) :: xp,yp,zp
@@ -30,10 +32,12 @@ program hi_project
 
     !print *,xc,yc,zc
     call read_mesh()
+
     call fstream%fout('Finished reading mesh info')
     call fstream%fout('Total Surface Node Number:'//fstream%toString(nnf))
     call fstream%fout('Total Normal  Node Number:'//fstream%toString(nnoded))
     call fstream%fout('Total         Node Number:'//fstream%toString(nnode))
+
     call topology_analysis()
 !  --------------------------------------------
     call init_ft(nsys,nnf) 
@@ -75,7 +79,10 @@ program hi_project
             zp = xyz(3,inode)
 
             !//output all surface nodes for potential and wave elevation
+            !write (filename, "(A5,I4)") "phi",itime
             write(7000+itime,1202) inode,bkn(inode,1),poxy(xp,yp,zp)
+            !write(filename,1202) inode,bkn(inode,1),poxy(xp,yp,zp)
+            !write (filename, "(A5,I4)") "phi",itime
             write(8000+itime,1202) inode,et(inode,1),eti(xp,yp)
             !write(9000+itime,1202) bkn(inode,1),poxy(xp,yp,zp)
         end do
