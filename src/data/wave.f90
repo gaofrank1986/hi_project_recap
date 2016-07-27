@@ -24,12 +24,11 @@ contains
         implicit none
 
         integer :: ifwko
-        !        real(8) :: wl
 
-        OPEN(1, FILE='INPUT/DATIN.txt',      STATUS='OLD') 
+        open(1, file='INPUT/DATIN.txt', status='old') 
 
-        READ(1,*)      IFWKO
-        READ(1,*)      H, AMP, WK, BETA
+        read(1,*)      ifwko
+        read(1,*)      h, amp, wk, beta
 
         if (ifwko.eq.0) then
             if (h .le. 0.0d0) then
@@ -72,7 +71,7 @@ contains
         close(1)
     end subroutine 
 
-    ! < compute wk according to ?
+    ! @func : compute wk according to ?
     subroutine waveck(sigma,h,wk)
         implicit  none
 

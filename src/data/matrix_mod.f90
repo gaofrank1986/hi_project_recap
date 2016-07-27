@@ -1,11 +1,16 @@
 module matrix_mod
     use kinds
     implicit none
-    integer, allocatable :: indx(:,:)
+    ! @var : [amata] lhs matrix in Ax = B
+    ! @var : [bmata] rhs matrix in Ax = B
+    ! @var : [cmata] used for generating bmata
     real(rk),allocatable :: amata(:,:,:),bmata(:,:)
     real(rk),allocatable :: cmata(:,:,:)
+    ! @var : [indx] store pivot info in LU decomposision
+    integer, allocatable :: indx(:,:)
+    !
+    !
     !real(rk),allocatable ::  lhs(:,:,:),rhs(:,:),rhs_c(:,:,:)
-    ! new name lhs,rhs,rhs constructor
 contains
    subroutine init_matrix_var(nsys,nnode,nnrml)
        implicit none
