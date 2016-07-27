@@ -22,9 +22,13 @@ contains
         implicit none
         integer,intent(in) :: nnf,nnode,nnrml,nsys
 
+        if (allocated(unkn)) dellocate(unkn,unkn_o)
+        if (allocated(bkn)) dellocate(bkn,bkn_o,et,et_o,dpdt,dh,dp,dposi)
+
         allocate(unkn(nnode,nsys),unkn_o(nnode,nsys))
         allocate(bkn(nnrml,nsys),bkn_o(nnrml,nsys),&
             &    et(nnf,nsys),et_o(nnf,nsys), dpdt(nnode,nsys))
+
         allocate(dh(4,nnf,nsys),dp(4,nnf,nsys),dposi(0:4,6))
         !allocate(dh(4,nnf,nsys),dp(4,nnf,nsys),dposi(4,6))
         unkn=0.
