@@ -318,14 +318,18 @@
 
         call e%mapped%get_std()
         e%ck=cnr_glb_mtx
-        e%nk=passed_nrml
-        !call e%get_nk()
-!        call mat%init(e%ck)
+        call mat%init(e%ck)
         !call mat%pprint("e%ck")
-        !call mat%init(e%nk)
-        !call mat%pprint("e%nk")
+        e%nk=passed_nrml
+        call mat%init(e%nk)
+        !call mat%pprint("e%nk assinged")
+        call e%get_nk()
+
+        call mat%init(e%nk)
+        !call mat%pprint("e%nk calced")
         tol=1.e-8
-        call singular_elem(e,pm,tol,3,nodj,result0)
+        print *,nodj,"=>",indx(nodj)
+        call singular_elem(e,pm,tol,3,indx(nodj),result0)
         result0 = swap_g2t(result0)
         write (6,'(2i5,8f10.5)') ielem,nodj,result0
 
@@ -336,24 +340,23 @@
         !write(9013,'(2i6,8f12.6)') ielem,nodj,amatrix(is,:)
 
         !< note p03 is used here
-       ! call preset_src(si,eta,p0m,origin_offset)
-        !call eval_singular_elem(cnr_glb_mtx,passed_nrml,result0,result1,result2)
-        !write (6,'(2i5,8f10.5)') ielem,nodj,result0
-        !result0=0.0d0
+        call preset_src(si,eta,p0m,origin_offset)
+        call eval_singular_elem(cnr_glb_mtx,passed_nrml,result0,result1,result2)
+        write (6,'(2i5,8f10.5)') ielem,nodj,result0
+        result0=0.0d0
 
-        call sgbd0_1(is,ielem,nodj,p0,result1,result2)
+        call sgbd0_1(e,is,ielem,nodj,p0,result1,result2)
 
         ! omitted since 0 on free surface
         !call sing_int0(is,ielem,nodj,p0,result1,result0)
         write (6,'(2i5,8f10.5)') ielem,nodj,result2
 
-        stop
         if (any(abs(result2-result0) > 0.50d0)) then
 
       !  write (*,'(2i5,8f10.5)') ielem,nodj,result2
         !write (*,'(2i5,8f10.5)') ielem,nodj,result0
         !!write (*,'(2i5,8f10.5)') ielem,nodj,result2-result0
-        !print *,"========="
+        print *,"========="
     end if
 
 
@@ -364,7 +367,7 @@
         aval(:) = aval+result0 !< elemental plus
         bval(:) = bval+result1 !< elemental plus
             
-        write(9010,'(2i6,8f12.6)') ielem,nodj,result2
+        !write(9010,'(2i6,8f12.6)') ielem,nodj,result2
 
 
     end subroutine 
