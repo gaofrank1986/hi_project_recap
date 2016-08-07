@@ -63,7 +63,7 @@
             do i =1,8
                 xxx(1:3,i) = xyz(1:3,ncon(ielem,i))
                 xxd(1:3,i) = dxyz(1:3,ncond(ielem,i))
-                print '(3f10.5)',xxd(1:3,i)
+                !print '(3f10.5)',xxd(1:3,i)
             end do
 
         endif
@@ -108,7 +108,7 @@
                 do  j=1, ncn(ielem)
                     n01=[sf0(j),dsf0(1,j),dsf0(2,j)]
                     call comp_coef(theta,xj,xxj,jk01,n01,f1,f2,param)
-                    print '(2f10.5)',f1,f2
+                    !print '(2f10.5)',f1,f2
 
                     f=f2/plo/plo+f1/plo                       ! (c19)
 
@@ -259,16 +259,16 @@
        real(8) :: a(3),b(3),ast,bst,as_3,as_2,g31,b30,a30,b31,a31
 
        !theta=[csst,snst]
-       print '(2f10.5)',theta
-       print '(3f10.5)',xj(1,:)
-       print '(3f10.5)',xj(2,:)
-       print '(3f10.5)',xxj(1,:)
-       print '(3f10.5)',xxj(2,:)
-       print '(3f10.5)',xxj(3,:)
-       print '(3f10.5)',n0(:)
-       print '(3f10.5)',jk0(1,:)
-       print '(3f10.5)',jk0(2,:)
-       print '(3f10.5)',jk0(3,:)
+!       print '(2f10.5)',theta
+       !print '(3f10.5)',xj(1,:)
+       !print '(3f10.5)',xj(2,:)
+       !print '(3f10.5)',xxj(1,:)
+       !print '(3f10.5)',xxj(2,:)
+       !print '(3f10.5)',xxj(3,:)
+       !print '(3f10.5)',n0(:)
+       !print '(3f10.5)',jk0(1,:)
+       !print '(3f10.5)',jk0(2,:)
+       !print '(3f10.5)',jk0(3,:)
 
        !jk1(1:3) = jk0(2,1:3)*csst+jk0(3,1:3)*snst
        jk1(1:3) = matmul(theta,jk0(2:3,:))
@@ -284,9 +284,9 @@
        ast=norm2(a)
        bst=norm2(b)
 
-       print '(3f15.5)',a
-       print '(3f15.5)',b
-       print '(2f15.5)',bst,ast
+!       print '(3f15.5)',a
+       !print '(3f15.5)',b
+       !print '(2f15.5)',bst,ast
 
        as_3=1.0d0/ast**3
        as_2=-3.0d0*(dot_product(a,b))/ast**5
@@ -307,6 +307,6 @@
 
        param(1) = -dot_product(a,b)/ast**4
        param(2) = 1.0d0/ast
-       stop
+       !stop
 
    end subroutine

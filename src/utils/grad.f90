@@ -25,15 +25,20 @@ module gradient
     use linalg,only: inverse
     use shape_funcs,only:spfunc8
     implicit none
+    ! @var : [param_pos] local node position of a rectangle
     real(rk),parameter :: param_pos(8,2) = &
         reshape((/-1. , 0. , 1. ,1. ,1. ,0. ,-1. ,-1. ,&
                   -1. ,-1. ,-1. ,0. ,1. ,1. , 1. , 0. /),(/8,2/))
+    ! @var : [sf_infp
     real(rk),allocatable,save :: sf_info(:,:,:),jacob_info(:,:,:)
 
 contains
 
     ! @param nodele:connected elem
     ! @param nodelj:node is jth node in connected elem
+    ! @param : [xyze(2,8,nnf)] x,y info for each node of each elem
+    ! @param : [nodele] first connected elem
+    ! @param : [nodej] first connected node position in elem
 
     subroutine init_gradient(nnf,nelemf,xyze,nodele,nodelj,debug)
         integer,intent(in) :: nnf,nelemf,nodele(nnf),nodelj(nnf)
@@ -45,11 +50,14 @@ contains
         integer :: i
         allocate(sf_info(nnf,3,8),jacob_info(nnf,2,2))
         do i = 1,nnf
+            ! get local pos
             xi= param_pos(nodelj(i),:)
+            ! get global pos
             p_xy = xyze(1:2,1:8,nodele(i))
+            ! get shape func and first deriv of shape func
             call spfunc8(xi(1),xi(2),sf,dsf)
             !nodelj is the pos of node i in the element
-            !get its local shape func and deriv of shape func
+
             !record the info in sf_info
             sf_info(i,1,:) = sf
             sf_info(i,2:3,:) = dsf

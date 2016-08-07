@@ -24,6 +24,8 @@ module free_term
      real(8),allocatable,public,save :: fterm(:,:,:)
      integer,private,save :: nsys,nnf
 contains
+
+     ! @param : [a,b] nsys,nnf
      subroutine init_ft(a,b)
           integer,intent(in) :: a,b
           nsys = a
@@ -33,6 +35,7 @@ contains
      end subroutine
 
      subroutine get_free_term()
+         ! @ var fterm[1:nnf,1:nsys,1:4]
           implicit none
           integer :: m,i,j,k
           real(8)::tmp

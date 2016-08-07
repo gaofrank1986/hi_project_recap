@@ -242,17 +242,24 @@
     ! @params p0 input src point
     subroutine sing_int1(is,ielem,nodj,p0,aval,bval) 
 
-        use mesh,only:ncon,ncond,xyz,dxyz,ncn
+        use mesh,only:ncon,ncond,ncn,xyze,dxyze,xyz,dxyz
 
         use hi_intg
+        use hs_intg
+        use Matrix_wrapper_mod
         use green_funcs,only:Gcombo1_2
         use proj_cnst,only: ex,ey,xiqsi,xiqet
 
         implicit none
 
         integer:: is,ielem,nodj
-        real(8):: p0(3)
+        real(8):: p0(3),tol
         real(8),intent(out):: bval(8),aval(8)
+
+        type(HSElem) :: e
+        type(HSParams) :: pm
+
+        type(Matrix2D) :: mat
 
         integer ::inode,inodd
         
@@ -302,27 +309,25 @@
         origin_offset(:) = (/0,0,0/)
 
         !========switch cnr_glb_mtx order for hi module
-        cnr_glb_mtx(:,1) = xyz(:,ncon(ielem,1))
-        cnr_glb_mtx(:,2) = xyz(:,ncon(ielem,3))
-        cnr_glb_mtx(:,3) = xyz(:,ncon(ielem,5))
-        cnr_glb_mtx(:,4) = xyz(:,ncon(ielem,7))
-        cnr_glb_mtx(:,5) = xyz(:,ncon(ielem,2))
-        cnr_glb_mtx(:,6) = xyz(:,ncon(ielem,4))
-        cnr_glb_mtx(:,7) = xyz(:,ncon(ielem,6))
-        cnr_glb_mtx(:,8) = xyz(:,ncon(ielem,8))
-        !cnr_glb_mtx(:,8) = matmul(xyze(:,1:8,ielem),trf)
-        !passed_nrml(:,8) = matmul(dxyze(:,1:8,ielem),trf)
 
-      
-        passed_nrml(:,1) = dxyz(:,ncond(ielem,1))
-        passed_nrml(:,2) = dxyz(:,ncond(ielem,3))
-        passed_nrml(:,3) = dxyz(:,ncond(ielem,5))
-        passed_nrml(:,4) = dxyz(:,ncond(ielem,7))
-        passed_nrml(:,5) = dxyz(:,ncond(ielem,2))
-        passed_nrml(:,6) = dxyz(:,ncond(ielem,4))
-        passed_nrml(:,7) = dxyz(:,ncond(ielem,6))
-        passed_nrml(:,8) = dxyz(:,ncond(ielem,8))
+        cnr_glb_mtx(1:3,:) = swap_t2g(xyze(:,1:8,ielem))
+        passed_nrml = swap_t2g(dxyze(:,1:8,ielem))
 
+        pm%beta = 3.0d0
+        call pm%init_mat()
+
+        call e%mapped%get_std()
+        e%ck=cnr_glb_mtx
+        e%nk=passed_nrml
+        !call e%get_nk()
+!        call mat%init(e%ck)
+        !call mat%pprint("e%ck")
+        !call mat%init(e%nk)
+        !call mat%pprint("e%nk")
+        tol=1.e-8
+        call singular_elem(e,pm,tol,3,nodj,result0)
+        result0 = swap_g2t(result0)
+        write (6,'(2i5,8f10.5)') ielem,nodj,result0
 
         ! add mirrored sink
         ! Gcombo1_2 is the mirrored sink part only
@@ -331,17 +336,18 @@
         !write(9013,'(2i6,8f12.6)') ielem,nodj,amatrix(is,:)
 
         !< note p03 is used here
-        call preset_src(si,eta,p0m,origin_offset)
-        call eval_singular_elem(cnr_glb_mtx,passed_nrml,result0,result1,result2)
-        !write (*,'(2i5,8f10.5)') ielem,nodj,result0
+       ! call preset_src(si,eta,p0m,origin_offset)
+        !call eval_singular_elem(cnr_glb_mtx,passed_nrml,result0,result1,result2)
+        !write (6,'(2i5,8f10.5)') ielem,nodj,result0
         !result0=0.0d0
 
-        !call SGBD0_1(is,ielem,nodj,p0,result1,result2)
+        call sgbd0_1(is,ielem,nodj,p0,result1,result2)
 
         ! omitted since 0 on free surface
         !call sing_int0(is,ielem,nodj,p0,result1,result0)
-        !write (*,'(2i5,8f10.5)') ielem,nodj,result0
+        write (6,'(2i5,8f10.5)') ielem,nodj,result2
 
+        stop
         if (any(abs(result2-result0) > 0.50d0)) then
 
       !  write (*,'(2i5,8f10.5)') ielem,nodj,result2

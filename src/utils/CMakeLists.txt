@@ -6,7 +6,8 @@ add_library(utils SHARED gaussian.f90 free_term.f90 grad.f90 tsing1f.f90 tripole
 #add_executable(testf test.f90)
 
 ADD_SUBDIRECTORY(./hi_intgl)
+ADD_SUBDIRECTORY(./hi2)
 
-target_link_libraries(utils func const hi_mod)
+target_link_libraries(utils func const hi_mod hi2_mod)
 #set_target_properties(hello PROPERTIES OUTPUT_NAME "hello")
 
