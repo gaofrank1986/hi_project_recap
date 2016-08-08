@@ -5,28 +5,32 @@
     ! *                                                           *
     ! *************************************************************
     !
-    subroutine sgbd0_1(is,ielem,nodn,p0,valg,valdg) 
+    subroutine sgbd0_1(e,is,ielem,nodn,p0,valg,valdg) 
         use kinds
-        use mesh,only:xyz,dxyz,ncn,ncon,ncond
+        use param_mod
+        !use mesh,only:xyz,dxyz,ncn,ncon,ncond
         use shape_funcs
         use proj_cnst,only:ex,ey,xiqet,xiqsi
         use linalg,only:cross_product
         use green_funcs,only:gcombo1_1
+        use util_funcs
+        use gaussm3
 
         implicit none
 
         integer,intent(in)      ::  is,ielem,nodn   
         real(rk),intent(in)     ::  p0(3) 
+        type(HSElem) :: e
         real(rk),intent(out)    ::  valg(8),valdg(8)
 
         integer loop1,loop2,nsamb
-        integer i,j
+        integer i,j,ngp
 
         real(rk)  sf0(8),dsf0(2,8),ddsf0(3,8) 
         real(rk)  sf(8),dsf(2,8)
         real(rk)  xj(2,3),xjp(2,3),xxj(3,3)
 
-        real(rk) :: det,ans
+        real(rk) :: det,ans,det2
         real(rk)  xxx(3,8),xxd(3,8)
         real(rk) ::xi0(2),p(3),np(3),xi(2)
         real(rk)  tot(8),totf(8)
@@ -37,16 +41,17 @@
         !< --- parameter
         real(rk)  xitsi(6),xitet(6)
         real(rk)  xiq(8),wiq(8),xit(7),wit(7)
+        real(rk),allocatable :: gw(:),gp(:)
 
-        data xiq/ 0.960289856497536d+00, 0.796666477413626d+00, &
-            0.525532409916329d+00, 0.183434642495650d+00, &
-            -0.183434642495650d+00,-0.525532409916329d+00, &
-            -0.796666477413626d+00,-0.960289856497536d+00/
+!        data xiq/ 0.960289856497536d+00, 0.796666477413626d+00, &
+            !0.525532409916329d+00, 0.183434642495650d+00, &
+            !-0.183434642495650d+00,-0.525532409916329d+00, &
+            !-0.796666477413626d+00,-0.960289856497536d+00/
 
-        data wiq/ 0.101228536290376d+00, 0.222381034453374d+00, &
-            0.313706645877887d+00, 0.362683783378362d+00, &
-            0.362683783378362d+00, 0.313706645877887d+00, &
-            0.222381034453374d+00, 0.101228536290376d+00/     
+        !data wiq/ 0.101228536290376d+00, 0.222381034453374d+00, &
+            !0.313706645877887d+00, 0.362683783378362d+00, &
+            !0.362683783378362d+00, 0.313706645877887d+00, &
+            !0.222381034453374d+00, 0.101228536290376d+00/     
 
         !<---------------------------------------------------
 
@@ -54,18 +59,16 @@
         valdg=0.0d0
         tot=0.0d0
         totf=0.0d0
+        call gauleg(8,xiq,wiq)
 
-        if(ncn(ielem).eq.8)  then 
+        if(8.eq.8)  then 
+        !if(ncn(ielem).eq.8)  then 
 
             xi0=[xiqsi(nodn),xiqet(nodn)]
+            xi0=e%mapped%nodes(indx(nodn))%getArray()
             call spfunc8_1(xi0(1),xi0(2),sf0,dsf0,ddsf0) 
-
-            do i =1,8
-                xxx(1:3,i) = xyz(1:3,ncon(ielem,i))
-                xxd(1:3,i) = dxyz(1:3,ncond(ielem,i))
-                !print '(3f10.5)',xxd(1:3,i)
-            end do
-
+            xxx(1:3,1:8) = swap_g2t(e%ck)
+            xxd(1:3,1:8) = swap_g2t(e%nk)
         endif
 
         !< shape func 1st,2nd order derivatives at xi0
@@ -77,17 +80,19 @@
         jk01(3,:) = cross_product(xxj(3,:),xj(2,:))+cross_product(xj(1,:),xxj(2,:))
 
         !< line integral part
-        do  j=1, ncn(ielem)
+        do  j=1, 8!ncn(ielem)
             n01=[sf0(j),dsf0(1,j),dsf0(2,j)]
-            call cirbod_2(nodn,ncn(ielem),xi0,jk01,n01,xj,xxj,ans)
+            call cirbod_2(nodn,8,xi0,jk01,n01,xj,xxj,ans)
+            !call cirbod_2(nodn,ncn(ielem),xi0,jk01,n01,xj,xxj,ans)
             valdg(j) = ans
         enddo
         
-
+        ngp=8
         !< area integral part
         nsamb=0
-        if(ncn(ielem).eq.8)  then 
-            do  loop1=1, 8 ;do  loop2=1, 8      
+        !if(ncn(ielem).eq.8)  then 
+        if(8.eq.8)  then 
+            do  loop1=1, ngp ;do  loop2=1, ngp      
                 nsamb=nsamb+1  
 
                 xi=[xiq(loop1),xiq(loop2)]
@@ -104,8 +109,10 @@
 
                 xjp(1:2,1:3)=matmul(dsf,transpose(xxx))
                 det =norm2(cross_product(xjp(1,:),xjp(2,:)))
+                !det2 = get_jcb_det(transpose(xjp))
+                !print *,det,det2
 
-                do  j=1, ncn(ielem)
+                do  j=1,8! ncn(ielem)
                     n01=[sf0(j),dsf0(1,j),dsf0(2,j)]
                     call comp_coef(theta,xj,xxj,jk01,n01,f1,f2,param)
                     !print '(2f10.5)',f1,f2
@@ -123,9 +130,9 @@
             enddo; enddo
             ! fixme add vs to compensate sign flip
             vs=sign(1.0d0,totf(nodn)*tot(nodn))
-            write (*,'(a10,8f10.5)') "line part",valdg(:)
-            write (*,'(a10,8f10.5)') "tot part",tot(:)
-            write (*,'(a10,8f10.5)') "totf part",totf(:)
+!            write (*,'(a10,8f10.5)') "line part",valdg(:)
+            !write (*,'(a10,8f10.5)') "tot part",tot(:)
+            !write (*,'(a10,8f10.5)') "totf part",totf(:)
 
             valdg=vs*valdg+totf-vs*tot
 
@@ -133,7 +140,102 @@
 
    end subroutine
 
-   !
+   subroutine part_0(nodn,ncne,xi0,jk01,n01,xj,xxj,ans)
+       use kinds
+       use gaussm3
+       use util_funcs
+       use green_funcs,only:gcombo1_1
+       implicit none 
+
+       integer nodn,i,ncne,ngp,j
+
+       real(rk) xl,xm,yl,ym
+       real(rk) plo,ans,r_ans,r
+       real(rk) f1,f2       
+       real(rk) xi(2),xi0(2),theta(2),xj(2,3),xxj(3,3),the
+       real(rk) :: jk01(3,3),n01(3),param(2),rng(2)
+       real(rk) :: pi=4*atan(1.0d0)
+       real(rk),allocatable :: gw(:),gp(:)
+       !    
+
+
+       ans=0.0d0
+
+       ! todo can be changed to any node
+       rng=get_range_t(nodn)
+
+       ngp=10
+       allocate(gp(ngp),gw(ngp))
+       call gauleg(ngp,gp,gw)
+
+       xl=(rng(2)-rng(1))/2
+       xm=(rng(1)+rng(2))/2
+
+       do i = 1,ngp
+           the =xm+ gp(i)*xl
+           xi=intersect_unit_square(refmt(the))
+           plo=norm2(xi-xi0)
+           theta = (xi-xi0)/plo
+           call comp_coef(theta,xj,xxj,jk01,n01,f1,f2,param)
+
+           r_ans=0.0d0
+           do j=1,ngp
+               yl=plo/2
+               ym=plo/2
+               r=ym+gp(j)*yl
+               r_ans=r_ans+(f2/r**2+f1/r)*gw(j)
+               r_ans=r_ans*yl
+           end do
+           ans=ans+r_ans*gw(i)
+       end do
+       ans=ans*xl
+
+
+   end subroutine
+
+   subroutine cirbod_1(nodn,ncne,xi0,jk01,n01,xj,xxj,ans)
+       use kinds
+       use gaussm3
+       use util_funcs
+       implicit none 
+
+       integer newnum,nodn,in,i,ncne,ngp
+       integer new6(6),new8(8)
+
+       real(rk) xl,xm
+       real(rk) plo,ans
+       real(rk) f1,f2       
+       real(rk) xi(2),xi0(2),theta(2),xj(2,3),xxj(3,3),the
+       real(rk) :: jk01(3,3),n01(3),param(2),rng(2)
+       real(rk) :: pi=4*atan(1.0d0)
+       real(rk),allocatable :: gw(:),gp(:)
+       !    
+
+
+       ans=0.0d0
+
+       rng=get_range_t(nodn)
+
+       ngp=10
+       allocate(gp(ngp),gw(ngp))
+       call gauleg(ngp,gp,gw)
+       xl=(rng(2)-rng(1))/2
+       xm=(rng(1)+rng(2))/2
+
+       do i = 1,ngp
+           the =xm+ gp(i)*xl
+           xi=intersect_unit_square(refmt(the))
+           plo=norm2(xi-xi0)
+           theta = (xi-xi0)/plo
+           call comp_coef(theta,xj,xxj,jk01,n01,f1,f2,param)
+
+           ans=ans-f2*(param(1)/param(2)**2+1.0/plo)*gw(i)
+           ans=ans+f1*dlog(plo/param(2))*gw(i) 
+       end do
+
+
+   end subroutine
+
    !C
    !C **************************************************************
    !C *                                                            *
@@ -146,17 +248,21 @@
    !C
    subroutine cirbod_2(nodn,ncne,xi0,jk01,n01,xj,xxj,ans)
        use kinds
+       use gaussm3
+       use util_funcs
        implicit none 
 
-       integer newnum,nodn,in,i,ncne
+       integer newnum,nodn,in,i,ncne,ngp
        integer new6(6),new8(8)
 
        real(rk) xiqsi(32),xiqet(32),wiq1(17),wiq2(25)
-       real(rk) xitsi(24),xitet(24),wit1(9),wit2(17)
+       real(rk) xitsi(24),xitet(24),wit1(9),wit2(17),xl,xm
        real(rk) plo,ans
        real(rk) f1,f2       
-       real(rk) xi(2),xi0(2),theta(2),xj(2,3),xxj(3,3)
+       real(rk) xi(2),xi0(2),theta(2),xj(2,3),xxj(3,3),the
        real(rk) jk01(3,3),n01(3),param(2)
+       real(rk) :: pi=4*atan(1.0d0)
+       real(rk),allocatable :: gw(:),gp(:)
        !    
        ! ** sampling points and weighting factors for quadrilateral element
        !
@@ -211,6 +317,23 @@
        if (ncne .eq. 8) then 
            newnum=new8(nodn) 
            select case(nodn)
+           case(9)
+               ngp=10
+               allocate(gp(ngp),gw(ngp))
+               call gauleg(ngp,gp,gw)
+               xl=(pi/2-0)/2
+               xm=(0+pi/2)/2
+               do i = 1,ngp
+                   the =xm+ gp(i)*xl
+                   xi=intersect_unit_square(the)
+                   plo=norm2(xi-xi0)
+                   theta = (xi-xi0)/plo
+                   call comp_coef(theta,xj,xxj,jk01,n01,f1,f2,param)
+
+                   ans=ans-f2*(param(1)/param(2)**2+1.0/plo)*gw(i)
+                   ans=ans+f1*dlog(plo/param(2))*gw(i) 
+               end do
+
            case(1,3,5,7)
                do   i=1, 17!two edges
 
@@ -243,6 +366,8 @@
 
 
    end subroutine
+   
+
 
 
 
@@ -259,17 +384,6 @@
        real(8) :: a(3),b(3),ast,bst,as_3,as_2,g31,b30,a30,b31,a31
 
        !theta=[csst,snst]
-!       print '(2f10.5)',theta
-       !print '(3f10.5)',xj(1,:)
-       !print '(3f10.5)',xj(2,:)
-       !print '(3f10.5)',xxj(1,:)
-       !print '(3f10.5)',xxj(2,:)
-       !print '(3f10.5)',xxj(3,:)
-       !print '(3f10.5)',n0(:)
-       !print '(3f10.5)',jk0(1,:)
-       !print '(3f10.5)',jk0(2,:)
-       !print '(3f10.5)',jk0(3,:)
-
        !jk1(1:3) = jk0(2,1:3)*csst+jk0(3,1:3)*snst
        jk1(1:3) = matmul(theta,jk0(2:3,:))
 
@@ -283,10 +397,6 @@
 
        ast=norm2(a)
        bst=norm2(b)
-
-!       print '(3f15.5)',a
-       !print '(3f15.5)',b
-       !print '(2f15.5)',bst,ast
 
        as_3=1.0d0/ast**3
        as_2=-3.0d0*(dot_product(a,b))/ast**5

@@ -12,7 +12,7 @@ contains
         integer,intent(in) ::nsys,nnode,nnrml
         if(allocated(angle)) deallocate(angle) 
         ! maybe a error if frc31-33 not allocated
-        if(allocated(fra3)) deallocate(fra3,frc31,frc32,fr33) 
+        if(allocated(fra3)) deallocate(fra3,frc31,frc32,frc33) 
         if(allocated(angle)) deallocate(angle) 
         if(allocated(nrml_2_node)) deallocate(nrml_2_node) 
 

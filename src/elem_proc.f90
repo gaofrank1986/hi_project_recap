@@ -258,7 +258,6 @@
 
         type(HSElem) :: e
         type(HSParams) :: pm
-
         type(Matrix2D) :: mat
 
         integer ::inode,inodd
@@ -323,7 +322,7 @@
         e%nk=passed_nrml
         call mat%init(e%nk)
         !call mat%pprint("e%nk assinged")
-        call e%get_nk()
+        !call e%get_nk()
 
         call mat%init(e%nk)
         !call mat%pprint("e%nk calced")
@@ -343,7 +342,8 @@
         call preset_src(si,eta,p0m,origin_offset)
         call eval_singular_elem(cnr_glb_mtx,passed_nrml,result0,result1,result2)
         write (6,'(2i5,8f10.5)') ielem,nodj,result0
-        result0=0.0d0
+        !write (6,'(2i5,8f10.5)') ielem,nodj,result1
+        !result0=0.0d0
 
         call sgbd0_1(e,is,ielem,nodj,p0,result1,result2)
 
@@ -351,13 +351,13 @@
         !call sing_int0(is,ielem,nodj,p0,result1,result0)
         write (6,'(2i5,8f10.5)') ielem,nodj,result2
 
-        if (any(abs(result2-result0) > 0.50d0)) then
+        !if (any(abs(result2-result0) > 0.50d0)) then
 
-      !  write (*,'(2i5,8f10.5)') ielem,nodj,result2
-        !write (*,'(2i5,8f10.5)') ielem,nodj,result0
-        !!write (*,'(2i5,8f10.5)') ielem,nodj,result2-result0
-        print *,"========="
-    end if
+            !  write (*,'(2i5,8f10.5)') ielem,nodj,result2
+            !write (*,'(2i5,8f10.5)') ielem,nodj,result0
+            !write (*,'(2i5,8f10.5)') ielem,nodj,result2-result0
+            print *,"========="
+        !end if
 
 
 
