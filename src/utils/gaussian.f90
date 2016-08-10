@@ -16,9 +16,9 @@ contains
     !C *********************************************************************
     !C
     subroutine get_gaussian_data(xc,yc,zc)
-
+        
         use shape_funcs,only:spfunc8,spfunc6
-        use proj_cnst,only:cross_product
+        use linalg,only:cross_product
 
 
         implicit   none  
