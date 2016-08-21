@@ -10,20 +10,25 @@ program hi_project
 
     implicit  none  
     type(Ostream) :: fstream
-    character(len=1024) :: filename
-    
 
     integer :: inode
     real(8) :: xp,yp,zp
-    fstream = Ostream("main",[6])
-    open(9,  file='output/output1.txt',    status='unknown')
-    open(10, file='output/output.txt' ,    status='unknown')
-    open(101,file='output/outamt.txt' ,    status='unknown')          
-    open(102,file='output/outbmt.txt' ,    status='unknown')
 
-         
+    fstream = Ostream("main",[6])
+    fd = create_folder()
+    !comment this line if not running in Linux
+    call execute_command_line("rm fort.* ")
+
+    open(9,  file=fd//'output1.txt',    status='unknown')
+    open(10, file=fd//'output.txt' ,    status='unknown')
+    !open(101,file=fd//'outamt.txt' ,    status='unknown')          
+    !open(102,file=fd//'outbmt.txt' ,    status='unknown')
+    !open(103,file=fd//'main.log' ,    status='unknown')
+    call logfl%reg(fd//'main.log',103)
+
     call read_wav_data()
     call fstream%fout('Finished reading wave info')
+    call logfl%writeln('Finished reading wave info')
     call init_time_var
     call output_wav_data()
     xc=0
@@ -37,23 +42,32 @@ program hi_project
     call fstream%fout('Total Surface Node Number:'//fstream%toString(nnf))
     call fstream%fout('Total Normal  Node Number:'//fstream%toString(nnoded))
     call fstream%fout('Total         Node Number:'//fstream%toString(nnode))
+    call logfl%writeln('Finished reading mesh info')
+    call logfl%writeln('Total Surface Node Number:'//fstream%toString(nnf))
+    call logfl%writeln('Total Normal  Node Number:'//fstream%toString(nnoded))
+    call logfl%writeln('Total         Node Number:'//fstream%toString(nnode))
 
     call topology_analysis()
-!  --------------------------------------------
+    !  --------------------------------------------
     call init_ft(nsys,nnf) 
-
-    call fstream%fout('Initilaized free term vars')
     call init_data(nsys,nnode,nnoded,nnf) 
+    call fstream%fout('Initilaized free term vars')
     call fstream%fout('Initilaized data vars')
-    call get_gaussian_data(xc,yc,zc)                  
+    !  -----------------------------------------------
+    call get_gaussian_data(xc,yc,zc)
     call fstream%fout('Generating guassian point info')
-    call init_hi_var() 
-    call fstream%fout('Initialising hi mod vars')
+
+    !call inf%read_solid_angle(nnode)
+    !call inf%write_solid_angle(nnode)
+    !  -----------------------------------------------
+    !call init_hi_var() 
+    !call fstream%fout('Initialising hi mod vars')
     !call get_free_term()
-    !call tassb0_freq
     call tassb0
-    call init_gradient(nnf,nelemf,xyze(1:2,:,1:nelemf),nodele(1:nnf,1),nodelj(1:nnf,1))
-    call fstream%fout('Initialising info needed for surface gradient evaluation')
+
+
+    !call init_gradient(nnf,nelemf,xyze(1:2,:,1:nelemf),nodele(1:nnf,1),nodelj(1:nnf,1))
+    !call fstream%fout('Initialising info needed for surface gradient evaluation')
     !call tassbt
 
 
@@ -62,10 +76,11 @@ program hi_project
     !!! >>===========================================<<
 
     time=0.0d0
-    tstep=0.05
+    tstep=0.035
     ntime=100
+
     
-    do itime = 0,ntime
+    do itime = 0,200!ntime
         call fstream%fout(fstream%toString(itime)//'/'//fstream%toString(ntime,'(i5)'))
         time = itime*tstep
         call time_intg_rk4
@@ -73,19 +88,20 @@ program hi_project
         !if (mod(itime,10).eq.0) then
         ! elem =491 node =633,1503
 
+        open(201,file=getfilename(fd//"potential",itime))
+        open(202,file=getfilename(fd//"wav_elev",itime))
+
         do inode =1,nnf
             xp = xyz(1,inode)
             yp = xyz(2,inode)
             zp = xyz(3,inode)
 
             !//output all surface nodes for potential and wave elevation
-            !write (filename, "(A5,I4)") "phi",itime
-            write(7000+itime,1202) inode,bkn(inode,1),poxy(xp,yp,zp)
-            !write(filename,1202) inode,bkn(inode,1),poxy(xp,yp,zp)
-            !write (filename, "(A5,I4)") "phi",itime
-            write(8000+itime,1202) inode,et(inode,1),eti(xp,yp)
-            !write(9000+itime,1202) bkn(inode,1),poxy(xp,yp,zp)
+            write(201,1202) inode,bkn(inode,1),poxy(xp,yp,zp)
+            write(202,1202) inode,et(inode,1),eti(xp,yp)
         end do
+        close(201)
+        close(202)
 
         !//output error on given node
         !inode =288
@@ -127,7 +143,9 @@ program hi_project
         !end do
     end do
 
-    1202 format(i7,5x,2f14.8)
+    1202 format(i7,8x,2f20.10)
     call fstream%fout("============== main program ends ===============")
+    !comment this line if not running in Linux
+    call execute_command_line("mv fort.* "//fd)
 end  program      
 

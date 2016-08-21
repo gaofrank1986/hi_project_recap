@@ -13,11 +13,12 @@
   
       use data_all
       use motion
-      use linalg,only:rlubksb
       use wave_funcs_simple,only:dinp,poxy
       use gradient,only:eval_gradient
       use free_term,only:fterm
       use proj_cnst,only:rsn,ex,ey
+      use misc_var,only:sol
+      use io
 
       implicit none  
 
@@ -55,7 +56,7 @@
           dpoxyz_save(2,1,inode) = dpoy 
       end do
 
-      !//get computed dpoxyz_save
+      !//get computed dpoxyz_sav on surface elem
       do  inode=1,  nnf  
 !          do is=1, nsys; do ip=1, nsys
               !cmat(inode,is)=cmat(inode,is)+rsn(is,ip)*bkn(inode,ip)
@@ -72,7 +73,7 @@
       end do
 
       !//======================================
-      !  ----generate cmat-----------------
+      !  ----generate cmat----boudnary condition-------------
       !  ------------------------------
 
       cmat(:,:)=0.0d0
@@ -103,7 +104,8 @@
               !timerk at each rugga kutta time step
               !call dpoxyz(h,g,ampn,phi_w,beta,wkn,freq,timerk,rampf,xp,yp,zp,&
               !&              nfreq,nwave,iorder,dpox,dpoy,dpoz)
-
+              
+              ! this is for incident wav
               dpdn=(dpox*ex(ip)*dxyz(1,inode)+&
                   &           dpoy*ey(ip)*dxyz(2,inode)+&
                   &           dpoz       *dxyz(3,inode) )
@@ -115,6 +117,7 @@
               !dpdn=dpdn-dsdt(4)*ey(ip)*dxyz(4,inode)
               !dpdn=dpdn-dsdt(5)*ex(ip)*dxyz(5,inode)
               !dpdn=dpdn-dsdt(6)*ex(ip)*ey(ip)*dxyz(6,inode)
+              dpdn=-dpdn
 
               ! cmat[nff+1:nnoded] store dpdn
               do  is=1, nsys 
@@ -129,57 +132,39 @@
         ! Generate bmata matrix---------
         !|||----------------------------------
 
-        bmata(:,:)=0.0d0 !//initialize bmata
+!        bmata(:,:)=0.0d0 !//initialize bmata
 
         do is=1, nsys; do ind=1,   nnode
             !---------------loop-body--------------------------
-            bmata(ind,is)=dot_product(cmata(ind,:,is),cmat(:,is))
+            sol%B(ind,is)=dot_product(sol%C(ind,:,is),cmat(:,is))
             ! .. cmat d\phi/dp   ... phi
             ! .. cmata
             !if (ind<=nnf) then!potential only
-                !bmata(ind,is) = bmata(ind,is)-fterm(ind,is,1)*cmat(ind,is)&
+                !sol%B(ind,is) = sol%B(ind,is)-fterm(ind,is,1)*cmat(ind,is)&
                     !&-fterm(ind,is,2)*dpoxyz_save(1,is,ind) &
                     !&-fterm(ind,is,3)*dpoxyz_save(2,is,ind)
             !end if
             !---------------------------------------------------
         enddo;enddo 
 
-        !Solving Ax=B      // B is time varying
-        ! result saved in bmata
-        do  is=1, nsys   
-            call rlubksb(is,amata,nnode,nnode, 1,nsys, 1,indx,bmata)
-        enddo
+
+        unkn=sol%Solve(cmat)
 
 
-        if ((itime.eq.0).and.(rkn.eq.1)) then
-            do n2 = 1,nnf
-                xp=ex(ip)*xyz(1,n2)
-                yp=ey(ip)*xyz(2,n2)
-                zp=       xyz(3,n2)
-                call dinp(xp,yp,zp,dpox,dpoy,dpoz)   !get initial condition    
+    1202 format(i7,8x,2f20.16)
 
-                write(9000,1202) n2,bmata(n2,1),dpoz
-            end do
+                !output dp/dn
+        !if ((itime.eq.0).and.(rkn.eq.1)) then
+        if ((rkn.eq.1)) then
+        open(203,file=getfilename(fd//"solved",itime))
+        do n2 = 1,nnf
+        xp=ex(ip)*xyz(1,n2)
+        yp=ey(ip)*xyz(2,n2)
+        zp=       xyz(3,n2)
+        call dinp(xp,yp,zp,dpox,dpoy,dpoz)   !get initial condition    
+
+        write(203,1202) n2,unkn(n2,1),dpoz
+        end do
+        close(203)
         end if
-
-
-    1202 format(i6,2f14.8)
-        !do i = 1,nnode
-        !write(401,*) bmata(i,1:nsys)
-        !end do
-        !do i=1,nnoded
-        !!print *,cmat(i,1)
-        !write(403,*) cmat(i,1)
-        !enddo
-
-        ! applied symmetry to get bmat
-        do ip=1, nsys; do ind=1, nnode 
-            bmat(ip)=(0.0d0, 0.0d0)
-            do  is=1, nsys
-                bmat(ip)=bmat(ip)+bmata(ind,is)*rsn(ip,is)
-            enddo
-            bmat(ip)=bmat(ip)/nsys
-            unkn(ind,ip)=bmat(ip)        
-        enddo;enddo
-
     end subroutine

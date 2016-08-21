@@ -239,32 +239,30 @@
     subroutine runge_kutta(n) 
 
          use data_all
-         use motion
+         !use motion
          use time_mod
-         use linalg,only:rlubksb
-         use wave_funcs_simple,only:dinp,dpot,eti,deti,poxy
+         !use linalg,only:rlubksb
+         !use wave_funcs_simple,only:dinp,dpot,eti,deti,poxy
 
          implicit none
 
          integer inode,n,ip
          !real(8) COMP(6),AMPF(6)!,TRXYZ(3,3) 
 
-
-         ! 
          ! 
          ! RAMPF: ramp function for incient potential 
          ! RAMPV: ramp function for damping  
          ! 
 
-         WRITE(11,*)  
-         WRITE(11,*) ' Inside  Runge_Kutta        N=',N 
+         !WRITE(11,*)  
+         !WRITE(11,*) ' Inside  Runge_Kutta        N=',N 
 
-         !IF(TimeRK .LT. 2.0d0*TPER) THEN 
-         !RAMPF=0.5d0*(1.0d0-COS(PI*TimeRK/2.0d0/TPER)) 
-         !ELSE 
-         !RAMPF=1.0D0 
-         !END IF 
-         rampf=1.0d0
+         if(timerk .lt. 2.0d0*tper) then 
+             rampf=0.5d0*(1.0d0-cos(pi*timerk/2.0d0/tper)) 
+         else 
+             rampf=1.0d0 
+         end if 
+         !rampf=1.0d0
 
          ! 
          !  ================================================ at RK1 step 
@@ -280,9 +278,9 @@
              !solve for unkn
              do ip=1,    nsys 
                  do inode=1, nnf 
-                     dh(1,inode,ip)=  unkn(inode,ip) !-dampf(inode)*et(inode,ip) 
+                     dh(1,inode,ip)=  unkn(inode,ip) -dampf(inode)*et(inode,ip) 
                      !d\eti / dt
-                     dp(1,inode,ip)= -g*et(inode,ip) !-dampf(inode)*bkn(inode,ip) 
+                     dp(1,inode,ip)= -g*et(inode,ip) -dampf(inode)*bkn(inode,ip) 
                      !{d \phi}/dt
                  enddo   
              enddo 
@@ -319,8 +317,8 @@
              ! 
              DO IP=1,    NSYS 
                  DO INODE=1, NNF 
-                     DH(2,INODE,IP)=  UNKN(INODE,IP) !-DAMPF(INODE)*ET(INODE,IP) 
-                     DP(2,INODE,IP)= -G*ET(INODE,IP) !-DAMPF(INODE)*BKN(INODE,IP) 
+                     DH(2,INODE,IP)=  UNKN(INODE,IP) -DAMPF(INODE)*ET(INODE,IP) 
+                     DP(2,INODE,IP)= -G*ET(INODE,IP) -DAMPF(INODE)*BKN(INODE,IP) 
                  ENDDO   
              ENDDO   
 
@@ -361,8 +359,8 @@
              ! 
              DO IP=1,    NSYS 
                  DO INODE=1, NNF 
-                     DH(3,INODE,IP)=  UNKN(INODE,IP) !-DAMPF(INODE)*ET(INODE,IP) 
-                     DP(3,INODE,IP)= -G*ET(INODE,IP) !-DAMPF(INODE)*BKN(INODE,IP) 
+                     DH(3,INODE,IP)=  UNKN(INODE,IP) -DAMPF(INODE)*ET(INODE,IP) 
+                     DP(3,INODE,IP)= -G*ET(INODE,IP) -DAMPF(INODE)*BKN(INODE,IP) 
                  ENDDO   
              ENDDO   
              ! 
@@ -410,8 +408,8 @@
              ! 
              DO IP=1,    NSYS 
                  DO INODE=1, NNF 
-                     DH(4,INODE,IP)=  UNKN(INODE,IP) !-DAMPF(INODE)*ET(INODE,IP) 
-                     DP(4,INODE,IP)= -G*ET(INODE,IP) !-DAMPF(INODE)*BKN(INODE,IP) 
+                     DH(4,INODE,IP)=  UNKN(INODE,IP) -DAMPF(INODE)*ET(INODE,IP) 
+                     DP(4,INODE,IP)= -G*ET(INODE,IP) -DAMPF(INODE)*BKN(INODE,IP) 
                  ENDDO   
              ENDDO   
              ! 

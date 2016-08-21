@@ -140,7 +140,7 @@
 
 
 
-        !!!!attention !!!!!! sing_int1 didn't affect matrix A
+        !!!!attn !!!!!! sing_int1 didn't affect matrix A
         ! it is ok, bmatrix is almost 0 fort surface boudary
 
         if(numqua.eq.0)       then
@@ -153,27 +153,27 @@
                 end if
             end do
 
-        else if(numqua.eq.2) then
-            do is=1,nsys     
-                if(is.eq.1.or.is.eq.2) then  
-                    call sing_int(is,ielem,nodnum,xp,yp,zp,amatrix,bmatrix,hi)
-                else if(is.eq.3.or.is.eq.4) then  
-                    !call norm_int(is,ielem,ncn(ielem),xp,yp,zp,amatrix,bmatrix,gpointer) 
-                end if
-            end do
+!        else if(numqua.eq.2) then
+            !do is=1,nsys     
+                !if(is.eq.1.or.is.eq.2) then  
+                    !call sing_int(is,ielem,nodnum,xp,yp,zp,amatrix,bmatrix,hi)
+                !else if(is.eq.3.or.is.eq.4) then  
+                    !!call norm_int(is,ielem,ncn(ielem),xp,yp,zp,amatrix,bmatrix,gpointer) 
+                !end if
+            !end do
 
-        else if(numqua.eq.4) then
-            do   is=1,  nsys
-                if(is.eq.1.or.is.eq.4) then   
-                    call sing_int(is,ielem,nodnum,xp,yp,zp,amatrix,bmatrix,hi)
-                else  if(is.eq.2.or.is.eq.3) then  
-                    !call norm_int(is,ielem,ncn(ielem),xp,yp,zp,amatrix,bmatrix,gpointer) 
-                end if
-            end do
-        else if(numqua.eq.5) then
-            do  is=1, nsys  
-                call sing_int(is,ielem,nodnum,xp,yp,zp,amatrix,bmatrix,hi)
-            end do
+        !else if(numqua.eq.4) then
+            !do   is=1,  nsys
+                !if(is.eq.1.or.is.eq.4) then   
+                    !call sing_int(is,ielem,nodnum,xp,yp,zp,amatrix,bmatrix,hi)
+                !else  if(is.eq.2.or.is.eq.3) then  
+                    !!call norm_int(is,ielem,ncn(ielem),xp,yp,zp,amatrix,bmatrix,gpointer) 
+                !end if
+            !end do
+        !else if(numqua.eq.5) then
+            !do  is=1, nsys  
+                !call sing_int(is,ielem,nodnum,xp,yp,zp,amatrix,bmatrix,hi)
+            !end do
         endif
 
         end subroutine
@@ -246,9 +246,10 @@
 
         use hi_intg
         use hs_intg
-        use Matrix_wrapper_mod
+        use Matrix_io_mod
         use green_funcs,only:Gcombo1_2
         use proj_cnst,only: ex,ey,xiqsi,xiqet
+        use intgrd_funcs
 
         implicit none
 
@@ -257,7 +258,7 @@
         real(8),intent(out):: bval(8),aval(8)
 
         type(HSElem) :: e
-        type(HSParams) :: pm
+        type(HSParams) :: pm,p2
         type(Matrix2D) :: mat
 
         integer ::inode,inodd
@@ -313,50 +314,61 @@
         passed_nrml = swap_t2g(dxyze(:,1:8,ielem))
 
         pm%beta = 3.0d0
+        pm%f_bar=>f1
         call pm%init_mat()
 
         call e%mapped%get_std()
         e%ck=cnr_glb_mtx
-        call mat%init(e%ck)
+        !call mat%init(e%ck)
         !call mat%pprint("e%ck")
         e%nk=passed_nrml
-        call mat%init(e%nk)
+        !call mat%init(e%nk)
         !call mat%pprint("e%nk assinged")
         !call e%get_nk()
 
-        call mat%init(e%nk)
+        !call mat%init(e%nk)
         !call mat%pprint("e%nk calced")
         tol=1.e-8
-        print *,nodj,"=>",indx(nodj)
+        !print *,nodj,"=>",indx(nodj)
         call singular_elem(e,pm,tol,3,indx(nodj),result0)
         result0 = swap_g2t(result0)
-        write (6,'(2i5,8f10.5)') ielem,nodj,result0
+        !write (6,'(2i5,8f10.5)') ielem,nodj,result0
+        result1=0.0d0
 
         ! add mirrored sink
         ! Gcombo1_2 is the mirrored sink part only
         ! attention p0 is used here,not p0m
-        call norm_int(is,ielem,8,p0,aval,bval,Gcombo1_2)
+        !call norm_int(is,ielem,8,p0,aval,bval,Gcombo1_2)
         !write(9013,'(2i6,8f12.6)') ielem,nodj,amatrix(is,:)
 
         !< note p03 is used here
-        call preset_src(si,eta,p0m,origin_offset)
-        call eval_singular_elem(cnr_glb_mtx,passed_nrml,result0,result1,result2)
-        write (6,'(2i5,8f10.5)') ielem,nodj,result0
+       ! call preset_src(si,eta,p0m,origin_offset)
+        !call eval_singular_elem(cnr_glb_mtx,passed_nrml,result0,result1,result2)
+        !write (6,'(2i5,8f10.5)') ielem,nodj,result0
         !write (6,'(2i5,8f10.5)') ielem,nodj,result1
-        !result0=0.0d0
+!        !result0=0.0d0
+        !p2%beta = 3.0d0
+        !p2%f_bar=>f2
+        !call p2%init_mat()
+        
+        !call singular_elem(e,p2,tol,3,indx(nodj),result1)
+        !result1 = swap_g2t(result1)
+        !write (6,'(2i5,8f10.5)') ielem,nodj,result1
 
-        call sgbd0_1(e,is,ielem,nodj,p0,result1,result2)
+
+
+        !call sgbd0_1(e,is,ielem,nodj,p0,result1,result2)
 
         ! omitted since 0 on free surface
         !call sing_int0(is,ielem,nodj,p0,result1,result0)
-        write (6,'(2i5,8f10.5)') ielem,nodj,result2
+        !write (6,'(2i5,8f10.5)') ielem,nodj,result2
 
         !if (any(abs(result2-result0) > 0.50d0)) then
 
             !  write (*,'(2i5,8f10.5)') ielem,nodj,result2
             !write (*,'(2i5,8f10.5)') ielem,nodj,result0
             !write (*,'(2i5,8f10.5)') ielem,nodj,result2-result0
-            print *,"========="
+            !print *,"========="
         !end if
 
 

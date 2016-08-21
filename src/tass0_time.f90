@@ -14,11 +14,13 @@
         use mesh,only:is_connected,topology_analysis
         use mesh,only:xyz,nnf,nnode,nelem,ncn,ncon,nodqua,nsys,nelemf,dxyze
         use wave,only:h
-        use matrix_mod
-        use misc_var,only:angle
+        !use matrix_mod
+        use misc_var
         use linalg,only:rludcmp
         use proj_cnst,only:rsn
         use io
+        use info_mod
+        use solver_mod
 
         implicit   none  
         integer  inode,ielem,ip
@@ -30,31 +32,38 @@
         !real(8) :: fterm_coef(0:3,4)
         real(8) :: dsign
         type(Ostream) :: fstream 
+        type(info) :: inf
 
         fstream = Ostream("tass0",[6])
 
         call fstream%fout('lhs matrix computing start......')
+        !call inf%read_solid_angle(nnode)
         
 
         !DSDT(:)=0.0
         !                 
 
 
-        amata = 0.0d0
-        cmata = 0.0d0
+        !sol%A = 0.0d0
+        !sol%C = 0.0d0
 
         ! =======================================================================
         !call output_fterms()
         pause
 
+        hi = 1 !old method
+        !hi = 2 ! new method
+
+        if (hi.eq.1) then
+            call logfl%writeln("Adopting old method")
+        else
+            call logfl%writeln("Adopting new method")
+        end if
+
+
         do     inode=1, nnf
-
             call fstream%fout('Surface '//fstream%toString(inode))
-
-            if (inode <= nnf) then
-                hi = 1
-                !hi = 2
-            end if
+            !if (inode.eq.4) stop
 
             xp=xyz(1,inode)
             yp=xyz(2,inode)
@@ -65,13 +74,16 @@
                 &                        h,xyz,dxyze,s_angle)    
 
             angle(inode)=1.0d0- s_angle
+            !s_angle= 1-inf%angle(inode)
+            write(9999,*) inode, 1-s_angle !angle(inode)
+           
 
             if (hi.eq.1) then
                 ! old BIE, alpha goes to rhs matrix
-                cmata(inode,inode,1:nsys)= -1.0d0+s_angle!-angle(inode)
+                sol%C(inode,inode,1:nsys)= -1.0d0+s_angle!-angle(inode)
             else 
                 ! new BIE, alpha goes to lhs matrix
-                amata(inode,inode,1:nsys)= 1.0d0-s_angle!angle(inode)
+                sol%A(inode,inode,1:nsys)= 1.0d0-s_angle!angle(inode)
             end if
             !  ---------------------------
             !  Integration on the free surface
@@ -92,6 +104,7 @@
                 if ((is_connected(ielem,inode)).eqv.(.false.))   then 
                     call norm_elem_wrapper(ielem,xp,yp,zp,amatrix,bmatrix,hi)
                 else 
+                    !fixme change 
                     call sing_elem_wrapper(inode,ielem,nodqua(inode),xp,yp,zp,&
                         &                   amatrix,bmatrix,hi)
                 end if
@@ -145,8 +158,10 @@
 
             angle(inode)=1.0d0 - s_angle
 
-            amata(inode,inode,1:nsys)= 1.0d0-s_angle! angle(inode)
+            !s_angle= 1-inf%angle(inode)
+            sol%A(inode,inode,1:nsys)= 1.0d0-s_angle! angle(inode)
 
+            write(9999,*) inode, 1-s_angle!angle(inode)
             do   ielem=1,  nelemf
 
                 ii=0   
@@ -173,21 +188,21 @@
         !        if( nsys .eq. 2) then
         !do inode=1, nnf
         !if(nodqua(inode) .eq. 2) then
-        !amata(inode,inode,2)=1.0e20         
+        !sol%A(inode,inode,2)=1.0e20         
         !endif
         !enddo
         !else if( nsys .eq. 4) then
         !do inode=1, nnf
         !if(nodqua(inode) .eq. 2) then
-        !amata(inode,inode,2)=1.0e20
-        !amata(inode,inode,4)=1.0e20            
+        !sol%A(inode,inode,2)=1.0e20
+        !sol%A(inode,inode,4)=1.0e20            
         !else if(nodqua(inode) .eq. 4) then
-        !amata(inode,inode,3)=1.0e20
-        !amata(inode,inode,2)=1.0e20
+        !sol%A(inode,inode,3)=1.0e20
+        !sol%A(inode,inode,2)=1.0e20
         !else if(nodqua(inode) .eq. 5) then
-        !amata(inode,inode,2)=1.0e20
-        !amata(inode,inode,3)=1.0e20            
-        !amata(inode,inode,4)=1.0e20            
+        !sol%A(inode,inode,2)=1.0e20
+        !sol%A(inode,inode,3)=1.0e20            
+        !sol%A(inode,inode,4)=1.0e20            
         !endif
         !enddo
         !endif
@@ -199,24 +214,25 @@
 
         !do i = 1,nnode
         !do j = 1,nnode
-        !write(400,*) amata(i,j,1:nsys)
+        !write(400,*) sol%A(i,j,1:nsys)
         !end do;end do
 
         !do i = 1,nnode
         !do j = 1,nnoded
-        !write(402,*) cmata(i,j,1:nsys)
+        !write(402,*) sol%C(i,j,1:nsys)
         !end do;end do
         !stop
 
         !      do i = 1,nnode
-        !write(401,*) amata(i,i,1:nsys)
+        !write(401,*) sol%A(i,i,1:nsys)
         !end do
 
         call fstream%fout('Begin inversing LHS matrix............')
-        stop
-        do ip=1, nsys
-            call rludcmp(ip,amata,nnode,nnode,nsys,indx,dsign)  
-        enddo
+        !stop
+!        do ip=1, nsys
+            !call rludcmp(ip,sol%A,nnode,nnode,nsys,indx,dsign)  
+        !enddo
+        call sol%LUDecomp()
         call fstream%fout('Finished inversing LHS matrix............')
 
         !write(102, *) 
@@ -227,11 +243,12 @@
 
     subroutine common_block(flag1,hi,ielem,inode,amatrix,bmatrix)!,fterm_coef)
 
-        use matrix_mod
+        !use matrix_mod
         use mesh,only:ncn,ncon,ncond,nsys,xyz,dxyz,nnf
         use free_term,only:fterm
         use proj_cnst,only :rsn,ex,ey
         use wave_funcs_simple,only:dinp1
+        use misc_var
 
         implicit none
         integer,intent(in) :: ielem,inode,flag1,hi
@@ -257,22 +274,23 @@
 
                 if (flag1.eq.0) then
                     do   is=1, nsys    
-                        amata(inode,jncon,ip)=amata(inode,jncon,ip)+&
+                        sol%A(inode,jncon,ip)=sol%A(inode,jncon,ip)+&
                             &              rsn(is,ip)*bmatrix(is,j)
 
-                        cmata(inode,jnrml,ip)=cmata(inode,jnrml,ip)+rsn(is,ip)&
+                        sol%C(inode,jnrml,ip)=sol%C(inode,jnrml,ip)+rsn(is,ip)&
                             &           *amatrix(is,j)
                     enddo
                 else 
                     do  is=1, nsys    
                         if(jncon .gt. nnf)  then
-                            amata(inode,jncon,ip)=amata(inode,jncon,ip)-&
+                            sol%A(inode,jncon,ip)=sol%A(inode,jncon,ip)-&
                                 &                   rsn(is,ip)*amatrix(is,j)
                         else
-                            cmata(inode,jncon,ip)=cmata(inode,jncon,ip)+rsn(is,ip)*amatrix(is,j)!*phi2
+                            !phi coeffcient goes to rhs
+                            sol%C(inode,jncon,ip)=sol%C(inode,jncon,ip)+rsn(is,ip)*amatrix(is,j)!*phi2
                         endif
 
-                        cmata(inode,jnrml,ip)=cmata(inode,jnrml,ip)-rsn(is,ip)*bmatrix(is,j)!*dpdn
+                        sol%C(inode,jnrml,ip)=sol%C(inode,jnrml,ip)-rsn(is,ip)*bmatrix(is,j)!*dpdn
                     enddo
                 end if
                 
