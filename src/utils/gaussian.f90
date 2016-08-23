@@ -109,7 +109,6 @@ contains
 
             else
                 !c ** for triangular element **
-                print *,"triangle is depreciated"
                 do  j=1, 4
                     nsamb=nsamb+1
                     !c
@@ -118,12 +117,25 @@ contains
                     si =xitsi(j)
                     eta=xiteta(j)
                     call spfunc6(si,eta,sf,dsf)
-
+                    ! ** evaluate the Jacobian matrix at (SI,ETA) 
+                    xj = matmul(dsf(:,1:ncn(ie)), &
+                        & transpose(xyze(:,1:ncn(ie),ie)))
+                    !C ** compute the determinant of the Jacobian maxtix at (SI,ETA) 
+                    det=norm2(cross_product(xj(1,:),xj(2,:)))
+                    !C ** transform the local coordinates of the sampling points to  
+                    sambxy(ie,nsamb,1:3) = matmul(sf(1:ncn(ie)),transpose(xyze(:,1:ncn(ie),ie))) 
+                    dsamb(ie,nsamb,1:3) = matmul(sf(1:ncn(ie)),transpose(dxyze(:,1:ncn(ie),ie)))
+                    dsamb(ie,nsamb,1:3)=dsamb(ie,nsamb,1:3)/norm2(dsamb(ie,nsamb,1:3))
+                    dsamb(ie,nsamb,4:6)=cross_product(sambxy(ie,nsamb,1:3)-p,&
+                        & dsamb(ie,nsamb,1:3))
+                    !C                                                                 
+                    !C ** calculate the free surface boundary condition*WIT*DET    
+                    !C 
+                    samb(ie,nsamb,0)=wit(j)*det 
+                    samb(ie,nsamb,1:ncn(ie)) =sf(1:ncn(ie))*samb(ie,nsamb,0)
                 end do
             endif
         end do
-
-
 
         do ind=1, nnoded
             dxyz(4:6,ind)=cross_product(xyz(1:3,ind)-p,dxyz(1:3,ind))
