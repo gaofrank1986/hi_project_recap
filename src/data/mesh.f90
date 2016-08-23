@@ -106,7 +106,7 @@ contains
         !&         DSAMB(NELEM,16,6))
 
 
-        call MESHFS4_2(0)! Read in data on free surface mesh
+        call MESHFS4_2(1)! Read in data on free surface mesh
         call MESHBD_2(IPOL) ! Read in data on body mesh
 
         close(2)
@@ -362,7 +362,7 @@ subroutine pre_mesh_2()
              XYZTP(1,M)=X
              XYZTP(2,M)=Y
              XYZTP(3,M)=Z
-
+             DAMPTP(M)=DAMPE(I,IEL)
 180       CONTINUE
 200     CONTINUE
 
@@ -488,33 +488,92 @@ subroutine pre_mesh_2()
 
 480      CONTINUE
 500     CONTINUE
+end 
+subroutine output_mesh(filename)
+    implicit none
 
-1000   FORMAT(1X,8I6)
-         write(11,*) Isys
-        write(11,*)  NELEM, NNODE,NNODED,1
-        write(11,*) ' 1  0  0.0  0.0  0.0'
+    integer :: n,iel,i
+    character(len=*) :: filename
+    open(102,file=filename)
 
-	 DO N=1, NNODE
-	  write(11,1010) N, 1, XYZTP(1,N),XYZTP(2,N),XYZTP(3,N)
-	 ENDDO
-	 DO N=1, NNODED
-	  write(11,1010) N, 1, DXYZTP(1,N),DXYZTP(2,N),DXYZTP(3,N)
-	 ENDDO
-!
-	 DO IEL=1, NELEM
-	  write(11,1001) IEL, NCN(IEL)
-        write(11,1005) (NCON(IEL, I), I=1, NCN(IEL))
-	 ENDDO
-!
-	 DO IEL=1, NELEM
-	  write(11,1001) IEL, NCN(IEL)
-        WRITE(11,1005) (NCOND(IEL, I), I=1, NCN(IEL))
-	 ENDDO
-1001   FORMAT(1X,2I6,3F14.6)
-1010   FORMAT(1X,I6,I4,3F14.6)
-1005   FORMAT(8(1X,I6))
-1020   FORMAT(1X,I6,I4,6F14.6)
-       END
+
+    write(102,'(i6)') isys 
+    write(102,'(4i6)')  nelem, nnode,nnoded,1 
+    write(102,'(a)') ' 1  0  0.0  0.0  0.0' 
+
+    do n=1, nnode 
+        write(102,1010) n, 1, xyz(1,n),xyz(2,n),xyz(3,n) 
+    enddo 
+
+    do n=1, nnoded 
+        write(102,1010) n, 1, dxyz(1,n),dxyz(2,n),dxyz(3,n) 
+    enddo 
+
+    do iel=1, nelem 
+        write(102,1001) iel, ncn(iel) 
+        write(102,1005) (ncon(iel, i), i=1, ncn(iel)) 
+    enddo 
+
+    do iel=1, nelem 
+        write(102,1001) iel, ncn(iel) 
+        write(102,1005) (ncond(iel, i), i=1, ncn(iel)) 
+    enddo 
+    close(102)
+    1001   format(1x,2i6,3f14.6) 
+    1010   format(1x,i6,i4,3f14.6) 
+    1005   format(8(1x,i6)) 
+end subroutine
+
+    subroutine output_surface(filename)
+        implicit none
+
+        integer :: n,iel,i
+        character(len=*) :: filename
+        open(102,file=filename)
+
+
+        write(102,'(i6)') isys 
+        write(102,'(4i6)')  nelemf, nnf,nnf,1 
+        write(102,'(a)') ' 1  0  0.0  0.0  0.0' 
+
+        do n=1, nnf 
+            write(102,1010) n, 1, xyz(1,n),xyz(2,n),xyz(3,n) 
+        enddo 
+
+        do n=1, nnf 
+            write(102,1010) n, 1, dxyz(1,n),dxyz(2,n),dxyz(3,n) 
+        enddo 
+
+        do iel=1, nelemf
+            write(102,1001) iel, ncn(iel) 
+            write(102,1005) (ncon(iel, i), i=1, ncn(iel)) 
+        enddo 
+
+        do iel=1, nelemf
+            write(102,1001) iel, ncn(iel) 
+            write(102,1005) (ncond(iel, i), i=1, ncn(iel)) 
+        enddo 
+        close(102)
+        1001   format(1x,2i6,3f14.6) 
+        1010   format(1x,i6,i4,3f14.6) 
+        1005   format(8(1x,i6)) 
+        end subroutine
+
+    subroutine output_damp_info(filename)
+        implicit none
+
+        integer :: n,iel,i
+        character(len=*) :: filename
+        open(102,file=filename)
+
+        do n=1, nnf 
+            write(102,'(i6,6x,f20.15)') n, dampf(n)
+        enddo 
+        close(102)
+
+        end subroutine
+
+
 
     subroutine comp_link(ielem,inode,ii) 
         !use mvar_mod
